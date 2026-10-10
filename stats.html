@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Pangalay Mirror stats</title>
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#1A0820;color:#F6EFDF;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+main{width:min(92vw,640px);padding:32px 16px;box-sizing:border-box}
+h1{font-size:28px;margin:0 0 6px;font-weight:600}
+p{margin:0 0 24px;color:#C9D8D6;line-height:1.5}
+.g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.c{border:1px solid #8A6A1C;border-radius:12px;padding:18px 14px;background:rgba(0,0,0,.25)}
+.c b{display:block;font-size:44px;line-height:1.1;color:#F2C14E;font-variant-numeric:tabular-nums}
+.c span{font-size:14px;color:#C9D8D6}
+small{display:block;margin-top:20px;color:#8AA3A3;line-height:1.5}
+button{margin-top:20px;font:inherit;padding:10px 16px;border-radius:8px;border:1px solid #F2C14E;background:transparent;color:#F2C14E;cursor:pointer}
+@media(max-width:480px){.g{grid-template-columns:1fr}}
+</style>
+<main>
+<h1>Pangalay Mirror stats</h1>
+<p>Counts since the counter was added. Each number is one browser session.</p>
+<div class="g">
+<div class="c"><b id="visits">–</b><span>Opened the page</span></div>
+<div class="c"><b id="plays">–</b><span>Pressed play</span></div>
+<div class="c"><b id="finished">–</b><span>Watched to the end</span></div>
+</div>
+<button id="r">Refresh</button>
+<small>Reloading the film counts as a new visit, so these are visits, not unique people. Opening this stats page does not add to the counts.</small>
+</main>
+<script>
+function load(){['visits','plays','finished'].forEach(function(k){
+  fetch('https://abacus.jasoncameron.dev/get/aljabrialam-pangalay-mirror/'+k).then(function(r){return r.ok?r.json():{value:0}}).then(function(d){document.getElementById(k).textContent=(d.value||0).toLocaleString()}).catch(function(){document.getElementById(k).textContent='?'});
+})}
+document.getElementById('r').addEventListener('click',load);load();
+</script>
+</html>

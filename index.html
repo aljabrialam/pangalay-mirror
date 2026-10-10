@@ -633,7 +633,7 @@ list.innerHTML=SC.map(function(s,i){return '<button data-i="'+i+'">'+s.name+'<sp
 var btns=[].slice.call(list.children);
 function show(){
   var c=at(t),late=c.loc/c.len>.45;
-  if(c.i!==cur){cur=c.i;narrate(c.id);els.forEach(function(p){p[0].classList.toggle('on',p[1].indexOf(c.id)>-1)});cap.textContent=c.cap;btns.forEach(function(b,k){b.setAttribute('aria-current',k===c.i)})}
+  if(c.i!==cur){cur=c.i;if(c.id==='end'&&playing)count('finished');narrate(c.id);els.forEach(function(p){p[0].classList.toggle('on',p[1].indexOf(c.id)>-1)});cap.textContent=c.cap;btns.forEach(function(b,k){b.setAttribute('aria-current',k===c.i)})}
   stage.classList.toggle('is-late',late);
   var p=poseAt(t),gx=c.id==='choose'?810:640,bob=inHold?0:3*sin(t*1.6);
   if(c.id==='play'){bob+=16*sm(cl((c.loc-73.4)/1.1))*(1-sm(cl((c.loc-76)/1.1)));cap.textContent=c.loc>=FIN?'Closing gesture: hands to heart, then bow':c.cap}
@@ -736,8 +736,12 @@ function setSnd(on){
 }
 $('snd').addEventListener('click',function(){setSnd(!sndOn)});
 /* sound is on by default; browsers only allow it after one tap, so the film waits behind a start button */
+/* anonymous counters: how many opened the page, pressed play, and reached the end card. No cookies, nothing personal. Only counts on the live site. */
+var LIVE=/github\.io$/.test(location.hostname),counted={};
+function count(k){if(!LIVE||counted[k])return;counted[k]=1;try{fetch('https://abacus.jasoncameron.dev/hit/aljabrialam-pangalay-mirror/'+k,{mode:'cors',keepalive:true}).catch(function(){})}catch(e){}}
+count('visits');
 var started=false;
-function begin(){if(started)return;started=true;$('start').hidden=true;setSnd(true)}
+function begin(){if(started)return;started=true;count('plays');$('start').hidden=true;setSnd(true)}
 $('start').addEventListener('click',function(){begin();setPlay(true)});
 function setPlay(p){playing=p;music();playB.textContent=p?'Pause':(t>=DUR?'Replay':'Play');if(p){last=performance.now();requestAnimationFrame(tick)}}
 function tick(now){if(!playing)return;t+=(now-last)/1000;last=now;if(t>=DUR){t=DUR;show();setPlay(false);return}show();beat();requestAnimationFrame(tick)}
