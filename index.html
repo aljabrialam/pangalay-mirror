@@ -112,6 +112,10 @@ h1{font-family:var(--display);font-weight:400;font-size:30px;color:var(--paper);
 .col h3{margin:0;font-family:var(--display);font-weight:400;font-size:2.6cqw;color:var(--paper);line-height:1.05}
 .col p{margin:0;font-size:1.55cqw;color:var(--mist);line-height:1.35}
 .col .k{color:var(--gold)}
+.who{display:flex;align-items:center;gap:2.6cqw;text-align:left}
+.whot{display:flex;flex-direction:column;gap:.8cqw}
+.ava{width:11cqw;height:11cqw;border-radius:50%;flex:none;display:grid;place-items:center;font-family:var(--display);font-size:4.4cqw;color:var(--gold);background:#2A0C2E;border:.35cqw solid var(--gold)}
+.card .bio{margin:0;max-width:62cqw;font-size:1.9cqw;line-height:1.5;color:var(--paper);text-align:center}
 .title2{font-family:var(--display);font-size:4cqw;color:var(--paper);line-height:1}
 .intro{flex-direction:row;gap:5cqw;text-align:left}
 .intro .map{width:30cqw;height:auto;flex:none;display:block}
@@ -359,6 +363,20 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--ember);outline-
       </div>
       <div class="subt">You learn the dance by playing, and meet the culture as you score.</div>
     </div>
+    <div class="card sc" data-on="me">
+      <div class="band"></div>
+      <div class="k">The maker</div>
+      <div class="who">
+        <div class="ava" aria-hidden="true">AA</div>
+        <div class="whot">
+          <div class="title2">Aljabri Alam</div>
+          <div class="tagl">Tausug · Filipino · based in Singapore</div>
+          <div class="subt">Technical Lead and AI Advocate at VISEO Asia</div>
+        </div>
+      </div>
+      <p class="bio">I am Tausug. For about ten years I have built software for banks, government, media and healthcare. Pangalay Mirror is my way of using that craft to share my people&rsquo;s dance and culture with the world.</p>
+      <div class="subt">linkedin.com/in/aljabri-alam</div>
+    </div>
     <div class="card sc" data-on="end">
       <div class="band"></div><svg class="tree" viewBox="-110 -200 220 210" aria-hidden="true"></svg>
       <div class="mark">Pangalay Mirror</div>
@@ -374,7 +392,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--ember);outline-
     <button id="play">Pause</button>
     <button id="restart" class="ghost">Restart</button>
     <button id="snd" class="ghost" aria-pressed="false">Sound off</button>
-    <input id="seek" type="range" min="0" max="186" step="0.1" value="0" aria-label="Position in film">
+    <input id="seek" type="range" min="0" max="195" step="0.1" value="0" aria-label="Position in film">
     <output id="time">0:00 / 2:56</output>
   </div>
   <div class="scenes" id="scenes"></div>
@@ -395,8 +413,9 @@ var SC=[
  {id:'result',at:143,name:'Round result',cap:''},
  {id:'keep',at:155,name:'Keepsake',cap:''},
  {id:'how',at:164.6,name:'How it works',cap:''},
- {id:'end',at:178.8,name:'End card',cap:''}
-],DUR=186,DANCE=37,INK='#0B1418',SKIN='#C98E63';
+ {id:'me',at:178.8,name:'The maker',cap:''},
+ {id:'end',at:187.8,name:'End card',cap:''}
+],DUR=195,DANCE=37,INK='#0B1418',SKIN='#C98E63';
 function $(i){return document.getElementById(i)}
 var stage=$('stage'),seek=$('seek'),out=$('time'),playB=$('play'),cap=$('cap'),list=$('scenes');
 
