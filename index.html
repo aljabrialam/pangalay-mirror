@@ -31,6 +31,12 @@ h1{font-family:var(--display);font-weight:400;font-size:30px;color:var(--paper);
 .stage.is-late .dim{opacity:.3}
 .lens{position:absolute;inset:0;box-shadow:inset 0 0 12cqw 2cqw rgba(0,0,0,.55);border-radius:10px}
 .cap{position:absolute;left:3cqw;top:2.6cqw;font-family:var(--display);font-size:max(12px,2.2cqw);color:var(--paper);text-shadow:0 1px 6px rgba(0,0,0,.8)}
+.start{position:absolute;inset:0;z-index:9;border:0;margin:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:.6cqw;padding-bottom:2cqw;background:linear-gradient(rgba(10,3,14,0) 55%,rgba(10,3,14,.78));color:var(--paper);font:inherit}
+.start[hidden]{display:none}
+.start .pl{width:5cqw;height:5cqw;border-radius:50%;background:var(--gold);display:grid;place-items:center}
+.start .pl::before{content:'';border-left:1.6cqw solid #1A0820;border-top:1cqw solid transparent;border-bottom:1cqw solid transparent;margin-left:.4cqw}
+.start b{font-size:2cqw;font-weight:600}
+.start span{font-size:1.3cqw;color:var(--mist)}
 .concept{position:absolute;right:1.6cqw;top:3.1cqw;font-size:max(10px,1.1cqw);letter-spacing:.14em;text-transform:uppercase;color:var(--mist);background:rgba(6,20,26,.7);padding:.4cqw .8cqw;border-radius:.4cqw}
 
 /* scene drawing */
@@ -385,13 +391,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--ember);outline-
     </div>
 
     <div class="concept">Concept · installation view simulated</div>
+    <button id="start" class="start"><span class="pl" aria-hidden="true"></span><b>Tap to play</b><span>Sound on</span></button>
   </div>
 
   <audio id="bgm" src="pangalay.mp3" preload="auto"></audio>
   <div class="bar">
     <button id="play">Pause</button>
     <button id="restart" class="ghost">Restart</button>
-    <button id="snd" class="ghost" aria-pressed="false">Sound off</button>
+    <button id="snd" class="ghost" aria-pressed="true">Sound on</button>
     <input id="seek" type="range" min="0" max="195" step="0.1" value="0" aria-label="Position in film">
     <output id="time">0:00 / 2:56</output>
   </div>
@@ -705,20 +712,24 @@ function unlock(){
 }
 function wake(){try{if(AC&&AC.state!=='running')AC.resume()}catch(e){}}
 document.addEventListener('visibilitychange',function(){if(!document.hidden)wake()});
-$('snd').addEventListener('click',function(){
-  sndOn=!sndOn;
+function setSnd(on){
+  sndOn=on;
   if(sndOn){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();AC.resume()}catch(e){}unlock();
     var c0=at(t);if(playing&&c0.loc>.3)narrate(c0.id,c0.loc)}
-  this.textContent=sndOn?'Sound on':'Sound off';this.setAttribute('aria-pressed',sndOn);music();
-});
+  $('snd').textContent=sndOn?'Sound on':'Sound off';$('snd').setAttribute('aria-pressed',sndOn);music();
+}
+$('snd').addEventListener('click',function(){setSnd(!sndOn)});
+/* sound is on by default; browsers only allow it after one tap, so the film waits behind a start button */
+var started=false;
+function begin(){if(started)return;started=true;$('start').hidden=true;setSnd(true)}
+$('start').addEventListener('click',function(){begin();setPlay(true)});
 function setPlay(p){playing=p;music();playB.textContent=p?'Pause':(t>=DUR?'Replay':'Play');if(p){last=performance.now();requestAnimationFrame(tick)}}
 function tick(now){if(!playing)return;t+=(now-last)/1000;last=now;if(t>=DUR){t=DUR;show();setPlay(false);return}show();beat();requestAnimationFrame(tick)}
-playB.addEventListener('click',function(){wake();if(!playing&&t>=DUR)t=0;setPlay(!playing)});
-$('restart').addEventListener('click',function(){t=0;show();setPlay(true)});
+playB.addEventListener('click',function(){begin();wake();if(!playing&&t>=DUR)t=0;setPlay(!playing)});
+$('restart').addEventListener('click',function(){begin();t=0;show();setPlay(true)});
 seek.addEventListener('input',function(){t=+seek.value;show();if(!playing)playB.textContent=t>=DUR?'Replay':'Play'});
 list.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;t=SC[+b.dataset.i].at+.01;show();if(!playing)playB.textContent='Play'});
 show();
-var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-setPlay(!reduce);
+setPlay(false);
 })();
 </script>
