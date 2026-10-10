@@ -614,12 +614,13 @@ function gong(f,v,d){
     g.gain.setValueAtTime(0.0001,n);g.gain.linearRampToValueAtTime(v*p[1],n+.006);g.gain.exponentialRampToValueAtTime(.0001,n+len);
     o.connect(g);g.connect(AC.destination);o.start(n);o.stop(n+len+.05)});
 }
-var bgm=$('bgm');try{bgm.volume=.7}catch(e){}
+var bgm=$('bgm'),bgGain=null;try{bgm.volume=.7}catch(e){}
+function setVol(v){try{if(bgGain)bgGain.gain.value=v;else bgm.volume=v}catch(e){}}
 function music(){
   try{
-    var sc0=SC[cur];bgm.volume=(inHold||inSay||inFin||(sc0&&NARR[sc0.id]))?.18:.7;
+    var sc0=SC[cur];setVol((inHold||inSay||inFin||(sc0&&NARR[sc0.id]))?.18:.7);
     if(sndOn&&playing){
-      if(Math.abs(bgm.currentTime-t)>.4)bgm.currentTime=t;
+      if(!bgm.seeking&&Math.abs(bgm.currentTime-t)>.4)bgm.currentTime=t;
       if(bgm.paused){var p=bgm.play();if(p&&p.catch)p.catch(function(){})}
     }else{if(!bgm.paused)bgm.pause();if(voNow&&!voNow.paused)voNow.pause()}
   }catch(e){}
@@ -639,34 +640,51 @@ var NARR={
  end:'Pangalay Mirror. Move like the current, and meet the Tausug.'
 },NA={},NFILE={who:'intro0',where:'intro1',today:'intro2',step:'step',choose:'choose',mirror:'stance',result:'result',keep:'keep',how:'how',end:'end'};
 Object.keys(NFILE).forEach(function(k){try{NA[k]=new Audio(NFILE[k]+'.mp3');NA[k].preload='auto'}catch(e){}});
-function narrate(id){
+function narrate(id,off){
   if(!sndOn||!playing||!NARR[id])return;
   var fb=function(){speak({name:'',desc:NARR[id]})},a=NA[id];if(!a){fb();return}
-  try{if(voNow)voNow.pause();voNow=a;a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(fb)}catch(e){fb()}
+  if(off&&a.duration&&off>a.duration-.5)return;
+  try{if(voNow)voNow.pause();voNow=a;a.muted=false;a.currentTime=off||0;var p=a.play();if(p&&p.catch)p.catch(fb)}catch(e){fb()}
 }
 function speak(n){try{var u=new SpeechSynthesisUtterance((n.name?n.name+'. ':'')+n.desc);u.rate=.9;window.speechSynthesis.cancel();window.speechSynthesis.speak(u)}catch(e){}}
 var GA=[0,1,2,3].map(function(i){try{var a=new Audio('g'+i+'.mp3');a.preload='auto';return a}catch(e){return null}});
 function gsay(i){
   if(!sndOn)return;var n=NOTES[i],fb=function(){speak({name:n.g,desc:n.gd})},a=GA[i];if(!a){fb();return}
-  try{if(voNow)voNow.pause();voNow=a;a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(fb)}catch(e){fb()}
+  try{if(voNow)voNow.pause();voNow=a;a.muted=false;a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(fb)}catch(e){fb()}
 }
 var FA=null;try{FA=new Audio('exit.mp3');FA.preload='auto'}catch(e){}
 function fsay(){
-  if(!sndOn||!FA)return;try{if(voNow)voNow.pause();voNow=FA;FA.currentTime=0;var p=FA.play();if(p&&p.catch)p.catch(function(){})}catch(e){}
+  if(!sndOn||!FA)return;try{if(voNow)voNow.pause();voNow=FA;FA.muted=false;FA.currentTime=0;var p=FA.play();if(p&&p.catch)p.catch(function(){})}catch(e){}
 }
 function caught(n,i){
   if(!sndOn)return;gong(1318.5,.14,1.4);gong(1568,.1,1.6);
   var a=VO[i];if(!a){speak(n);return}
-  try{if(voNow)voNow.pause();voNow=a;a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){speak(n)})}catch(e){speak(n)}
+  try{if(voNow)voNow.pause();voNow=a;a.muted=false;a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){speak(n)})}catch(e){speak(n)}
 }
+var unlocked=false;
+/* phones only let a clip play if it was first started inside a tap: start every voice clip muted, then stop it */
+function unlock(){
+  if(unlocked)return;unlocked=true;
+  try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+  VO.concat(GA,Object.keys(NA).map(function(k){return NA[k]}),[FA]).forEach(function(a){
+    if(!a||a===voNow)return;
+    try{a.muted=true;var p=a.play(),stop=function(){if(voNow!==a){a.pause();a.currentTime=0}a.muted=false};
+      if(p&&p.then)p.then(stop,function(){a.muted=false});else stop()}catch(e){}
+  });
+  /* iPhone ignores element volume, so the music could not duck under the voice: route it through a gain node there */
+  try{bgm.volume=.5;if(bgm.volume!==.5&&AC&&!bgGain){var src=AC.createMediaElementSource(bgm);bgGain=AC.createGain();src.connect(bgGain);bgGain.connect(AC.destination)}}catch(e){bgGain=null}
+}
+function wake(){try{if(AC&&AC.state!=='running')AC.resume()}catch(e){}}
+document.addEventListener('visibilitychange',function(){if(!document.hidden)wake()});
 $('snd').addEventListener('click',function(){
   sndOn=!sndOn;
-  if(sndOn){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();AC.resume()}catch(e){sndOn=false}}
+  if(sndOn){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();AC.resume()}catch(e){}unlock();
+    var c0=at(t);if(playing&&c0.loc>.3)narrate(c0.id,c0.loc)}
   this.textContent=sndOn?'Sound on':'Sound off';this.setAttribute('aria-pressed',sndOn);music();
 });
 function setPlay(p){playing=p;music();playB.textContent=p?'Pause':(t>=DUR?'Replay':'Play');if(p){last=performance.now();requestAnimationFrame(tick)}}
 function tick(now){if(!playing)return;t+=(now-last)/1000;last=now;if(t>=DUR){t=DUR;show();setPlay(false);return}show();beat();requestAnimationFrame(tick)}
-playB.addEventListener('click',function(){if(!playing&&t>=DUR)t=0;setPlay(!playing)});
+playB.addEventListener('click',function(){wake();if(!playing&&t>=DUR)t=0;setPlay(!playing)});
 $('restart').addEventListener('click',function(){t=0;show();setPlay(true)});
 seek.addEventListener('input',function(){t=+seek.value;show();if(!playing)playB.textContent=t>=DUR?'Replay':'Play'});
 list.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;t=SC[+b.dataset.i].at+.01;show();if(!playing)playB.textContent='Play'});
