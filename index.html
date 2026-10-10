@@ -639,13 +639,27 @@ function music(){
   try{
     var sc0=SC[cur];setVol((inHold||inSay||inFin||(sc0&&NARR[sc0.id]))?.18:.7);
     if(sndOn&&playing){
+      wake();
       if(!bgm.seeking&&Math.abs(bgm.currentTime-t)>.4)bgm.currentTime=t;
       if(bgm.paused){var p=bgm.play();if(p&&p.catch)p.catch(function(){})}
     }else{if(!bgm.paused)bgm.pause();if(voNow&&!voNow.paused)voNow.pause()}
   }catch(e){}
 }
 function beat(){music()}
-var VO=[0,1,2,3].map(function(i){try{var a=new Audio('vo'+i+'.mp3');a.preload='auto';return a}catch(e){return null}}),voNow=null;
+var voice=new Audio(),voNow=voice,VURL={},SIL='data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
+voice.preload='auto';
+/* one shared player for every voice clip: a phone lets a player speak later only if a tap started it once, so one player is unlocked once and reused */
+['vo0','vo1','vo2','vo3','g0','g1','g2','g3','exit','intro0','intro1','intro2','step','choose','stance','result','keep','how','end'].forEach(function(f){
+  VURL[f]=f+'.mp3';
+  try{fetch(f+'.mp3').then(function(r){if(!r.ok)throw 0;return r.blob()}).then(function(b){VURL[f]=URL.createObjectURL(b)}).catch(function(){})}catch(e){}
+});
+var vSeek=null;
+function vplay(f,off){
+  try{voice.pause();if(vSeek){voice.removeEventListener('loadedmetadata',vSeek);vSeek=null}
+    voice.muted=false;voice.src=VURL[f];
+    if(off){vSeek=function(){voice.removeEventListener('loadedmetadata',vSeek);vSeek=null;try{voice.currentTime=off}catch(e){}};voice.addEventListener('loadedmetadata',vSeek)}
+    var p=voice.play();if(p&&p.catch)p.catch(function(){})}catch(e){}
+}
 var NARR={
  who:'Meet the Tausug, the people of the current. They are a seafaring people from the far south of the Philippines.',
  where:'Their home is the Sulu Archipelago, a chain of islands between Mindanao and Borneo, with Jolo at its heart. For centuries, the Sultanate of Sulu traded across these seas.',
@@ -658,38 +672,34 @@ var NARR={
  how:'Here is how it works. A webcam follows your body and hands. You follow the coach, and each gold move catches a treasure. Then every treasure tells its story.',
  end:'Pangalay Mirror. Move like the current, and meet the Tausug.'
 },NA={},NFILE={who:'intro0',where:'intro1',today:'intro2',step:'step',choose:'choose',mirror:'stance',result:'result',keep:'keep',how:'how',end:'end'};
-Object.keys(NFILE).forEach(function(k){try{NA[k]=new Audio(NFILE[k]+'.mp3');NA[k].preload='auto'}catch(e){}});
+
 function narrate(id,off){
   if(!sndOn||!playing||!NARR[id])return;
-  var fb=function(){speak({name:'',desc:NARR[id]})},a=NA[id];if(!a){fb();return}
-  if(off&&a.duration&&off>a.duration-.5)return;
-  try{if(voNow)voNow.pause();voNow=a;a.muted=false;a.currentTime=off||0;var p=a.play();if(p&&p.catch)p.catch(fb)}catch(e){fb()}
+  if(off>14)return;vplay(NFILE[id],off);
+
+
 }
 function speak(n){try{var u=new SpeechSynthesisUtterance((n.name?n.name+'. ':'')+n.desc);u.rate=.9;window.speechSynthesis.cancel();window.speechSynthesis.speak(u)}catch(e){}}
-var GA=[0,1,2,3].map(function(i){try{var a=new Audio('g'+i+'.mp3');a.preload='auto';return a}catch(e){return null}});
+
 function gsay(i){
-  if(!sndOn)return;var n=NOTES[i],fb=function(){speak({name:n.g,desc:n.gd})},a=GA[i];if(!a){fb();return}
-  try{if(voNow)voNow.pause();voNow=a;a.muted=false;a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(fb)}catch(e){fb()}
+  if(!sndOn)return;vplay('g'+i);
+
 }
-var FA=null;try{FA=new Audio('exit.mp3');FA.preload='auto'}catch(e){}
+
 function fsay(){
-  if(!sndOn||!FA)return;try{if(voNow)voNow.pause();voNow=FA;FA.muted=false;FA.currentTime=0;var p=FA.play();if(p&&p.catch)p.catch(function(){})}catch(e){}
+  if(!sndOn)return;vplay('exit');
 }
 function caught(n,i){
   if(!sndOn)return;gong(1318.5,.14,1.4);gong(1568,.1,1.6);
-  var a=VO[i];if(!a){speak(n);return}
-  try{if(voNow)voNow.pause();voNow=a;a.muted=false;a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){speak(n)})}catch(e){speak(n)}
+  vplay('vo'+i);
+
 }
 var unlocked=false;
 /* phones only let a clip play if it was first started inside a tap: start every voice clip muted, then stop it */
 function unlock(){
   if(unlocked)return;unlocked=true;
   try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
-  VO.concat(GA,Object.keys(NA).map(function(k){return NA[k]}),[FA]).forEach(function(a){
-    if(!a||a===voNow)return;
-    try{a.muted=true;var p=a.play(),stop=function(){if(voNow!==a){a.pause();a.currentTime=0}a.muted=false};
-      if(p&&p.then)p.then(stop,function(){a.muted=false});else stop()}catch(e){}
-  });
+  try{voice.muted=false;voice.src=SIL;var p=voice.play();if(p&&p.catch)p.catch(function(){})}catch(e){}
   /* iPhone ignores element volume, so the music could not duck under the voice: route it through a gain node there */
   try{bgm.volume=.5;if(bgm.volume!==.5&&AC&&!bgGain){var src=AC.createMediaElementSource(bgm);bgGain=AC.createGain();src.connect(bgGain);bgGain.connect(AC.destination)}}catch(e){bgGain=null}
 }
