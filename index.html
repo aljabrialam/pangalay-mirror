@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Pangalay Mirror Film</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Albert+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Albert+Sans:wght@400;500;600&family=Noto+Naskh+Arabic:wght@500&display=swap">
 <style>
 /* Layout: one 16:9 stage that plays like a film. The mirror scene is the hero; transport and scene list sit under it. Single dusk-sea look by choice. */
 :root{
@@ -122,6 +122,17 @@ h1{font-family:var(--display);font-weight:400;font-size:30px;color:var(--paper);
 .whot{display:flex;flex-direction:column;gap:.8cqw}
 .ava{width:13cqw;height:13cqw;object-fit:cover;border-radius:50%;flex:none;display:grid;place-items:center;font-family:var(--display);font-size:4.4cqw;color:var(--gold);background:#2A0C2E;border:.35cqw solid var(--gold)}
 .card .bio{margin:0;max-width:62cqw;font-size:1.9cqw;line-height:1.5;color:var(--paper);text-align:center}
+.hero{font-family:'Noto Naskh Arabic','Geeza Pro','Segoe UI','Noto Sans Arabic',serif;font-size:7.4cqw;line-height:1.25;color:var(--gold);display:flex;align-items:center;gap:2.4cqw;text-shadow:0 .3cqw 1.6cqw rgba(242,193,78,.35)}
+.hero i{width:1.5cqw;height:1.5cqw;background:var(--gold);transform:rotate(45deg);box-shadow:0 0 0 .35cqw #2A0C2E,0 0 0 .55cqw var(--gold);flex:none}
+.hero+.mark{font-size:6.4cqw}
+.duo{display:flex;align-items:baseline;gap:1.2cqw;font-size:1.7cqw;color:var(--mist)}
+.duo span[dir=rtl]{font-family:'Noto Naskh Arabic','Geeza Pro','Segoe UI',serif;font-size:2.4cqw;color:var(--gold)}
+.duo b{color:var(--paper);font-weight:600}
+.duo b::after{content:'·';margin-left:1.2cqw;color:var(--dim);font-weight:400}
+.sug{font-family:'Noto Naskh Arabic','Geeza Pro','Segoe UI','Noto Sans Arabic',serif;font-size:3.4cqw;line-height:1.5;color:var(--gold);direction:rtl;unicode-bidi:isolate}
+.sug.l{text-align:left}
+.sug.sm{font-size:2.1cqw;line-height:1.35}
+.sug[hidden]{display:none}
 .title2{font-family:var(--display);font-size:4cqw;color:var(--paper);line-height:1}
 .intro{flex-direction:row;gap:5cqw;text-align:left}
 .intro .map{width:30cqw;height:auto;flex:none;display:block}
@@ -282,13 +293,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--ember);outline-
         <div class="k" id="gk"></div>
         <div class="mid" id="gname"></div>
         <div class="sm" id="gdesc"></div>
-        <div class="rule" id="prule"><div class="k krow">You caught<span class="wave" id="pwave" hidden><b></b><b></b><b></b><b></b><b></b><b></b></span></div><div class="mid pap" id="pname"></div><div class="sm" id="pdesc"></div></div>
+        <div class="rule" id="prule"><div class="k krow">You caught<span class="wave" id="pwave" hidden><b></b><b></b><b></b><b></b><b></b><b></b></span></div><div class="mid pap" id="pname"></div><div class="sug sm l" dir="rtl" lang="tsg" id="par"></div><div class="sm" id="pdesc"></div></div>
       </div>
     </div>
 
     <div class="card sc" data-on="title">
       <div class="band"></div><svg class="tree" viewBox="-110 -200 220 210" aria-hidden="true"></svg>
+      <div class="hero" dir="rtl" lang="tsg"><i aria-hidden="true"></i>فَڠَلَيْ<i aria-hidden="true"></i></div>
       <div class="mark">Pangalay Mirror</div>
+      <div class="duo"><span dir="rtl" lang="tsg">تَؤُ سُوْغْ</span><b>Tau Sūg</b><span>People of the current</span></div>
       <div class="tagl">Step in. Move. Meet the Tausug.</div>
       <div class="subt">A dance game that teaches pangalay and introduces Tausug culture</div>
     </div>
@@ -308,6 +321,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--ember);outline-
         <div class="blk sc" data-on="who">
           <div class="k">Meet</div>
           <div class="mark">The Tausug</div>
+          <div class="sug l" dir="rtl" lang="tsg">تَؤُ سُوْغْ</div>
           <div class="tagl">People of the current</div>
           <div class="subt">tau: people · sūg: current</div>
           <div class="say late">A seafaring people from the far south of the Philippines.</div>
@@ -335,10 +349,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--ember);outline-
       <div class="k">Round complete · Score 1,300 · ★★★★★</div>
       <div class="title2">Four gestures learned, four treasures met</div>
       <div class="cols c4">
-        <div class="col"><img class="tr" src="tr0.png" alt=""><span class="k">Open arms</span><h3>Kulintangan</h3><p>A row of small gongs. Cousin of the gamelan.</p></div>
-        <div class="col"><img class="tr" src="tr1.png" alt=""><span class="k">Hands overhead</span><h3>Pis syabit</h3><p>A woven headcloth of squares, hooks and zigzags.</p></div>
+        <div class="col"><img class="tr" src="tr0.png" alt=""><span class="k">Open arms</span><h3>Kulintangan</h3><div class="sug sm l" dir="rtl" lang="tsg">كُلِنْتَڠَنْ</div><p>A row of small gongs. Cousin of the gamelan.</p></div>
+        <div class="col"><img class="tr" src="tr1.png" alt=""><span class="k">Hands overhead</span><h3>Pis syabit</h3><div class="sug sm l" dir="rtl" lang="tsg">فِسْ سِيَبِتْ</div><p>A woven headcloth of squares, hooks and zigzags.</p></div>
         <div class="col"><img class="tr" src="tr2.png" alt=""><span class="k">Crossed arms</span><h3>Pearl shell</h3><p>Sulu pearls once sailed to the markets of Singapore.</p></div>
-        <div class="col"><img class="tr" src="tr3.png" alt=""><span class="k">Wrist turn</span><h3>Kalis</h3><p>The wavy-bladed Tausug sword. Cousin of the keris.</p></div>
+        <div class="col"><img class="tr" src="tr3.png" alt=""><span class="k">Wrist turn</span><h3>Kalis</h3><div class="sug sm l" dir="rtl" lang="tsg">كَلِسْ</div><p>The wavy-bladed Tausug sword. Cousin of the keris.</p></div>
       </div>
       <div class="subt">Each gesture carries a meaning, and each catch introduces a piece of Tausug culture.</div>
     </div>
@@ -354,6 +368,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--ember);outline-
       <div class="keepside">
         <div class="k">Your keepsake</div>
         <div class="title2">Magsukul</div>
+        <div class="sug" dir="rtl" lang="tsg">مَغْسُكُلْ</div>
         <div class="tagl">Thank you, in Bahasa Sūg</div>
         <div class="qr"><svg id="qr" viewBox="0 0 13 13" aria-hidden="true"></svg></div>
         <div class="subt">Scan to save your snapshot</div>
@@ -385,6 +400,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--ember);outline-
     </div>
     <div class="card sc" data-on="end">
       <div class="band"></div><svg class="tree" viewBox="-110 -200 220 210" aria-hidden="true"></svg>
+      <div class="hero" dir="rtl" lang="tsg"><i aria-hidden="true"></i>فَڠَلَيْ<i aria-hidden="true"></i></div>
       <div class="mark">Pangalay Mirror</div>
       <div class="tagl">Move like the current. Meet the Tausug.</div>
       <div class="subt">Common Ground Makeathon · Culture × Tech</div>
@@ -496,10 +512,10 @@ function poseAt(x){
   return idle(x);
 }
 var NOTES=[
- {hit:9.6,el:'n0',side:-1,pose:{l:[88,4,55],r:[-88,-4,-55]},g:'Open arms',gd:'A greeting of welcome and joy. It can also be waves or a bird\u2019s wings.',name:'Kulintangan',desc:'A row of small gongs. Cousin of the gamelan.'},
- {hit:25.5,el:'n1',side:1,pose:{l:[150,25,-70],r:[-150,-25,70]},g:'Hands overhead',gd:'Triumph and great happiness.',name:'Pis syabit',desc:'A woven headcloth of squares, hooks and zigzags. Cousin of songket.'},
+ {hit:9.6,el:'n0',side:-1,pose:{l:[88,4,55],r:[-88,-4,-55]},g:'Open arms',gd:'A greeting of welcome and joy. It can also be waves or a bird\u2019s wings.',name:'Kulintangan',ar:'كُلِنْتَڠَنْ',desc:'A row of small gongs. Cousin of the gamelan.'},
+ {hit:25.5,el:'n1',side:1,pose:{l:[150,25,-70],r:[-150,-25,70]},g:'Hands overhead',gd:'Triumph and great happiness.',name:'Pis syabit',ar:'فِسْ سِيَبِتْ',desc:'A woven headcloth of squares, hooks and zigzags. Cousin of songket.'},
  {hit:45.1,el:'n3',x:640,y:582,dy:124,pose:{l:[10,-125,-25],r:[-10,125,25]},g:'Crossed arms',gd:'Held at the chest, for protectiveness or playfulness.',name:'Pearl shell',desc:'Sulu pearls once sailed to the markets of Singapore.'},
- {hit:62.1,el:'n2',side:1,turn:1,pose:{l:[35,30,40],r:[-92,-8,-55]},g:'Wrist turn',gd:'Arm positions change by turning the hand at the wrist.',name:'Kalis',desc:'The wavy-bladed Tausug sword. Cousin of the keris.'}
+ {hit:62.1,el:'n2',side:1,turn:1,pose:{l:[35,30,40],r:[-92,-8,-55]},g:'Wrist turn',gd:'Arm positions change by turning the hand at the wrist.',name:'Kalis',ar:'كَلِسْ',desc:'The wavy-bladed Tausug sword. Cousin of the keris.'}
 ];
 var inHold=false;
 /* each hold lasts as long as that treasure's voice clip */
@@ -567,7 +583,7 @@ function panel(j,on,idx,say,fin){
   var key=j+'|'+on+'|'+idx+'|'+say+'|'+fin;if(key===shown)return;shown=key;var g=NOTES[j],n=NOTES[idx],sc=0;for(var k=0;k<=idx;k++)sc+=100*(k+1);
   $('gk').textContent=on?'Hold the pose and listen':(say?'Learn the gesture':'Next gesture');$('gname').textContent=g.g;$('gdesc').textContent=g.gd;
   if(fin){$('gk').textContent='Closing gesture';$('gname').textContent='Hands to heart';$('gdesc').textContent='Lower your arms, bring your hands to your chest, and bow. The dance ends as gently as it began.'}
-  $('prule').hidden=!n;if(n){$('pname').textContent=n.name;$('pdesc').textContent=n.desc}
+  $('prule').hidden=!n;if(n){$('pname').textContent=n.name;$('par').textContent=n.ar||'';$('par').hidden=!n.ar;$('pdesc').textContent=n.desc}
 }
 function game(c){
   var loc=c.id==='play'?c.loc:(c.i>7?99:-9),idx=-1,j=-1,rate='';
