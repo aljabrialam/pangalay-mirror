@@ -30,4 +30,14 @@ No-camera demo: add `?demo=1` to either app URL.
 - [ ] Leave the result up for 60 seconds, then check attract mode and raise a hand to start the next round.
 - [ ] Keep keyboard keys 1–5 and `?demo=1` available as stage fallbacks.
 
+## Mobile startup review
+
+- [ ] On the actual phone and browser, open the production app over HTTPS, allow camera access, and confirm startup advances from permission to pose tracking and then body framing without a hang or crash.
+- [ ] Confirm portrait mode shows “Turn your phone sideways” and the prompt disappears after rotating to landscape.
+- [ ] Deny camera access once; confirm the app explains how to allow it again, offers retry and the no-camera demo, and releases any opened camera stream.
+- [ ] On a phone, confirm the dance, narration, catches, and result screen remain responsive using the one-arm wrist-turn fallback.
+- [ ] Repeat with the aligned `/app/timeline.html` route.
+
+The local 390×844 and 844×390 viewport review verifies portrait guidance and landscape sizing only. It does not replace a physical mobile camera, GPU/CPU fallback, or memory-pressure review.
+
 Automated/local checks pass for syntax, unique gesture matching, the full demo (score 1,000; four catches), intro skip progression, and synthetic palm orientation. Real camera, saved PNG and QR scanning, event lighting, and Wi-Fi-off startup still need this device review.

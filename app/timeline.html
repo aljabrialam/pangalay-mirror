@@ -9,8 +9,8 @@
 :root{--night:#1A0820;--deep:#2A0C2E;--gold:#F2C14E;--paper:#F6EFDF;--mist:#C9D8D6;--jade:#5FD0A8;--ink:#0B1418}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:#0d0412;color:var(--paper);font-family:'Albert Sans',system-ui,sans-serif}
-#app{position:relative;width:100vw;height:100vh;overflow:hidden;display:grid;place-items:center}
-#stage{position:relative;width:min(100vw,177.78vh);aspect-ratio:16/9;container-type:inline-size;overflow:hidden;background:var(--night)}
+#app{position:relative;width:100vw;height:100vh;height:100dvh;overflow:hidden;display:grid;place-items:center}
+#stage{position:relative;width:min(100vw,177.78dvh);aspect-ratio:16/9;container-type:inline-size;overflow:hidden;background:var(--night)}
 #scene{position:absolute;inset:0;width:100%;height:100%}
 .strip{position:absolute;left:0;top:0;width:100%;height:2.6cqw;background:url(../film/pis-art.png) 0 -8px/40cqw auto;border-bottom:.3cqw solid var(--gold)}
 .cap{position:absolute;left:3cqw;top:4.2cqw;font-family:'Gloock',Georgia,serif;font-size:2.4cqw;text-shadow:0 .2cqw .8cqw #000}
@@ -43,7 +43,7 @@ html,body{margin:0;height:100%;background:#0d0412;color:var(--paper);font-family
 .hero{font-family:'Noto Naskh Arabic','Geeza Pro',serif;font-size:6cqw;line-height:1.2;color:var(--gold);direction:rtl}
 .tag{font-size:2.2cqw;color:var(--gold);font-weight:600}
 .pick{display:flex;gap:1.4cqw}
-button{font:inherit;font-size:1.7cqw;font-weight:600;padding:1cqw 2.2cqw;border-radius:.8cqw;border:2px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer}
+button{font:inherit;font-size:1.7cqw;font-weight:600;padding:1cqw 2.2cqw;border-radius:.8cqw;border:2px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer}button:disabled{opacity:.7;cursor:wait}
 button.on,button.go{background:var(--gold);color:var(--night)}
 .note{font-size:1.2cqw;color:var(--mist);max-width:60cqw;line-height:1.5}
 #choice{position:absolute;z-index:3;left:22cqw;top:13cqw;width:56cqw;padding:2cqw;border:1px solid rgba(242,193,78,.55);border-radius:1.2cqw;background:rgba(26,8,32,.94);text-align:center;box-shadow:0 1cqw 3cqw #0008}
@@ -86,6 +86,12 @@ button.on,button.go{background:var(--gold);color:var(--night)}
 #laneRating{position:absolute;right:1cqw;top:.5cqw;color:var(--gold);font-family:'Gloock',Georgia,serif;font-size:1.6cqw;opacity:0;transition:opacity .2s}#laneRating.on{opacity:1;animation:ratingPop .65s cubic-bezier(.18,.9,.3,1.35)}
 @keyframes ratingPop{0%{transform:scale(.7);opacity:0}70%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
 @media(prefers-reduced-motion:reduce){#laneMarker:before,.lane-move.approaching,.lane-move.caught,#laneRating.on{animation:none}.lane-move,#laneRating{transition:none}.lane-move.approaching,.lane-move.at-marker{transform:translateX(-50%)}}
+#orientationHint{display:none;position:fixed;inset:0;z-index:20;padding:24px;background:radial-gradient(ellipse at center,#321239,#100613);color:var(--paper);text-align:center;place-items:center}
+#orientationHint .orientation-card{max-width:420px;padding:28px;border:1px solid rgba(242,193,78,.6);border-radius:18px;background:rgba(26,8,32,.82);box-shadow:0 12px 42px #0008}
+#orientationHint .phone-icon{font-size:clamp(40px,12vw,68px);line-height:1.2;color:var(--gold)}
+#orientationHint h2{margin:12px 0;font:clamp(25px,7vw,36px)/1.1 'Gloock',Georgia,serif;color:var(--gold)}
+#orientationHint p{margin:0;font-size:clamp(16px,4.4vw,19px);line-height:1.5}
+@media (orientation:portrait) and (max-width:767px){#orientationHint{display:grid}}
 </style>
 </head>
 <body>
@@ -192,9 +198,12 @@ button.on,button.go{background:var(--gold);color:var(--night)}
     <div class="mark" id="coverTitle">Pangalay Mirror</div>
     <div class="tag" id="tagline">Step in. Move. Meet the Tausug.</div>
     <button class="go" id="start">Start with camera</button>
-    <div class="note" id="msg">Stand back so the camera sees you from the waist up. Keys: 1–4 and 5 force a gesture, D shows the debug numbers. Add <b>?demo=1</b> to the address to run without a camera.</div>
+    <div class="note" id="msg" aria-live="polite">Stand back so the camera sees you from the waist up. Keys: 1–4 and 5 force a gesture, D shows the debug numbers. Add <b>?demo=1</b> to the address to run without a camera.</div>
+    <button class="go" id="demoFallback" type="button" hidden onclick="location.href=new URL('?demo=1',location.href).href">Try no-camera demo</button>
   </div>
 </div></div>
+
+<div id="orientationHint" role="status" aria-live="polite"><div class="orientation-card"><div class="phone-icon" aria-hidden="true">↻</div><h2>Turn your phone sideways</h2><p>Pangalay Mirror is designed for landscape play. Rotate your phone to see the full dance screen.</p></div></div>
 
 <audio id="bgm" src="../film/pangalay.mp3" loop preload="auto"></audio>
 
@@ -445,20 +454,44 @@ function checkAttract(lm,now){
 function selectAvatar(k){pick(k);$('choice').hidden=true;choiceSince={boy:null,girl:null};$('cap').textContent='Follow the coach. Hold each gesture to catch a treasure.';beginStance()}
 
 /* ---------- camera + MediaPipe ---------- */
-const video=$('video'),ov=$('overlay'),ctx=ov.getContext('2d');let landmarker=null,handLandmarker=null,lastHandDetect=0,cachedHands=null;
-async function initCamera(){
-  const stream=await navigator.mediaDevices.getUserMedia({video:{width:640,height:480,facingMode:'user'},audio:false});
+const video=$('video'),ov=$('overlay'),ctx=ov.getContext('2d');let landmarker=null,handLandmarker=null,cameraStream=null,lastHandDetect=0,cachedHands=null,startupInProgress=false;
+function isMobileBrowser(){return matchMedia('(pointer: coarse)').matches||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(/Macintosh/i.test(navigator.userAgent)&&navigator.maxTouchPoints>1)}
+function stopCamera(){
+  for(const tracker of [handLandmarker,landmarker]){try{tracker?.close()}catch(e){}}
+  handLandmarker=null;landmarker=null;cachedHands=null;lastHandDetect=0;
+  if(cameraStream){cameraStream.getTracks().forEach(track=>track.stop());cameraStream=null}
+  video.pause();video.srcObject=null;ov.width=0;ov.height=0;
+}
+function startupErrorMessage(error){
+  if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia)return 'Camera access needs a secure browser page. Open the app on its HTTPS link, or use the no-camera demo.';
+  if(error?.name==='NotAllowedError'||error?.name==='SecurityError')return 'Camera permission was blocked. Allow camera access for this site in your browser settings, then tap Try again.';
+  if(error?.name==='NotFoundError'||error?.name==='DevicesNotFoundError')return 'No camera was found. Connect or enable a camera, then tap Try again.';
+  if(error?.name==='NotReadableError'||error?.name==='TrackStartError')return 'The camera is busy or unavailable. Close other apps using it, then tap Try again.';
+  if(/model|wasm|fetch|network|gpu|webgl|delegate/i.test(error?.message||''))return 'Pose tracking could not load. Check your connection, then tap Try again or use the no-camera demo.';
+  return 'Camera startup failed. Check camera permission and close other apps using the camera, then tap Try again or use the no-camera demo.';
+}
+async function initCamera(onProgress=()=>{}){
+  if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia)throw new Error('Secure camera access is unavailable');
+  onProgress('Requesting camera permission…');
+  cameraStream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480},facingMode:{ideal:'user'}},audio:false});
+  video.srcObject=cameraStream;await video.play();ov.width=video.videoWidth;ov.height=video.videoHeight;
+  onProgress('Preparing pose tracking…');
   const {FilesetResolver,PoseLandmarker}=await import('./vendor/vision_bundle.mjs').catch(()=>import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs'));
   let wasm='./vendor/wasm';try{const r=await fetch(wasm+'/vision_wasm_internal.js',{method:'HEAD'});if(!r.ok)throw 0}catch(e){wasm='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'}
   const fs=await FilesetResolver.forVisionTasks(wasm);
   let model='./models/pose_landmarker_lite.task';try{const r=await fetch(model,{method:'HEAD'});if(!r.ok)throw 0}catch(e){model='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task'}
-  landmarker=await PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:model,delegate:'GPU'},runningMode:'VIDEO',numPoses:1});
-  try{
-    const {HandLandmarker}=await import('./vendor/vision_bundle.mjs').catch(()=>import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs'));
-    let handModel='./models/hand_landmarker.task';try{const r=await fetch(handModel,{method:'HEAD'});if(!r.ok)throw 0}catch(e){handModel='https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task'}
-    handLandmarker=await HandLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:handModel,delegate:'GPU'},runningMode:'VIDEO',numHands:2});
-  }catch(e){handLandmarker=null;console.warn('Hand tracking unavailable; one-arm wrist-turn fallback remains enabled.',e)}
-  video.srcObject=stream;await video.play();ov.width=video.videoWidth;ov.height=video.videoHeight}
+  const poseOptions={runningMode:'VIDEO',numPoses:1};
+  try{landmarker=await PoseLandmarker.createFromOptions(fs,{...poseOptions,baseOptions:{modelAssetPath:model,delegate:'GPU'}})}
+  catch(gpuError){console.warn('GPU pose tracking unavailable; retrying with CPU.',gpuError);onProgress('Switching to lower-load pose tracking…');landmarker=await PoseLandmarker.createFromOptions(fs,{...poseOptions,baseOptions:{modelAssetPath:model,delegate:'CPU'}})}
+  if(!isMobileBrowser()){
+    onProgress('Preparing optional hand tracking…');
+    try{
+      const {HandLandmarker}=await import('./vendor/vision_bundle.mjs').catch(()=>import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs'));
+      let handModel='./models/hand_landmarker.task';try{const r=await fetch(handModel,{method:'HEAD'});if(!r.ok)throw 0}catch(e){handModel='https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task'}
+      handLandmarker=await HandLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:handModel,delegate:'GPU'},runningMode:'VIDEO',numHands:2});
+    }catch(e){handLandmarker=null;console.warn('Hand tracking unavailable; one-arm wrist-turn fallback remains enabled.',e)}
+  }else{handLandmarker=null;console.info('Using the one-arm wrist-turn fallback on this mobile device.')}
+}
 function drawSkeleton(lm){ctx.clearRect(0,0,ov.width,ov.height);if(!lm)return;ctx.strokeStyle='#5FD0A8';ctx.lineWidth=5;ctx.lineCap='round';
   [[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24]].forEach(([a,b])=>{ctx.beginPath();ctx.moveTo(lm[a].x*ov.width,lm[a].y*ov.height);ctx.lineTo(lm[b].x*ov.width,lm[b].y*ov.height);ctx.stroke()})}
 function loop(now){
@@ -477,10 +510,13 @@ function pick(k){kind=k;build('avatar','a',k);setPose('a',pose)}
 build('ghost','h','ghost');setPose('h',IDLE);pick('girl');initLane();
 $('start').onclick=async()=>{
   if(phase==='attract'){beginRound();return}
+  if(startupInProgress)return;
   try{voice.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';voice.play().catch(()=>{})}catch(e){}   /* unlock the voice player inside the tap */
   bgm.volume=.5;bgm.play().catch(()=>{});
-  if(!DEMO){$('msg').textContent='Starting the camera and loading the pose model…';
-    try{await initCamera()}catch(e){$('msg').innerHTML='Could not start the camera or the pose model ('+(e&&e.message||e)+'). Check camera permission, or add <b>?demo=1</b> to the address.';return}}
+  if(!DEMO){startupInProgress=true;$('start').disabled=true;$('start').textContent='Starting…';$('demoFallback').hidden=true;
+    try{await initCamera(message=>{$('msg').textContent=message})
+    }catch(e){console.error('Camera startup failed',e);stopCamera();$('msg').textContent=startupErrorMessage(e);$('demoFallback').hidden=false;$('start').disabled=false;$('start').textContent='Try again with camera';startupInProgress=false;return}}
+  startupInProgress=false;$('start').disabled=false;$('demoFallback').hidden=true;
   $('cover').hidden=true;last=performance.now();
   beginRound();
   requestAnimationFrame(loop)};
