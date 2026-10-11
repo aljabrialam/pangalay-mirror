@@ -53,7 +53,10 @@ button.on,button.go{background:var(--gold);color:var(--night)}
 .choice-bar{height:.5cqw;background:#ffffff24;border-radius:1cqw;overflow:hidden;margin-top:.65cqw}
 .choice-bar i{display:block;width:0;height:100%;background:var(--gold)}
 #intro{position:absolute;z-index:4;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;background:radial-gradient(ellipse 70% 70% at 50% 50%,rgba(24,7,30,.97),rgba(24,7,30,.9)),url(../film/pis-art.png) center/cover}
-.intro-card{width:64cqw;padding:4cqw;border:1px solid rgba(242,193,78,.55);border-radius:1.4cqw;background:rgba(26,8,32,.76);box-shadow:0 1cqw 3cqw #0008}
+.intro-card{width:88cqw;max-height:88cqh;overflow:auto;padding:3cqw;border:1px solid rgba(242,193,78,.55);border-radius:1.4cqw;background:rgba(26,8,32,.76);box-shadow:0 1cqw 3cqw #0008}
+.intro-layout{display:flex;align-items:center;justify-content:center;gap:2cqw}.intro-text{flex:1;min-width:0}
+#whereMap{display:block;flex:none;width:30cqw;height:auto;max-height:72cqh;filter:drop-shadow(0 .4cqw .7cqw #0008)}#whereMap[hidden]{display:none}
+.map-land{fill:#C9D8D6;fill-opacity:.84;stroke:#F6EFDF;stroke-opacity:.56;stroke-width:2}.map-borneo{fill:#B6C5BD}.map-sulu{fill:#F2C14E;stroke:#FFF2B8;stroke-width:3}.map-route{fill:none;stroke:#F2C14E;stroke-width:2;stroke-dasharray:5 5}.map-label{font:600 22px 'Albert Sans',sans-serif;fill:#F6EFDF;paint-order:stroke;stroke:#1A0820;stroke-width:4;stroke-linejoin:round}.map-label.gold{fill:#F2C14E}.map-note{font:500 18px 'Albert Sans',sans-serif;fill:#C9D8D6}
 .intro-k{font-size:1.2cqw;letter-spacing:.18em;text-transform:uppercase;color:var(--mist);font-weight:700}
 .intro-title{margin:1cqw 0;font-family:'Gloock',Georgia,serif;font-size:4.5cqw;line-height:1.05;color:var(--gold)}
 .intro-copy{font-size:2cqw;line-height:1.45;color:var(--paper)}
@@ -64,12 +67,22 @@ button.on,button.go{background:var(--gold);color:var(--night)}
 #timelineLane{position:absolute;z-index:5;left:23cqw;bottom:1.2cqw;width:74cqw;height:7.4cqw;padding:.55cqw 1cqw .7cqw;background:rgba(6,20,26,.92);border:1px solid rgba(242,193,78,.62);border-radius:.9cqw;overflow:hidden;box-shadow:0 .4cqw 1cqw #0008}
 #timelineLane[hidden]{display:none}
 #laneHeading{font-size:.92cqw;letter-spacing:.14em;text-transform:uppercase;color:var(--mist);margin-bottom:.3cqw}
-#laneTrack{position:relative;height:4.3cqw;border-top:1px solid #ffffff2c}
+#laneTrack{position:relative;height:4.3cqw;border-top:1px solid #ffffff2c;isolation:isolate}
 #laneMarker{position:absolute;z-index:2;left:32%;top:-.3cqw;height:4.6cqw;border-left:.2cqw solid var(--gold);filter:drop-shadow(0 0 .3cqw var(--gold))}
-.lane-move{position:absolute;top:.4cqw;transform:translateX(-50%);width:4.4cqw;height:3.5cqw;border-radius:.5cqw;background:#ffffff12;text-align:center;color:var(--paper);transition:opacity .12s}
+#laneMarker:before{content:'';position:absolute;left:-.55cqw;top:1.45cqw;width:.9cqw;height:.9cqw;border-radius:50%;background:var(--gold);box-shadow:0 0 .7cqw .18cqw #f2c14eaa;animation:markerBeat .8s ease-in-out infinite alternate}
+.lane-move{position:absolute;top:.4cqw;transform:translateX(-50%);width:4.4cqw;height:3.5cqw;border-radius:.5cqw;background:#ffffff12;text-align:center;color:var(--paper);transition:opacity .16s,transform .18s,box-shadow .18s,background .18s;will-change:left,transform}
 .lane-move.gold{border:1px solid var(--gold);color:var(--gold);background:#f2c14e22}.lane-move.filler{width:2.8cqw;color:var(--mist);border:1px solid #c9d8d655}
+.lane-move.approaching{transform:translateX(-50%) scale(1.12);background:#f2c14e45;box-shadow:0 0 .8cqw #f2c14e88;animation:cueApproach .55s ease-in-out infinite alternate}
+.lane-move.at-marker{transform:translateX(-50%) scale(1.18);background:#f2c14e55;box-shadow:0 0 1cqw #f2c14eaa;z-index:1}
+.lane-move.caught{animation:cueCaught .68s ease-out both;z-index:3}
+.lane-paused .lane-move,.lane-paused #laneMarker:before{animation-play-state:paused}
+@keyframes markerBeat{from{transform:scale(.82);opacity:.72}to{transform:scale(1.22);opacity:1}}
+@keyframes cueApproach{from{filter:brightness(1)}to{filter:brightness(1.5)}}
+@keyframes cueCaught{0%{transform:translateX(-50%) scale(1.18);box-shadow:0 0 0 .1cqw #f2c14eaa}45%{transform:translateX(-50%) scale(1.45);box-shadow:0 0 1.4cqw .6cqw #f2c14e99;background:#fff2b8}100%{transform:translateX(-50%) scale(.8);opacity:0}}
 .lane-glyph{display:block;font-size:1.7cqw;line-height:2cqw}.lane-name{display:block;font-size:.65cqw;letter-spacing:.06em;white-space:nowrap}
-#laneRating{position:absolute;right:1cqw;top:.5cqw;color:var(--gold);font-family:'Gloock',Georgia,serif;font-size:1.6cqw;opacity:0;transition:opacity .2s}#laneRating.on{opacity:1}
+#laneRating{position:absolute;right:1cqw;top:.5cqw;color:var(--gold);font-family:'Gloock',Georgia,serif;font-size:1.6cqw;opacity:0;transition:opacity .2s}#laneRating.on{opacity:1;animation:ratingPop .65s cubic-bezier(.18,.9,.3,1.35)}
+@keyframes ratingPop{0%{transform:scale(.7);opacity:0}70%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){#laneMarker:before,.lane-move.approaching,.lane-move.caught,#laneRating.on{animation:none}.lane-move,#laneRating{transition:none}.lane-move.approaching,.lane-move.at-marker{transform:translateX(-50%)}}
 </style>
 </head>
 <body>
@@ -112,9 +125,30 @@ button.on,button.go{background:var(--gold);color:var(--night)}
 
   <div id="intro" hidden aria-live="polite">
     <div class="intro-card">
-      <div class="intro-k" id="introK">A people of the current</div>
-      <div class="intro-title" id="introTitle">Meet the Tausug</div>
-      <div class="intro-copy" id="introCopy"></div>
+      <div class="intro-layout">
+        <div class="intro-text">
+          <div class="intro-k" id="introK">A people of the current</div>
+          <div class="intro-title" id="introTitle">Meet the Tausug</div>
+          <div class="intro-copy" id="introCopy"></div>
+        </div>
+        <svg id="whereMap" hidden viewBox="0 0 480 660" role="img" aria-label="Simplified map showing the Sulu Archipelago and Jolo between Mindanao and Borneo">
+          <text class="map-note" x="18" y="28">SIMPLIFIED MAP · PHILIPPINES</text>
+          <path class="map-land" d="M302 61 Q335 68 350 98 L344 134 368 157 356 190 330 208 318 246 298 237 287 201 267 183 281 150 270 122 282 86Z"/>
+          <path class="map-land" d="M328 301 Q348 286 365 302L374 323 362 338 346 333Z M375 350 Q397 339 411 356L405 374 385 377Z M350 370 Q366 359 381 371L376 390 358 391Z"/>
+          <path class="map-land" d="M347 396 Q377 386 404 408L419 442 410 478 390 501 366 493 350 462 333 441Z"/>
+          <path class="map-land" d="M164 285 Q184 295 183 322L172 351 178 378 162 410 151 444 134 458 125 425 138 392 132 361 146 330Z"/>
+          <path class="map-borneo" d="M66 526 Q105 501 149 515L182 546 177 583 149 611 117 620 89 599 68 571Z"/>
+          <path class="map-sulu" d="M221 491 Q228 482 235 490L233 501 224 502Z M244 508 Q252 499 259 508L256 519 247 520Z M269 525 Q278 516 286 525L283 536 273 537Z M294 543 Q303 534 310 544L307 554 297 555Z"/>
+          <circle cx="278" cy="529" r="11" fill="none" stroke="#FFF2B8" stroke-width="3"/>
+          <path class="map-route" d="M251 536 Q243 555 220 562"/>
+          <text class="map-label" x="308" y="89">Luzon</text>
+          <text class="map-label" x="369" y="321">Visayas</text>
+          <text class="map-label" x="367" y="450">Mindanao</text>
+          <text class="map-label" x="76" y="650">Borneo</text>
+          <text class="map-label gold" x="137" y="567">Sulu Archipelago</text>
+          <text class="map-label gold" x="292" y="520">Jolo</text>
+        </svg>
+      </div>
       <div class="intro-actions"><button class="go" id="skipIntro">Skip intro</button></div>
     </div>
   </div>
@@ -139,6 +173,7 @@ button.on,button.go{background:var(--gold);color:var(--night)}
     <div class="got" id="got"></div>
     <div class="row" style="gap:3cqw"><span>Score <b id="score2">0</b></span><span id="stars2"></span></div>
     <button class="go" id="downloadSnapshot">Download my snapshot</button>
+    <div class="note">Your keepsake is made on this device. Your camera image is not uploaded.</div>
     <button class="go" id="again">Play again</button>
   </div>
 
@@ -258,7 +293,7 @@ let kind='girl',step=-1,phase='idle',heldMs=0,lostMs=0,score=0,caught=[],pose=ID
 const HOLD=650;
 const LANE_EVENTS=[{t:9.6,g:'↔',n:'OPEN',gold:1},{t:18.4,g:'•',n:'FLOW'},{t:25.5,g:'↟',n:'OVERHEAD',gold:1},{t:36.2,g:'•',n:'FLOW'},{t:45.1,g:'×',n:'CROSS',gold:1},{t:52.9,g:'•',n:'FLOW'},{t:62.1,g:'↻',n:'WRIST',gold:1},{t:72.6,g:'♡',n:'CLOSE'}];
 function initLane(){const box=$('laneNotes');box.innerHTML='';LANE_EVENTS.forEach((m,i)=>{const e=document.createElement('div');e.id='laneMove'+i;e.className='lane-move '+(m.gold?'gold':'filler');e.innerHTML='<span class="lane-glyph">'+m.g+'</span><span class="lane-name">'+m.n+'</span>';box.appendChild(e)})}
-function tickLane(){const track=$('laneTrack'),w=track.clientWidth||600;LANE_EVENTS.forEach((m,i)=>{const e=$('laneMove'+i),x=w*.32+(m.t-laneTime)*w/32;e.style.left=(x/w*100)+'%';e.style.opacity=x<-20||x>w+20?'0':'1'})}
+function tickLane(){const track=$('laneTrack'),lane=$('timelineLane'),w=track.clientWidth||600;lane.classList.toggle('lane-paused',phase==='hold'||phase==='done');LANE_EVENTS.forEach((m,i)=>{const e=$('laneMove'+i),delta=m.t-laneTime,x=w*.32+delta*w/32;e.style.left=(x/w*100)+'%';e.style.opacity=x<-20||x>w+20?'0':'1';e.classList.toggle('approaching',delta>0&&delta<=2);e.classList.toggle('at-marker',delta<=0&&delta>=-.65)})}
 const TREASURE_STARTS=[{x:1180,y:180},{x:1180,y:510},{x:-40,y:390},{x:1160,y:650}],HAND_LENGTH=182.2;
 function wristTarget(s){const sidePose=side=>{const a1=s.pose[side][0]*Math.PI/180,a2=(s.pose[side][0]+s.pose[side][1])*Math.PI/180,a3=(s.pose[side][0]+s.pose[side][1]+s.pose[side][2])*Math.PI/180,sgn=side==='l'?-1:1;return{x:sgn*46-80*Math.sin(a1)-75*Math.sin(a2)-14*Math.sin(a3),y:-315+80*Math.cos(a1)+75*Math.cos(a2)+14*Math.cos(a3)}};
   const p=s.target==='center'?{x:(sidePose('l').x+sidePose('r').x)/2,y:(sidePose('l').y+sidePose('r').y)/2}:sidePose(s.target==='left'?'l':'r');return{x:560+p.x*1.02,y:655+p.y*1.02}}
@@ -272,6 +307,7 @@ function show(i){step=i;phase='teach';heldMs=0;phaseAt=performance.now();const s
   say(s.teach,()=>{if(step===i&&phase==='teach'){phase='try';$('gk').textContent=s.closing?'Closing gesture · your turn':`Gesture ${i+1} of 4 · your turn`}});
   setTimeout(()=>{if(step===i&&phase==='teach'){phase='try'}},9000)}
 function hit(){const s=STEPS[step];phase='hold';$('hold').style.width='100%';
+  if(!s.closing){const when=[9.6,25.5,45.1,62.1][step],cue=LANE_EVENTS.findIndex(m=>m.t===when),tile=$('laneMove'+cue);if(tile){tile.classList.remove('at-marker','approaching');tile.classList.add('caught');setTimeout(()=>tile.classList.remove('caught'),700)}}
   if(!s.closing){const when=[9.6,25.5,45.1,62.1][step],delta=Math.abs(laneTime-when);const r=$('laneRating');r.textContent=delta<1.3?'Perfect':delta<4?'Good':'Keep moving';r.classList.add('on');setTimeout(()=>r.classList.remove('on'),1500)}
   if(s.closing){flash('Magsukul!');setTimeout(finish,1800);return}
   collectTreasureCue();
@@ -284,20 +320,39 @@ function finish(){phase='done';laneActive=false;clearTreasureCue();$('timelineLa
   restartTimer=setTimeout(()=>{if(phase!=='done')return;$('result').hidden=true;$('coverTitle').textContent='Pangalay Mirror';$('tagline').textContent='Raise your hand to begin';$('start').textContent='Raise your hand to begin';$('msg').textContent='Hold either hand above your shoulder for a moment.';$('cover').hidden=false;phase='attract';attractHandSince=null},20000)}
 async function downloadSnapshot(){
   const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;const c=canvas.getContext('2d');
+  let playerFrame=null;
+  try{if(video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0){playerFrame=document.createElement('canvas');playerFrame.width=video.videoWidth;playerFrame.height=video.videoHeight;const pc=playerFrame.getContext('2d');pc.save();pc.translate(playerFrame.width,0);pc.scale(-1,1);pc.drawImage(video,0,0,playerFrame.width,playerFrame.height);pc.restore()}}catch(e){playerFrame=null}
   const sky=c.createLinearGradient(0,0,0,1350);sky.addColorStop(0,'#150618');sky.addColorStop(.42,'#B8473F');sky.addColorStop(.66,'#F08A4B');sky.addColorStop(.67,'#1C6E77');sky.addColorStop(1,'#072C33');c.fillStyle=sky;c.fillRect(0,0,1080,1350);
-  c.fillStyle='#F2C14E';c.globalAlpha=.72;c.beginPath();c.arc(540,600,190,0,Math.PI*2);c.fill();c.globalAlpha=1;
-  c.fillStyle='#F2C14E';c.fillRect(0,1000,1080,8);
+  c.fillStyle='rgba(6,20,26,.72)';c.fillRect(0,0,1080,118);c.fillStyle='#F2C14E';c.fillRect(0,118,1080,5);
+  c.textAlign='center';c.fillStyle='#F6EFDF';c.font='700 30px "Albert Sans",sans-serif';c.fillText('PANGALAY MIRROR · YOUR DANCE',540,74);
+  c.fillStyle='rgba(6,20,26,.7)';c.fillRect(50,145,610,450);c.fillRect(680,145,350,450);
+  c.strokeStyle='rgba(242,193,78,.8)';c.lineWidth=4;c.strokeRect(50,145,610,450);c.strokeRect(680,145,350,450);
+  if(playerFrame){
+    const x=70,y=165,w=570,h=380,scale=Math.max(w/playerFrame.width,h/playerFrame.height),sw=w/scale,sh=h/scale,sx=(playerFrame.width-sw)/2,sy=(playerFrame.height-sh)/2;
+    c.save();c.beginPath();c.rect(x,y,w,h);c.clip();c.drawImage(playerFrame,sx,sy,sw,sh,x,y,w,h);c.restore();
+    c.fillStyle='#F2C14E';c.font='700 24px "Albert Sans",sans-serif';c.textAlign='left';c.fillText('YOU · YOUR MOMENT',76,576)
+  }else{
+    c.fillStyle='#0B1418';c.fillRect(70,165,570,380);c.fillStyle='#F2C14E';c.textAlign='center';c.font='700 29px "Albert Sans",sans-serif';c.fillText('NO CAMERA SNAPSHOT',355,330);c.fillStyle='#F6EFDF';c.font='500 23px "Albert Sans",sans-serif';c.fillText('This demo keepsake has no player photo.',355,375)
+  }
   const transforms={aL1:'translate(-46,-315) rotate(150)',aL2:'translate(0,80) rotate(25)',aL3:'translate(0,75) rotate(-70)',aR1:'translate(46,-315) rotate(-150)',aR2:'translate(0,80) rotate(-25)',aR3:'translate(0,75) rotate(70)'};
   let rig=body(kind)+arm('a',-1,kind)+arm('a',1,kind);for(const [id,t] of Object.entries(transforms))rig=rig.replace(`id="${id}"`,`id="${id}" transform="${t}"`);
   const base=new URL(FILM,location.href).href;rig=rig.replaceAll('../film/',base);
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="460" height="540" viewBox="-230 -520 460 540"><defs><clipPath id="skirtclip"><path d="M-44 -178 H44 L60 -4 H-60 Z"/></clipPath><clipPath id="pisclip"><path d="M12 -420 L44 -452 L36 -404 Z M-38 -390 A38 38 0 0 1 38 -390 Q0 -404 -38 -390 Z"/></clipPath></defs><g transform="translate(0,0)">${rig}</g></svg>`;
   const img=new Image();img.src=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
   try{await img.decode()}catch(e){URL.revokeObjectURL(img.src);throw e}
-  c.drawImage(img,260,270,560,660);URL.revokeObjectURL(img.src);
-  c.textAlign='center';c.fillStyle='#F6EFDF';c.font='600 30px "Albert Sans",sans-serif';c.fillText('PANGALAY MIRROR',540,110);
-  c.font='76px "Gloock",Georgia,serif';c.fillText('Magsukul',540,1100);
-  c.direction='rtl';c.font='64px "Noto Naskh Arabic",serif';c.fillText('مَغْسُكُلْ',540,1180);c.direction='ltr';
-  c.font='600 34px "Albert Sans",sans-serif';c.fillText(`Score  ${score.toLocaleString()}`,540,1270);
+  c.drawImage(img,700,170,310,365);URL.revokeObjectURL(img.src);c.fillStyle='#F2C14E';c.textAlign='center';c.font='700 24px "Albert Sans",sans-serif';c.fillText(`${kind.toUpperCase()} AVATAR`,855,576);
+  c.fillStyle='#F2C14E';c.fillRect(50,625,980,4);c.textAlign='center';c.fillStyle='#F6EFDF';c.font='600 24px "Albert Sans",sans-serif';c.fillText('YOUR ROUND',540,674);
+  c.fillStyle='#F2C14E';c.font='700 48px "Gloock",Georgia,serif';c.fillText(`Score  ${score.toLocaleString()}`,540,731);c.fillStyle='#F6EFDF';c.font='30px "Albert Sans",sans-serif';c.fillText($('stars2').textContent||'☆☆☆☆☆',540,772);
+  c.textAlign='center';c.fillStyle='#C9D8D6';c.font='700 20px "Albert Sans",sans-serif';c.fillText('TREASURES CAUGHT',540,818);
+  const treasureImages=await Promise.all(caught.map(async s=>{try{const im=new Image();im.src=new URL(FILM+s.img,location.href).href;await im.decode();return im}catch(e){return null}}));
+  const cell=220,start=100;for(let i=0;i<caught.length;i++){const x=start+i*cell,im=treasureImages[i];if(im)c.drawImage(im,x+70,828,80,80);c.fillStyle='#F6EFDF';c.font='600 20px "Albert Sans",sans-serif';c.fillText(caught[i].name,x+110,930)}
+  c.fillStyle='rgba(6,20,26,.76)';c.fillRect(50,960,980,215);c.strokeStyle='rgba(242,193,78,.6)';c.lineWidth=3;c.strokeRect(50,960,980,215);
+  let profile=null;try{profile=new Image();profile.src=new URL('../assets/me.jpg',location.href).href;await profile.decode()}catch(e){profile=null}
+  if(profile){c.save();c.beginPath();c.arc(160,1067,78,0,Math.PI*2);c.clip();c.drawImage(profile,82,989,156,156);c.restore();c.strokeStyle='#F2C14E';c.lineWidth=4;c.beginPath();c.arc(160,1067,80,0,Math.PI*2);c.stroke()}
+  else{c.fillStyle='#2A0C2E';c.beginPath();c.arc(160,1067,78,0,Math.PI*2);c.fill();c.fillStyle='#F2C14E';c.font='700 48px "Albert Sans",sans-serif';c.textAlign='center';c.fillText('AA',160,1084)}
+  c.textAlign='left';c.fillStyle='#F2C14E';c.font='700 34px "Gloock",Georgia,serif';c.fillText('Aljabri Alam',280,1015);c.fillStyle='#F6EFDF';c.font='600 22px "Albert Sans",sans-serif';c.fillText('Tausug · Technical Lead, VISEO Asia',280,1053);
+  c.font='500 21px "Albert Sans",sans-serif';c.fillText('A Tausug technologist sharing his people’s dance and',280,1090);c.fillText('culture through software.',280,1120);c.fillStyle='#F2C14E';c.font='600 19px "Albert Sans",sans-serif';c.fillText('linkedin.com/in/aljabri-alam',280,1151);
+  c.textAlign='center';c.fillStyle='#F2C14E';c.font='72px "Gloock",Georgia,serif';c.fillText('Magsukul',540,1250);c.direction='rtl';c.font='54px "Noto Naskh Arabic",serif';c.fillText('مَغْسُكُلْ',540,1310);c.direction='ltr';
   const a=document.createElement('a');a.download='pangalay-mirror-keepsake.png';a.href=canvas.toDataURL('image/png');a.click();
 }
 function reset(){score=0;caught=[];laneTime=0;laneActive=true;$('timelineLane').hidden=false;$('laneRating').textContent='';$('laneRating').classList.remove('on');try{bgm.currentTime=0;bgm.play().catch(()=>{})}catch(e){}tickLane();$('score').textContent='0';$('stars').textContent='☆☆☆☆☆';$('result').hidden=true;show(0)}
@@ -328,11 +383,11 @@ function waitForBody(lm,now){
 
 const INTRO=[
   {k:'Who are the Tausug?',title:'Meet the Tausug',copy:'The people of the current. They are a seafaring people from the far south of the Philippines.',audio:'intro0'},
-  {k:'Where do they live?',title:'The Sulu Archipelago',copy:'A chain of islands between Mindanao and Borneo, with Jolo at its heart. For centuries, the Sultanate of Sulu traded across these seas.',audio:'intro1'},
+  {k:'Where do they live?',title:'The Sulu Archipelago',copy:'A chain of islands between Mindanao and Borneo, with Jolo at its heart. For centuries, the Sultanate of Sulu traded across these seas.',audio:'intro1',map:true},
   {k:'What will you learn?',title:'Step into their world',copy:'Learn pangalay, one of their dances, and meet the treasures of their culture along the way.',audio:'intro2'}
 ];
 function beginIntroduction(){phase='intro';introIndex=-1;$('panel').hidden=true;$('choice').hidden=true;$('intro').hidden=false;showIntro(0)}
-function showIntro(i){introIndex=i;const card=INTRO[i];$('introK').textContent=card.k;$('introTitle').textContent=card.title;$('introCopy').textContent=card.copy;
+function showIntro(i){introIndex=i;const card=INTRO[i];$('introK').textContent=card.k;$('introTitle').textContent=card.title;$('introCopy').textContent=card.copy;$('whereMap').hidden=!card.map;$('intro').classList.toggle('has-map',!!card.map);
   let advanced=false;const advance=()=>{if(advanced||phase!=='intro'||introIndex!==i)return;advanced=true;if(i<INTRO.length-1)showIntro(i+1);else finishIntroduction()};
   say(card.audio,advance);setTimeout(advance,15000)}
 function finishIntroduction(){if(phase!=='intro')return;$('intro').hidden=true;introIndex=-1;

@@ -26,12 +26,13 @@ For the camera app, use HTTPS or `localhost`, allow camera access, and stand bac
 | **Gesture game** | Teaches four arm gestures, shows flying treasure targets, catches four treasures, then recognizes a closing pose | Built; demo mode reaches the result at 1,000 points. Real-camera gesture tuning remains |
 | **Hand Landmarker** | Checks palm orientation for the wrist-turn gesture | Built with one-arm-out fallback; real-camera check remains |
 | **Intro and stance lessons** | Introduces who the Tausug are, where they live, and what the player will learn | Built with the existing narration clips and Skip intro control |
-| **Keepsake** | Draws a 1080×1350 PNG with the avatar, approved Magsukul script, and score | Built locally in the browser; inspect the downloaded image on the event laptop |
+| **Keepsake** | Downloads a 1080×1350 keepsake with the player camera still, selected avatar, score, caught treasures, Magsukul, and maker profile | Rendered locally after the visitor clicks download; demo mode notes when no camera still is available |
 | **Attract screen** | Returns from results after 20 seconds; a held hand raise begins the next round | Built; real-camera repeat-round check remains |
-| **Next-moves lane** | Eight scrolling gold, filler, and closing cues with a fixed marker and Perfect/Good timing feedback | Built in the main `/app/` flow and the aligned timeline review route |
+| **Next-moves lane** | Eight scrolling gold, filler, and closing cues with approaching-cue glow, pulsing marker, catch burst, and Perfect/Good feedback | Built in the main `/app/` flow and the aligned timeline review route; reduced-motion preference is respected |
+| **Cultural introduction** | Who and Where cards explain the Tausug and the Sulu Archipelago | Includes a simplified map labeling Jolo, Mindanao, and Borneo |
 | **Concept film** | A scripted animation of the full experience, built from SVG avatars and narration | Published on GitHub Pages; remains separate from the playable app |
 
-Built for a one-day makeathon. No backend, accounts, or photo upload. The webcam feed is used locally for pose tracking; the keepsake is rendered in the browser and downloaded by the visitor.
+Built for a one-day makeathon. No backend, accounts, or photo upload. The webcam feed and keepsake snapshot stay on the visitor's device; the still is captured only when the visitor downloads the keepsake.
 
 ## The dance flow
 
@@ -59,6 +60,7 @@ Each gold gesture sends its matching Tausug cultural treasure toward a pose targ
 | **Pose tracking** | MediaPipe Tasks Vision, local JS/WASM bundle, local pose model, and local hand model |
 | **Deployment** | Vercel serves `/app/` and redirects its root to the app; the concept film remains on GitHub Pages |
 | **Dance lane** | Included in the primary `/app/` game; `/app/timeline.html` remains available as an aligned review route |
+| **Keepsake privacy** | The camera still is composed into a local browser download; it is not uploaded or stored by the app |
 | **Tracking limits** | Thresholds and hand-turn behavior still need testing under real camera distance, lighting, and movement |
 | **Cultural review** | No Baybayin and no machine-translated Tausug sentences. A few transliterations and the closing gesture still need review by a Tausug reader/teacher |
 | **Audio rights** | Confirm public-use rights for `pangalay.mp3` before a wider release |
