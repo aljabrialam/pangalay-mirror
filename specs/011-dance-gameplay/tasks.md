@@ -41,8 +41,8 @@
 ## Phase 5: Polish and Deployment
 
 - [X] T013 [US2] Update `docs/REVIEW-BEFORE-SUBMISSION.md` and `README.md` to describe the production lane and treasure interaction and retain event-device checks as unverified until performed.
-- [ ] T014 [US1] Verify `/app/` and `/app/timeline.html` on the production Vercel deployment after publishing the approved changes; confirm both routes serve the aligned app and local model assets.
-- [ ] T015 [US2] Review `git diff --check` and confirm the final changes contain no edits under `film/`, no visitor-image upload, and no new runtime dependency.
+- [X] T014 [US1] Verify `/app/` and `/app/timeline.html` on the production Vercel deployment after publishing the approved changes; confirm both routes serve the aligned app and local model assets.
+- [X] T015 [US2] Review `git diff --check` and confirm the final changes contain no edits under `film/`, no visitor-image upload, and no new runtime dependency.
 
 ## Dependencies & Execution Order
 
