@@ -2,17 +2,17 @@
 
 **Step in. Move. Meet the Tausug.**
 
-![Pangalay Mirror banner](graphics/pangalay-mirror-banner-16x9.png)
+![Animated production app preview: follow the coach, dance pangalay, and catch Tausug treasures](graphics/pangalay-mirror-preview.gif)
 
-Pangalay Mirror is a webcam dance game that introduces pangalay and Tausug culture through movement. A player follows a coach avatar, mirrors gestures, and catches cultural treasures as they learn. It is being built for the COMMON GROUND Makeathon, Culture × Tech track, in Singapore.
+Pangalay Mirror is a webcam dance game that introduces pangalay and Tausug culture through movement. A player follows a coach avatar, mirrors gestures, and catches cultural treasures as they learn. It was built for the COMMON GROUND Makeathon, Culture × Tech track, in Singapore.
 
-The project has two experiences: a self-playing concept film that tells the story, and a real browser app that uses a webcam and pose tracking. The GitHub Pages root remains the concept film; the playable app is deployed on Vercel.
+The project has two experiences: a self-playing concept film that tells the story, and a production browser app that uses a webcam and pose tracking. The GitHub Pages root remains the concept film; the production app is deployed on Vercel.
 
 ## For judges — try it in two minutes
 
 | | |
 |---|---|
-| **Playable app**<br>[pangalay-mirror.vercel.app/app](https://pangalay-mirror.vercel.app/app/) | **No-camera demo**<br>[Open the demo](https://pangalay-mirror.vercel.app/app/?demo=1) |
+| **Production app**<br>[pangalay-mirror.vercel.app/app](https://pangalay-mirror.vercel.app/app/) | **No-camera demo**<br>[Open the demo](https://pangalay-mirror.vercel.app/app/?demo=1) |
 | **Dance timeline review**<br>[Open the aligned review route](https://pangalay-mirror.vercel.app/app/timeline.html) | **Concept film**<br>[aljabrialam.github.io/pangalay-mirror](https://aljabrialam.github.io/pangalay-mirror/) |
 | **GitHub repo**<br>[github.com/aljabrialam/pangalay-mirror](https://github.com/aljabrialam/pangalay-mirror) | **Review checklist**<br>[`docs/REVIEW-BEFORE-SUBMISSION.md`](docs/REVIEW-BEFORE-SUBMISSION.md) |
 
@@ -56,7 +56,7 @@ Each gold gesture sends its matching Tausug cultural treasure toward a pose targ
 
 | | Current implementation |
 |---|---|
-| **Playable app** | A static HTML page with inline JavaScript; no framework, backend, or build step |
+| **Production app** | A static HTML page with inline JavaScript; no framework, backend, or build step |
 | **Pose tracking** | MediaPipe Tasks Vision, local JS/WASM bundle, local pose model, and local hand model |
 | **Deployment** | Vercel serves `/app/` and redirects its root to the app; the concept film remains on GitHub Pages |
 | **Dance lane** | Included in the primary `/app/` game; `/app/timeline.html` remains available as an aligned review route |

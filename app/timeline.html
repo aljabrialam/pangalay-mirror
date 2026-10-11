@@ -387,7 +387,7 @@ const INTRO=[
   {k:'What will you learn?',title:'Step into their world',copy:'Learn pangalay, one of their dances, and meet the treasures of their culture along the way.',audio:'intro2'}
 ];
 function beginIntroduction(){phase='intro';introIndex=-1;$('panel').hidden=true;$('choice').hidden=true;$('intro').hidden=false;showIntro(0)}
-function showIntro(i){introIndex=i;const card=INTRO[i];$('introK').textContent=card.k;$('introTitle').textContent=card.title;$('introCopy').textContent=card.copy;$('whereMap').hidden=!card.map;$('intro').classList.toggle('has-map',!!card.map);
+function showIntro(i){introIndex=i;const card=INTRO[i];$('introK').textContent=card.k;$('introTitle').textContent=card.title;$('introCopy').textContent=card.copy;$('whereMap').toggleAttribute('hidden',!card.map);$('intro').classList.toggle('has-map',!!card.map);
   let advanced=false;const advance=()=>{if(advanced||phase!=='intro'||introIndex!==i)return;advanced=true;if(i<INTRO.length-1)showIntro(i+1);else finishIntroduction()};
   say(card.audio,advance);setTimeout(advance,15000)}
 function finishIntroduction(){if(phase!=='intro')return;$('intro').hidden=true;introIndex=-1;
