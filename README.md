@@ -24,11 +24,27 @@ For the camera app, use HTTPS or `localhost`, allow camera access, and stand bac
 
 ![Pangalay Mirror production app marketing post](graphics/pangalay-mirror-marketing-post.png)
 
+**Ready-to-post caption**
+
+> Be among the first to experience **Pangalay Mirror**—a dance game that lets you move with the Tausug and discover our culture along the way.
+>
+> **Now live:** [pangalay-mirror.vercel.app/app](https://pangalay-mirror.vercel.app/app/)
+>
+> Scan the QR code or tap the link to step in and play!
+>
+> #PangalayMirror #Tausug #CultureAndTechnology #NowLive
+
 ### Web, mobile, and event kiosk
 
 ![Desktop web and mobile browser views, plus a proposed event kiosk](graphics/pangalay-mirror-platform-views.png)
 
 The web app is deployed at [pangalay-mirror.vercel.app/app](https://pangalay-mirror.vercel.app/app/). The mobile view represents the same responsive browser app; camera behavior still needs testing on target phones. The staffed, large-screen kiosk is a proposed venue setup, not a separate shipped mode.
+
+### Example end-of-round keepsake
+
+![Example Pangalay Mirror keepsake with the player's camera still, selected avatar, score, caught treasures, maker profile, and QR code](graphics/pangalay-mirror-keepsake-example.png)
+
+At the end of a round, the app prepares this keepsake preview automatically. Players can review it on screen and choose whether to download the PNG; the image is composed locally and is not uploaded.
 
 ### Future direction: clear-pyramid display
 
