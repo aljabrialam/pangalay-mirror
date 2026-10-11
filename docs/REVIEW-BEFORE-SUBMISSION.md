@@ -9,9 +9,10 @@ No-camera demo: add `?demo=1` to either app URL.
 - [ ] Open the production app over HTTPS and allow camera access.
 - [ ] Check the waist-up framing gate, then confirm the three intro cards play and Skip intro works on each card.
 - [ ] Confirm left-hand hold selects Boy, right-hand hold selects Girl, then listen to the stance lesson before the first move.
+- [ ] On the production app, follow the lane through four gold cues, three filler cues, and the closing cue. Confirm each gold treasure flies to its target, hold progress is visible, stories pause the lane, and timing feedback appears.
 - [ ] Complete all four catches and the closing pose; confirm the result shows 1,000 points and four treasures.
 - [ ] Download the keepsake PNG and inspect the avatar, Magsukul script, title, and score.
-- [ ] On the timeline review copy, check the scrolling lane and Perfect/Good response. Keep the production app as the entry point unless the owner approves promoting the copy.
+- [ ] Open `/app/timeline.html` and confirm it matches the production lane and treasure behavior.
 - [ ] Test the wrist turn with the palm turned toward the camera, then check the one-arm fallback if hand tracking is unavailable.
 - [ ] Disable Wi-Fi and reload to confirm local pose and hand models work; check sound on the actual speakers.
 - [ ] Leave the result up for 20 seconds, then check attract mode and raise a hand to start the next round.

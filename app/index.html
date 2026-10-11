@@ -61,6 +61,15 @@ button.on,button.go{background:var(--gold);color:var(--night)}
 .got{display:flex;gap:2cqw}
 .got div{width:14cqw;display:flex;flex-direction:column;align-items:center;gap:.4cqw;font-size:1.3cqw}
 .got img{width:9cqw;height:9cqw;object-fit:contain}
+#timelineLane{position:absolute;z-index:5;left:23cqw;bottom:1.2cqw;width:74cqw;height:7.4cqw;padding:.55cqw 1cqw .7cqw;background:rgba(6,20,26,.92);border:1px solid rgba(242,193,78,.62);border-radius:.9cqw;overflow:hidden;box-shadow:0 .4cqw 1cqw #0008}
+#timelineLane[hidden]{display:none}
+#laneHeading{font-size:.92cqw;letter-spacing:.14em;text-transform:uppercase;color:var(--mist);margin-bottom:.3cqw}
+#laneTrack{position:relative;height:4.3cqw;border-top:1px solid #ffffff2c}
+#laneMarker{position:absolute;z-index:2;left:32%;top:-.3cqw;height:4.6cqw;border-left:.2cqw solid var(--gold);filter:drop-shadow(0 0 .3cqw var(--gold))}
+.lane-move{position:absolute;top:.4cqw;transform:translateX(-50%);width:4.4cqw;height:3.5cqw;border-radius:.5cqw;background:#ffffff12;text-align:center;color:var(--paper);transition:opacity .12s}
+.lane-move.gold{border:1px solid var(--gold);color:var(--gold);background:#f2c14e22}.lane-move.filler{width:2.8cqw;color:var(--mist);border:1px solid #c9d8d655}
+.lane-glyph{display:block;font-size:1.7cqw;line-height:2cqw}.lane-name{display:block;font-size:.65cqw;letter-spacing:.06em;white-space:nowrap}
+#laneRating{position:absolute;right:1cqw;top:.5cqw;color:var(--gold);font-family:'Gloock',Georgia,serif;font-size:1.6cqw;opacity:0;transition:opacity .2s}#laneRating.on{opacity:1}
 </style>
 </head>
 <body>
@@ -78,6 +87,12 @@ button.on,button.go{background:var(--gold);color:var(--night)}
     <rect y="470" width="1280" height="170" fill="url(#sea)"/>
     <rect y="630" width="1280" height="90" fill="#22102A"/><rect y="630" width="1280" height="4" fill="#F2C14E"/>
     <g id="avatar" transform="translate(560,655) scale(1.02)"></g>
+    <g id="treasureCue" visibility="hidden" aria-label="Treasure target">
+      <circle id="treasureGlow" r="48" fill="#F2C14E" opacity="0"/>
+      <rect id="treasureRing" x="-28" y="-28" width="56" height="56" rx="3" transform="rotate(45)" fill="#0B1418" fill-opacity=".18" stroke="#F2C14E" stroke-width="5"/>
+      <circle id="treasureProgress" r="29" fill="none" stroke="#FFF4CE" stroke-width="4" stroke-dasharray="182.2" stroke-dashoffset="182.2" transform="rotate(-90)"/>
+      <image id="treasureSprite" x="-25" y="-25" width="50" height="50" preserveAspectRatio="xMidYMid meet"/>
+    </g>
   </svg>
   <div class="strip"></div>
   <div class="cap" id="cap">Follow the coach. Hold each gesture to catch a treasure.</div>
@@ -113,6 +128,8 @@ button.on,button.go{background:var(--gold);color:var(--night)}
     <div class="bar"><i id="hold"></i></div>
     <div class="rule" id="card" hidden><img id="timg" alt=""><div><div class="k">You caught</div><div class="name" id="tname"></div><div class="sug" id="tar" lang="tsg"></div><div class="sm" id="tdesc"></div></div></div>
   </div>
+
+  <div id="timelineLane" hidden aria-label="Next moves lane"><div id="laneHeading">Next moves · follow the marker</div><div id="laneTrack"><i id="laneMarker"></i><div id="laneNotes"></div></div><div id="laneRating" aria-live="polite"></div></div>
 
   <div id="result" hidden>
     <div class="k">Round complete</div>
@@ -180,10 +197,10 @@ function setPose(k,p){[['L',-1,p.l],['R',1,p.r]].forEach(a=>{
 /* ---------- content (from the film) ---------- */
 const IDLE={l:[8,6,0],r:[-8,-6,0]};
 const STEPS=[
- {key:'open', g:'Open arms',gd:'A greeting of welcome and joy.',pose:{l:[88,4,55],r:[-88,-4,-55]},teach:'g0',vo:'vo0',name:'Kulintangan',ar:'كُلِنْتَڠَنْ',desc:'A row of small gongs. Cousin of the gamelan.',img:'tr0.png'},
- {key:'overhead',g:'Hands overhead',gd:'Triumph and great happiness.',pose:{l:[150,25,-70],r:[-150,-25,70]},teach:'g1',vo:'vo1',name:'Pis syabit',ar:'فِسْ سِيَبِتْ',desc:'A woven headcloth. Cousin of songket.',img:'tr1.png'},
- {key:'crossed',g:'Crossed arms',gd:'Held at the chest, for protectiveness or playfulness.',pose:{l:[10,-125,-25],r:[-10,125,25]},teach:'g2',vo:'vo2',name:'Pearl shell',ar:'',desc:'Sulu pearls once sailed to the markets of Singapore.',img:'tr2.png'},
- {key:'kalis',g:'One arm out',gd:'Reach one arm out to the side and turn the wrist.',pose:{l:[35,30,40],r:[-92,-8,-55]},teach:'g3',vo:'vo3',name:'Kalis',ar:'كَلِسْ',desc:'The wavy-bladed Tausug sword. Cousin of the keris.',img:'tr3.png'},
+ {key:'open', g:'Open arms',gd:'A greeting of welcome and joy.',pose:{l:[88,4,55],r:[-88,-4,-55]},target:'right',teach:'g0',vo:'vo0',name:'Kulintangan',ar:'كُلِنْتَڠَنْ',desc:'A row of small gongs. Cousin of the gamelan.',img:'tr0.png'},
+ {key:'overhead',g:'Hands overhead',gd:'Triumph and great happiness.',pose:{l:[150,25,-70],r:[-150,-25,70]},target:'right',teach:'g1',vo:'vo1',name:'Pis syabit',ar:'فِسْ سِيَبِتْ',desc:'A woven headcloth. Cousin of songket.',img:'tr1.png'},
+ {key:'crossed',g:'Crossed arms',gd:'Held at the chest, for protectiveness or playfulness.',pose:{l:[10,-125,-25],r:[-10,125,25]},target:'center',teach:'g2',vo:'vo2',name:'Pearl shell',ar:'',desc:'Sulu pearls once sailed to the markets of Singapore.',img:'tr2.png'},
+ {key:'kalis',g:'One arm out',gd:'Reach one arm out to the side and turn the wrist.',pose:{l:[35,30,40],r:[-92,-8,-55]},target:'right',teach:'g3',vo:'vo3',name:'Kalis',ar:'كَلِسْ',desc:'The wavy-bladed Tausug sword. Cousin of the keris.',img:'tr3.png'},
  {key:'heart',g:'Hands to heart',gd:'The closing gesture. Bring your hands to your chest.',pose:{l:[25,-138,-10],r:[-25,138,10]},teach:'exit',vo:null,closing:true}
 ];
 
@@ -237,19 +254,32 @@ function finishVoice(){bgm.volume=.5;const d=voiceDone;voiceDone=null;if(d)d()}
 voice.addEventListener('ended',finishVoice);voice.addEventListener('error',finishVoice);
 
 /* ---------- game state ---------- */
-let kind='girl',step=-1,phase='idle',heldMs=0,lostMs=0,score=0,caught=[],pose=IDLE,forced=null,demoPose=IDLE,phaseAt=0,last=performance.now(),bodyVisibleSince=null,choiceSince={boy:null,girl:null},introIndex=-1,attractHandSince=null,restartTimer=null;
+let kind='girl',step=-1,phase='idle',heldMs=0,lostMs=0,score=0,caught=[],pose=IDLE,forced=null,demoPose=IDLE,phaseAt=0,last=performance.now(),bodyVisibleSince=null,choiceSince={boy:null,girl:null},introIndex=-1,attractHandSince=null,restartTimer=null,laneActive=false,laneTime=0,treasureCueAt=0,treasureTarget=null;
 const HOLD=650;
+const LANE_EVENTS=[{t:9.6,g:'↔',n:'OPEN',gold:1},{t:18.4,g:'•',n:'FLOW'},{t:25.5,g:'↟',n:'OVERHEAD',gold:1},{t:36.2,g:'•',n:'FLOW'},{t:45.1,g:'×',n:'CROSS',gold:1},{t:52.9,g:'•',n:'FLOW'},{t:62.1,g:'↻',n:'WRIST',gold:1},{t:72.6,g:'♡',n:'CLOSE'}];
+function initLane(){const box=$('laneNotes');box.innerHTML='';LANE_EVENTS.forEach((m,i)=>{const e=document.createElement('div');e.id='laneMove'+i;e.className='lane-move '+(m.gold?'gold':'filler');e.innerHTML='<span class="lane-glyph">'+m.g+'</span><span class="lane-name">'+m.n+'</span>';box.appendChild(e)})}
+function tickLane(){const track=$('laneTrack'),w=track.clientWidth||600;LANE_EVENTS.forEach((m,i)=>{const e=$('laneMove'+i),x=w*.32+(m.t-laneTime)*w/32;e.style.left=(x/w*100)+'%';e.style.opacity=x<-20||x>w+20?'0':'1'})}
+const TREASURE_STARTS=[{x:1180,y:180},{x:1180,y:510},{x:-40,y:390},{x:1160,y:650}],HAND_LENGTH=182.2;
+function wristTarget(s){const sidePose=side=>{const a1=s.pose[side][0]*Math.PI/180,a2=(s.pose[side][0]+s.pose[side][1])*Math.PI/180,a3=(s.pose[side][0]+s.pose[side][1]+s.pose[side][2])*Math.PI/180,sgn=side==='l'?-1:1;return{x:sgn*46-80*Math.sin(a1)-75*Math.sin(a2)-14*Math.sin(a3),y:-315+80*Math.cos(a1)+75*Math.cos(a2)+14*Math.cos(a3)}};
+  const p=s.target==='center'?{x:(sidePose('l').x+sidePose('r').x)/2,y:(sidePose('l').y+sidePose('r').y)/2}:sidePose(s.target==='left'?'l':'r');return{x:560+p.x*1.02,y:655+p.y*1.02}}
+function clearTreasureCue(){treasureTarget=null;$('treasureCue').setAttribute('visibility','hidden');$('treasureGlow').setAttribute('opacity','0');$('treasureProgress').setAttribute('stroke-dashoffset',String(HAND_LENGTH))}
+function setTreasureCue(s,i){if(s.closing){clearTreasureCue();return}treasureTarget=wristTarget(s);treasureCueAt=performance.now();const start=TREASURE_STARTS[i];$('treasureSprite').setAttribute('href',FILM+s.img);$('treasureCue').setAttribute('transform',`translate(${start.x} ${start.y}) scale(.45)`);$('treasureCue').setAttribute('visibility','visible');$('treasureProgress').setAttribute('stroke-dashoffset',String(HAND_LENGTH));$('treasureGlow').setAttribute('opacity','0')}
+function updateTreasureCue(now){if(!treasureTarget||step<0||STEPS[step].closing||phase==='hold')return;const start=TREASURE_STARTS[step],t=Math.max(0,Math.min(1,(now-treasureCueAt)/1100)),ease=1-Math.pow(1-t,3),x=start.x+(treasureTarget.x-start.x)*ease,y=start.y+(treasureTarget.y-start.y)*ease,scale=.45+.55*ease;$('treasureCue').setAttribute('transform',`translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${scale.toFixed(3)})`);const progress=phase==='try'?Math.min(1,heldMs/HOLD):0;$('treasureProgress').setAttribute('stroke-dashoffset',String(HAND_LENGTH*(1-progress)));$('treasureGlow').setAttribute('opacity',String(.08+.72*progress));$('treasureGlow').setAttribute('r',String(48+18*progress))}
+function collectTreasureCue(){if(!treasureTarget)return;$('treasureGlow').setAttribute('opacity','.95');$('treasureCue').setAttribute('transform',`translate(${treasureTarget.x} ${treasureTarget.y}) scale(1.35)`);setTimeout(clearTreasureCue,450)}
 function show(i){step=i;phase='teach';heldMs=0;phaseAt=performance.now();const s=STEPS[i];
+  setTreasureCue(s,i);
   $('gk').textContent=s.closing?'Closing gesture':`Gesture ${i+1} of 4 · learn it`;$('gname').textContent=s.g;$('gdesc').textContent=s.gd;setPose('h',s.pose);$('card').hidden=true;
   say(s.teach,()=>{if(step===i&&phase==='teach'){phase='try';$('gk').textContent=s.closing?'Closing gesture · your turn':`Gesture ${i+1} of 4 · your turn`}});
   setTimeout(()=>{if(step===i&&phase==='teach'){phase='try'}},9000)}
 function hit(){const s=STEPS[step];phase='hold';$('hold').style.width='100%';
+  if(!s.closing){const when=[9.6,25.5,45.1,62.1][step],delta=Math.abs(laneTime-when);const r=$('laneRating');r.textContent=delta<1.3?'Perfect':delta<4?'Good':'Keep moving';r.classList.add('on');setTimeout(()=>r.classList.remove('on'),1500)}
   if(s.closing){flash('Magsukul!');setTimeout(finish,1800);return}
+  collectTreasureCue();
   score+=250;caught.push(s);flash('Marayaw!');$('score').textContent=score.toLocaleString();const n=caught.length;$('stars').textContent='★★★★★'.slice(0,n+1>4?5:n)+'☆☆☆☆☆'.slice(n+1>4?5:n);
   $('gk').textContent='Hold the pose and listen';$('timg').src=FILM+s.img;$('tname').textContent=s.name;$('tar').textContent=s.ar;$('tdesc').textContent=s.desc;$('card').hidden=false;
   const i=step;let moved=false;const next=()=>{if(moved)return;moved=true;if(step===i)show(i+1)};say(s.vo,next);setTimeout(next,11000)}
 function flash(t){const r=$('rate');r.textContent=t;r.classList.add('on');setTimeout(()=>r.classList.remove('on'),1600)}
-function finish(){phase='done';$('score2').textContent=score.toLocaleString();$('stars2').textContent=$('stars').textContent;
+function finish(){phase='done';laneActive=false;clearTreasureCue();$('timelineLane').hidden=true;$('score2').textContent=score.toLocaleString();$('stars2').textContent=$('stars').textContent;
   $('got').innerHTML=caught.map(s=>`<div><img src="${FILM}${s.img}" alt=""><b>${s.name}</b></div>`).join('');$('result').hidden=false;say('result');clearTimeout(restartTimer);
   restartTimer=setTimeout(()=>{if(phase!=='done')return;$('result').hidden=true;$('coverTitle').textContent='Pangalay Mirror';$('tagline').textContent='Raise your hand to begin';$('start').textContent='Raise your hand to begin';$('msg').textContent='Hold either hand above your shoulder for a moment.';$('cover').hidden=false;phase='attract';attractHandSince=null},20000)}
 async function downloadSnapshot(){
@@ -270,10 +300,10 @@ async function downloadSnapshot(){
   c.font='600 34px "Albert Sans",sans-serif';c.fillText(`Score  ${score.toLocaleString()}`,540,1270);
   const a=document.createElement('a');a.download='pangalay-mirror-keepsake.png';a.href=canvas.toDataURL('image/png');a.click();
 }
-function reset(){score=0;caught=[];$('score').textContent='0';$('stars').textContent='☆☆☆☆☆';$('result').hidden=true;show(0)}
+function reset(){score=0;caught=[];laneTime=0;laneActive=true;$('timelineLane').hidden=false;$('laneRating').textContent='';$('laneRating').classList.remove('on');try{bgm.currentTime=0;bgm.play().catch(()=>{})}catch(e){}tickLane();$('score').textContent='0';$('stars').textContent='☆☆☆☆☆';$('result').hidden=true;show(0)}
 
 function frame(lm,aspect,now,hands=null){
-  const dt=Math.min(100,now-last);last=now;
+  const dt=Math.min(100,now-last);last=now;if(laneActive){if(phase!=='hold'&&phase!=='done')laneTime+=dt/1000;tickLane()}updateTreasureCue(now);
   if(forced){lm=fake(forced.pose);aspect=1;if(now>forced.until)forced=null}
   let D=null,P=null;
   if(lm){P=points(lm,aspect);const A=angles(P);pose=mix(pose,A,.45);D=detect(P,A,hands,aspect)}else pose=mix(pose,IDLE,.1);
@@ -371,7 +401,7 @@ function loop(now){
 
 /* ---------- start-up ---------- */
 function pick(k){kind=k;build('avatar','a',k);setPose('a',pose)}
-build('ghost','h','ghost');setPose('h',IDLE);pick('girl');
+build('ghost','h','ghost');setPose('h',IDLE);pick('girl');initLane();
 $('start').onclick=async()=>{
   if(phase==='attract'){beginRound();return}
   try{voice.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';voice.play().catch(()=>{})}catch(e){}   /* unlock the voice player inside the tap */
