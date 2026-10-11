@@ -18,6 +18,24 @@ The project has two experiences: a self-playing concept film that tells the stor
 
 For the camera app, use HTTPS or `localhost`, allow camera access, and stand back until the app sees your shoulders, elbows, and wrists. In demo mode, the game runs without a camera. Keys **1–4** force the four taught moves, **5** forces the closing gesture, and **D** toggles the tracking debug overlay.
 
+## Marketing and product views
+
+### Marketing post
+
+![Pangalay Mirror production app marketing post](graphics/pangalay-mirror-marketing-post.png)
+
+### Web, mobile, and event kiosk
+
+![Desktop web and mobile browser views, plus a proposed event kiosk](graphics/pangalay-mirror-platform-views.png)
+
+The web app is deployed at [pangalay-mirror.vercel.app/app](https://pangalay-mirror.vercel.app/app/). The mobile view represents the same responsive browser app; camera behavior still needs testing on target phones. The staffed, large-screen kiosk is a proposed venue setup, not a separate shipped mode.
+
+### Future direction: clear-pyramid display
+
+![Future concept for reflecting the Pangalay Mirror avatar inside a clear pyramid](graphics/pangalay-mirror-future-pyramid.png)
+
+One possible installation would reflect the dance avatar from a phone or tablet into a clear acrylic pyramid for a floating, multi-sided display. This is future concept art: the app does not currently produce a hologram. The practical version would be a reflection-based visual illusion that needs a physical prototype.
+
 ## What the app uses
 
 | | Role | Status |
@@ -59,6 +77,8 @@ Each gold gesture sends its matching Tausug cultural treasure toward a pose targ
 | **Production app** | A static HTML page with inline JavaScript; no framework, backend, or build step |
 | **Pose tracking** | MediaPipe Tasks Vision, local JS/WASM bundle, local pose model, and local hand model |
 | **Deployment** | Vercel serves `/app/` and redirects its root to the app; the concept film remains on GitHub Pages |
+| **Mobile browser** | Responsive layout for phone screens; camera and gesture performance still need target-device checks |
+| **Kiosk / pyramid display** | Future venue and reflection concepts only; neither is part of the current app |
 | **Dance lane** | Included in the primary `/app/` game; `/app/timeline.html` remains available as an aligned review route |
 | **Keepsake privacy** | The camera still is composed into a local browser download; it is not uploaded or stored by the app |
 | **Tracking limits** | Thresholds and hand-turn behavior still need testing under real camera distance, lighting, and movement |
@@ -76,7 +96,7 @@ pangalay-mirror/
 │   └── vendor/                    MediaPipe Tasks Vision JS and WebAssembly
 ├── film/                           Published concept film, audio, narration, and art
 ├── assets/                         Avatar art and supporting project assets
-├── graphics/                       Social graphics and editable HTML sources
+├── graphics/                       Marketing, responsive-view, and future-concept graphics
 ├── docs/
 │   ├── VOICE-SCRIPTS.md            Narration copy and clip mapping
 │   ├── CAPTION.md                  Social caption
