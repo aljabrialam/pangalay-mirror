@@ -36,6 +36,9 @@ html,body{margin:0;height:100%;background:#0d0412;color:var(--paper);font-family
 #debugOverlay{position:absolute;left:2.4cqw;top:9cqw;font:1cqw/1.4 ui-monospace,monospace;color:var(--jade);white-space:pre;background:rgba(0,0,0,.45);padding:.5cqw .8cqw;border-radius:.5cqw}
 #debugOverlay[hidden],#cover[hidden],#intro[hidden],#choice[hidden],#panel[hidden],.rule[hidden],#result[hidden]{display:none}
 #cover,#result{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6cqw;text-align:center;background:radial-gradient(ellipse 70% 70% at 50% 50%,rgba(24,7,30,.96),rgba(24,7,30,.82)),url(../film/pis-art.png) center/cover}
+#result{display:grid;grid-template-columns:minmax(0,1fr) 14cqw;align-items:center;gap:2cqw;padding:2cqw 4cqw;overflow:auto}
+.result-main,.result-preview{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.9cqw;min-width:0}.result-preview{padding:1cqw;border:1px solid rgba(242,193,78,.4);border-radius:1cqw;background:rgba(6,20,26,.45)}
+#keepsakePreview{display:block;width:12cqw;max-height:40cqh;aspect-ratio:4/5;object-fit:contain;border:1px solid rgba(242,193,78,.7);border-radius:.5cqw;box-shadow:0 .4cqw 1.2cqw #0009}#keepsakePreview[hidden]{display:none}#previewStatus{font-size:1.2cqw;color:var(--mist)}
 .mark{font-family:'Gloock',Georgia,serif;font-size:7cqw;line-height:1}
 .hero{font-family:'Noto Naskh Arabic','Geeza Pro',serif;font-size:6cqw;line-height:1.2;color:var(--gold);direction:rtl}
 .tag{font-size:2.2cqw;color:var(--gold);font-weight:600}
@@ -166,15 +169,22 @@ button.on,button.go{background:var(--gold);color:var(--night)}
   <div id="timelineLane" hidden aria-label="Next moves lane"><div id="laneHeading">Next moves · follow the marker</div><div id="laneTrack"><i id="laneMarker"></i><div id="laneNotes"></div></div><div id="laneRating" aria-live="polite"></div></div>
 
   <div id="result" hidden>
-    <div class="k">Round complete</div>
-    <div class="mark" style="font-size:5cqw">Magsukul</div>
-    <div class="hero" style="font-size:4cqw" lang="tsg">مَغْسُكُلْ</div>
-    <div class="tag">Thank you, in the Tausug language</div>
-    <div class="got" id="got"></div>
-    <div class="row" style="gap:3cqw"><span>Score <b id="score2">0</b></span><span id="stars2"></span></div>
-    <button class="go" id="downloadSnapshot">Download my snapshot</button>
-    <div class="note">Your keepsake is made on this device. Your camera image is not uploaded.</div>
-    <button class="go" id="again">Play again</button>
+    <div class="result-main">
+      <div class="k">Round complete</div>
+      <div class="mark" style="font-size:5cqw">Magsukul</div>
+      <div class="hero" style="font-size:4cqw" lang="tsg">مَغْسُكُلْ</div>
+      <div class="tag">Thank you, in the Tausug language</div>
+      <div class="got" id="got"></div>
+      <div class="row" style="gap:3cqw"><span>Score <b id="score2">0</b></span><span id="stars2"></span></div>
+      <button class="go" id="downloadSnapshot" disabled>Download keepsake PNG</button>
+      <div class="note">Your keepsake is made on this device. Your camera image is not uploaded.</div>
+      <button class="go" id="again">Play again</button>
+    </div>
+    <div class="result-preview">
+      <div class="k">Keepsake preview</div>
+      <div class="note" id="previewStatus" aria-live="polite">Preparing…</div>
+      <img id="keepsakePreview" alt="Preview of your Pangalay Mirror keepsake" hidden>
+    </div>
   </div>
 
   <div id="cover">
@@ -289,7 +299,7 @@ function finishVoice(){bgm.volume=.5;const d=voiceDone;voiceDone=null;if(d)d()}
 voice.addEventListener('ended',finishVoice);voice.addEventListener('error',finishVoice);
 
 /* ---------- game state ---------- */
-let kind='girl',step=-1,phase='idle',heldMs=0,lostMs=0,score=0,caught=[],pose=IDLE,forced=null,demoPose=IDLE,phaseAt=0,last=performance.now(),bodyVisibleSince=null,choiceSince={boy:null,girl:null},introIndex=-1,attractHandSince=null,restartTimer=null,laneActive=false,laneTime=0,treasureCueAt=0,treasureTarget=null;
+let kind='girl',step=-1,phase='idle',heldMs=0,lostMs=0,score=0,caught=[],pose=IDLE,forced=null,demoPose=IDLE,phaseAt=0,last=performance.now(),bodyVisibleSince=null,choiceSince={boy:null,girl:null},introIndex=-1,attractHandSince=null,restartTimer=null,laneActive=false,laneTime=0,treasureCueAt=0,treasureTarget=null,keepsakeCanvas=null,roundPlayerFrame=null;
 const HOLD=650;
 const LANE_EVENTS=[{t:9.6,g:'↔',n:'OPEN',gold:1},{t:18.4,g:'•',n:'FLOW'},{t:25.5,g:'↟',n:'OVERHEAD',gold:1},{t:36.2,g:'•',n:'FLOW'},{t:45.1,g:'×',n:'CROSS',gold:1},{t:52.9,g:'•',n:'FLOW'},{t:62.1,g:'↻',n:'WRIST',gold:1},{t:72.6,g:'♡',n:'CLOSE'}];
 function initLane(){const box=$('laneNotes');box.innerHTML='';LANE_EVENTS.forEach((m,i)=>{const e=document.createElement('div');e.id='laneMove'+i;e.className='lane-move '+(m.gold?'gold':'filler');e.innerHTML='<span class="lane-glyph">'+m.g+'</span><span class="lane-name">'+m.n+'</span>';box.appendChild(e)})}
@@ -315,13 +325,18 @@ function hit(){const s=STEPS[step];phase='hold';$('hold').style.width='100%';
   $('gk').textContent='Hold the pose and listen';$('timg').src=FILM+s.img;$('tname').textContent=s.name;$('tar').textContent=s.ar;$('tdesc').textContent=s.desc;$('card').hidden=false;
   const i=step;let moved=false;const next=()=>{if(moved)return;moved=true;if(step===i)show(i+1)};say(s.vo,next);setTimeout(next,11000)}
 function flash(t){const r=$('rate');r.textContent=t;r.classList.add('on');setTimeout(()=>r.classList.remove('on'),1600)}
+function capturePlayerFrame(){
+  try{if(video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0){const frame=document.createElement('canvas');frame.width=video.videoWidth;frame.height=video.videoHeight;const pc=frame.getContext('2d');pc.save();pc.translate(frame.width,0);pc.scale(-1,1);pc.drawImage(video,0,0,frame.width,frame.height);pc.restore();return frame}}catch(e){}
+  return null
+}
 function finish(){phase='done';laneActive=false;clearTreasureCue();$('timelineLane').hidden=true;$('score2').textContent=score.toLocaleString();$('stars2').textContent=$('stars').textContent;
+  roundPlayerFrame=capturePlayerFrame();keepsakeCanvas=null;$('keepsakePreview').hidden=true;$('previewStatus').hidden=false;$('previewStatus').textContent='Preparing your keepsake…';$('downloadSnapshot').disabled=true;
   $('got').innerHTML=caught.map(s=>`<div><img src="${FILM}${s.img}" alt=""><b>${s.name}</b></div>`).join('');$('result').hidden=false;say('result');clearTimeout(restartTimer);
-  restartTimer=setTimeout(()=>{if(phase!=='done')return;$('result').hidden=true;$('coverTitle').textContent='Pangalay Mirror';$('tagline').textContent='Raise your hand to begin';$('start').textContent='Raise your hand to begin';$('msg').textContent='Hold either hand above your shoulder for a moment.';$('cover').hidden=false;phase='attract';attractHandSince=null},20000)}
-async function downloadSnapshot(){
+  createKeepsake().then(canvas=>{if(phase!=='done')return;keepsakeCanvas=canvas;$('keepsakePreview').src=canvas.toDataURL('image/png');$('keepsakePreview').hidden=false;$('previewStatus').hidden=true;$('downloadSnapshot').disabled=false}).catch(e=>{console.error('Keepsake preview failed',e);$('previewStatus').textContent='Preview unavailable. Please try the round again.'});
+  restartTimer=setTimeout(()=>{if(phase!=='done')return;$('result').hidden=true;keepsakeCanvas=null;roundPlayerFrame=null;$('keepsakePreview').removeAttribute('src');$('keepsakePreview').hidden=true;$('coverTitle').textContent='Pangalay Mirror';$('tagline').textContent='Raise your hand to begin';$('start').textContent='Raise your hand to begin';$('msg').textContent='Hold either hand above your shoulder for a moment.';$('cover').hidden=false;phase='attract';attractHandSince=null},60000)}
+async function createKeepsake(){
   const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;const c=canvas.getContext('2d');
-  let playerFrame=null;
-  try{if(video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0){playerFrame=document.createElement('canvas');playerFrame.width=video.videoWidth;playerFrame.height=video.videoHeight;const pc=playerFrame.getContext('2d');pc.save();pc.translate(playerFrame.width,0);pc.scale(-1,1);pc.drawImage(video,0,0,playerFrame.width,playerFrame.height);pc.restore()}}catch(e){playerFrame=null}
+  const playerFrame=roundPlayerFrame;
   const sky=c.createLinearGradient(0,0,0,1350);sky.addColorStop(0,'#150618');sky.addColorStop(.42,'#B8473F');sky.addColorStop(.66,'#F08A4B');sky.addColorStop(.67,'#1C6E77');sky.addColorStop(1,'#072C33');c.fillStyle=sky;c.fillRect(0,0,1080,1350);
   c.fillStyle='rgba(6,20,26,.72)';c.fillRect(0,0,1080,118);c.fillStyle='#F2C14E';c.fillRect(0,118,1080,5);
   c.textAlign='center';c.fillStyle='#F6EFDF';c.font='700 30px "Albert Sans",sans-serif';c.fillText('PANGALAY MIRROR · YOUR DANCE',540,74);
@@ -352,9 +367,12 @@ async function downloadSnapshot(){
   else{c.fillStyle='#2A0C2E';c.beginPath();c.arc(160,1067,78,0,Math.PI*2);c.fill();c.fillStyle='#F2C14E';c.font='700 48px "Albert Sans",sans-serif';c.textAlign='center';c.fillText('AA',160,1084)}
   c.textAlign='left';c.fillStyle='#F2C14E';c.font='700 34px "Gloock",Georgia,serif';c.fillText('Aljabri Alam',280,1015);c.fillStyle='#F6EFDF';c.font='600 22px "Albert Sans",sans-serif';c.fillText('Tausug · Technical Lead, VISEO Asia',280,1053);
   c.font='500 21px "Albert Sans",sans-serif';c.fillText('A Tausug technologist sharing his people’s dance and',280,1090);c.fillText('culture through software.',280,1120);c.fillStyle='#F2C14E';c.font='600 19px "Albert Sans",sans-serif';c.fillText('linkedin.com/in/aljabri-alam',280,1151);
+  let qr=null;try{qr=new Image();qr.src=new URL('./keepsake-qr.svg',location.href).href;await qr.decode()}catch(e){qr=null}
+  if(qr){c.fillStyle='#fff';c.fillRect(850,970,150,150);c.drawImage(qr,855,975,140,140);c.fillStyle='#F2C14E';c.font='700 18px "Albert Sans",sans-serif';c.textAlign='center';c.fillText('SCAN TO PLAY',925,1137);c.fillStyle='#F6EFDF';c.font='500 13px "Albert Sans",sans-serif';c.fillText('pangalay-mirror.vercel.app',925,1155,150);c.fillText('/app/',925,1171)}
   c.textAlign='center';c.fillStyle='#F2C14E';c.font='72px "Gloock",Georgia,serif';c.fillText('Magsukul',540,1250);c.direction='rtl';c.font='54px "Noto Naskh Arabic",serif';c.fillText('مَغْسُكُلْ',540,1310);c.direction='ltr';
-  const a=document.createElement('a');a.download='pangalay-mirror-keepsake.png';a.href=canvas.toDataURL('image/png');a.click();
+  return canvas;
 }
+function downloadSnapshot(){if(!keepsakeCanvas)throw new Error('Keepsake preview is not ready');const a=document.createElement('a');a.download='pangalay-mirror-keepsake.png';a.href=keepsakeCanvas.toDataURL('image/png');a.click()}
 function reset(){score=0;caught=[];laneTime=0;laneActive=true;$('timelineLane').hidden=false;$('laneRating').textContent='';$('laneRating').classList.remove('on');try{bgm.currentTime=0;bgm.play().catch(()=>{})}catch(e){}tickLane();$('score').textContent='0';$('stars').textContent='☆☆☆☆☆';$('result').hidden=true;show(0)}
 
 function frame(lm,aspect,now,hands=null){
@@ -401,7 +419,7 @@ function beginAvatarChoice(){phase='choose';choiceSince={boy:null,girl:null};$('
   $('choiceHint').textContent='Raise one hand and hold it above your shoulder.';$('cap').textContent='Body found ✓';say('choose');
   setTimeout(()=>{if(phase==='choose')$('cap').textContent='Left hand for Boy · right hand for Girl'},1000)}
 function beginRound(){
-  clearTimeout(restartTimer);$('intro').hidden=true;$('choice').hidden=true;$('result').hidden=true;$('cover').hidden=true;$('tagline').textContent='Step in. Move. Meet the Tausug.';
+  clearTimeout(restartTimer);keepsakeCanvas=null;roundPlayerFrame=null;$('keepsakePreview').removeAttribute('src');$('keepsakePreview').hidden=true;$('previewStatus').hidden=false;$('downloadSnapshot').disabled=true;$('intro').hidden=true;$('choice').hidden=true;$('result').hidden=true;$('cover').hidden=true;$('tagline').textContent='Step in. Move. Meet the Tausug.';
   if(DEMO){beginIntroduction();return}
   phase='body';bodyVisibleSince=null;$('panel').hidden=false;$('cap').textContent='Step into view so I can see your arms.'
 }
@@ -468,7 +486,7 @@ $('start').onclick=async()=>{
   requestAnimationFrame(loop)};
 $('skipIntro').onclick=skipIntroduction;
 $('again').onclick=beginRound;
-$('downloadSnapshot').onclick=()=>downloadSnapshot().catch(e=>{console.error('Snapshot failed',e);$('msg').textContent='Could not create the snapshot. Please try again.'});
+$('downloadSnapshot').onclick=()=>{try{downloadSnapshot()}catch(e){console.error('Snapshot download failed',e);$('previewStatus').textContent='Could not download the keepsake. Please try again.'}};
 addEventListener('keydown',e=>{const n=+e.key;if(phase==='attract'&&n>=1&&n<=5)beginRound();if(n>=1&&n<=5){if(phase==='body'||phase==='choose'){bodyVisibleSince=null;$('choice').hidden=true;$('panel').hidden=false;$('cap').textContent='Follow the coach. Hold each gesture to catch a treasure.';reset()}forced={pose:STEPS[n-1].pose,until:performance.now()+1500}}if(e.key==='d'||e.key==='D')$('debugOverlay').hidden=!$('debugOverlay').hidden});
 if(DEMO)$('start').textContent='Start demo (no camera)';
 /* self-test hook: every target pose must satisfy its own rule and no other gold rule */

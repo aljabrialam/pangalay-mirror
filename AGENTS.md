@@ -41,7 +41,7 @@ Pangalay Mirror is an entry for the COMMON GROUND makeathon (11 Oct 2026, SQ Col
 | `assets/avatar_girl.png`, `avatar_boy.png` | Avatars rendered from the film's SVG, transparent, 1500×1770 | Done |
 | `graphics/*.png` | Five social graphics (4:5 post, avatar poster, treasures square, 9:16 story, 16:9 banner) | Done |
 | `graphics/source/*.dc.html` | Editable sources of those graphics (HTML with inline styles; image `src` values are `/_blob/…` ids from the design tool and will not resolve outside it — swap for files in `assets/`) | Reference |
-| `app/index.html` | **Playable prototype**: webcam → MediaPipe pose → arm angles → SVG avatar mirrors the player → gesture rules → catch → voice + treasure card → closing gesture → result. Includes a no-camera demo mode and keyboard overrides. | Works in demo mode; **not yet tested on a real camera** |
+| `app/index.html` | **Playable app**: webcam → MediaPipe pose → SVG avatar mirrors the player → gesture catches and narrated treasures → result and automatic keepsake preview with QR. Includes a no-camera demo and keyboard overrides. | App behavior still needs testing on a real event camera |
 | `app/vendor/` | MediaPipe Tasks Vision 0.10.14 (library + wasm), bundled for offline use | Done |
 | `app/models/` | Put `pose_landmarker_lite.task` here (see its README); otherwise it loads from the network | To do |
 | `docs/VOICE-SCRIPTS.md` | Every narration line and which file holds it | Reference |
@@ -99,7 +99,7 @@ Build order (riskiest first):
 Known risks:
 - **Crossed arms:** overlapping arms make landmarks jitter. Use a loose check (wrists past the opposite shoulder).
 - **Wrist turn:** body pose does not see wrist rotation. Either add the Hand Landmarker or redefine the gesture as one arm raised forward.
-- **QR keepsake:** needs somewhere to upload the photo. Fallback: a "download photo" button.
+- **QR keepsake:** The end-of-round preview and QR to the live app are generated locally; the player explicitly downloads the PNG. No photo upload service is used.
 - **Audio:** needs one "Start" tap before any sound.
 - **Venue:** track one person only (largest body), bundle the model file locally in case Wi-Fi is weak. All gestures are arms-only, so waist-up framing is enough.
 - **Painted look of the Canva mockup:** do not try to rig painted characters in a day. Use the SVG avatars.
@@ -141,7 +141,7 @@ Known gaps, in suggested order:
 2. "Wrist turn" is implemented as "one arm out to the side" because body tracking cannot see wrist rotation. Either keep that, or add the Hand Landmarker.
 3. No intro screens (who / where / today) and no stance lesson yet; the film has the copy and audio (`intro0–2.mp3`, `stance.mp3`).
 4. No Just Dance style timeline or "next moves" lane; the prototype is turn-based (teach, then wait for the player).
-5. Keepsake snapshot and QR are not built. Fallback: a "download photo" button that draws the avatar and webcam frame to a canvas.
+5. At round end, the keepsake preview is composed locally from the latest available camera frame, selected avatar, round score, treasures, and maker profile. A local QR links to the live app. The PNG is downloaded only after the visitor clicks; neither the still nor the preview is uploaded or saved by the app. Demo mode shows a no-camera note.
 6. Avatar choice by raising a hand (currently buttons).
 
 ## 5. Cultural content rules (important)

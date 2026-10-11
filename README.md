@@ -44,13 +44,13 @@ One possible installation would reflect the dance avatar from a phone or tablet 
 | **Gesture game** | Teaches four arm gestures, shows flying treasure targets, catches four treasures, then recognizes a closing pose | Built; demo mode reaches the result at 1,000 points. Real-camera gesture tuning remains |
 | **Hand Landmarker** | Checks palm orientation for the wrist-turn gesture | Built with one-arm-out fallback; real-camera check remains |
 | **Intro and stance lessons** | Introduces who the Tausug are, where they live, and what the player will learn | Built with the existing narration clips and Skip intro control |
-| **Keepsake** | Downloads a 1080×1350 keepsake with the player camera still, selected avatar, score, caught treasures, Magsukul, and maker profile | Rendered locally after the visitor clicks download; demo mode notes when no camera still is available |
-| **Attract screen** | Returns from results after 20 seconds; a held hand raise begins the next round | Built; real-camera repeat-round check remains |
+| **Keepsake** | Shows a 1080×1350 preview at the end of the round with the available camera still, selected avatar, score, caught treasures, Magsukul, maker profile, and a QR link to the live app | Generated locally in memory; PNG is saved only after the visitor clicks download; demo mode shows a no-camera note |
+| **Attract screen** | Returns from results after 60 seconds; a held hand raise begins the next round | Built; real-camera repeat-round check remains |
 | **Next-moves lane** | Eight scrolling gold, filler, and closing cues with approaching-cue glow, pulsing marker, catch burst, and Perfect/Good feedback | Built in the main `/app/` flow and the aligned timeline review route; reduced-motion preference is respected |
 | **Cultural introduction** | Who and Where cards explain the Tausug and the Sulu Archipelago | Includes a simplified map labeling Jolo, Mindanao, and Borneo |
 | **Concept film** | A scripted animation of the full experience, built from SVG avatars and narration | Published on GitHub Pages; remains separate from the playable app |
 
-Built for a one-day makeathon. No backend, accounts, or photo upload. The webcam feed and keepsake snapshot stay on the visitor's device; the still is captured only when the visitor downloads the keepsake.
+Built for a one-day makeathon. No backend, accounts, or photo upload. The webcam feed and end-of-round keepsake preview stay in browser memory on the visitor's device; the PNG is saved only when the visitor clicks download.
 
 ## The dance flow
 
@@ -64,26 +64,11 @@ flowchart LR
   F --> G[Catch a cultural treasure]
   G --> H[Closing pose]
   H --> I[Score · keepsake · Magsukul]
-  I --> J[Attract screen after 20 seconds]
+  I --> J[Attract screen after 60 seconds]
   J --> B
 ```
 
 Each gold gesture sends its matching Tausug cultural treasure toward a pose target: kulintangan, pis syabit, pearl shell, and kalis. The target responds as the player holds the pose; a catch pauses the lane while its story plays. Narration and music reuse a single shared audio player. The game supports a no-camera demo and keyboard controls as stage fallbacks.
-
-## What it is and what it is not
-
-| | Current implementation |
-|---|---|
-| **Production app** | A static HTML page with inline JavaScript; no framework, backend, or build step |
-| **Pose tracking** | MediaPipe Tasks Vision, local JS/WASM bundle, local pose model, and local hand model |
-| **Deployment** | Vercel serves `/app/` and redirects its root to the app; the concept film remains on GitHub Pages |
-| **Mobile browser** | Responsive layout for phone screens; camera and gesture performance still need target-device checks |
-| **Kiosk / pyramid display** | Future venue and reflection concepts only; neither is part of the current app |
-| **Dance lane** | Included in the primary `/app/` game; `/app/timeline.html` remains available as an aligned review route |
-| **Keepsake privacy** | The camera still is composed into a local browser download; it is not uploaded or stored by the app |
-| **Tracking limits** | Thresholds and hand-turn behavior still need testing under real camera distance, lighting, and movement |
-| **Cultural review** | No Baybayin and no machine-translated Tausug sentences. A few transliterations and the closing gesture still need review by a Tausug reader/teacher |
-| **Audio rights** | Confirm public-use rights for `pangalay.mp3` before a wider release |
 
 ## Project structure
 
