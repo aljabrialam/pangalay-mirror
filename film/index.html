@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pangalay Mirror Film</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Albert+Sans:wght@400;500;600&family=Noto+Naskh+Arabic:wght@500&display=swap">
+<style>
+/* Layout: one 16:9 stage that plays like a film. The mirror scene is the hero; transport and scene list sit under it. Single dusk-sea look by choice. */
+:root{
+  color-scheme:dark;
+  --night:#07161C; --ink:#0E2530; --line:#2A4651; --mist:#C9D8D6; --dim:#8AA3A3; --paper:#F6EFDF;
+  --gold:#F2C14E; --rose:#E0528A; --jade:#5FD0A8; --ember:#FF8A5C;
+  --panel:rgba(6,20,26,.82);
+  --display:'Gloock','Georgia','Times New Roman',serif;
+  --body:'Albert Sans',-apple-system,'Segoe UI',Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{background:var(--night);color:var(--mist);font-family:var(--body);font-size:16px;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:24px 40px;display:flex;flex-direction:column;gap:16px}
+h1{font-family:var(--display);font-weight:400;font-size:30px;color:var(--paper);margin:0;line-height:1.1}
+.note{max-width:68ch;color:var(--dim);font-size:14px;margin:0}
+.stage{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;container-type:inline-size;overflow:hidden;border-radius:10px;background:var(--ink);border:1px solid var(--line)}
+.stage svg.scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+.sc{opacity:0;transition:opacity .6s ease;pointer-events:none}
+.sc.on{opacity:1}
+.late{opacity:0;transition:opacity .5s ease}
+.stage.is-late .late{opacity:1}
+.early{transition:opacity .5s ease}
+.stage.is-late .early{opacity:0}
+.dim{transition:opacity .5s ease}
+.stage.is-late .dim{opacity:.3}
+.lens{position:absolute;inset:0;box-shadow:inset 0 0 12cqw 2cqw rgba(0,0,0,.55);border-radius:10px}
+.cap{position:absolute;left:3cqw;top:2.6cqw;font-family:var(--display);font-size:max(12px,2.2cqw);color:var(--paper);text-shadow:0 1px 6px rgba(0,0,0,.8)}
+.start{position:absolute;inset:0;z-index:9;border:0;margin:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:.6cqw;padding-bottom:2cqw;background:linear-gradient(rgba(10,3,14,0) 55%,rgba(10,3,14,.78));color:var(--paper);font:inherit}
+.start[hidden]{display:none}
+.start .pl{width:5cqw;height:5cqw;border-radius:50%;background:var(--gold);display:grid;place-items:center}
+.start .pl::before{content:'';border-left:1.6cqw solid #1A0820;border-top:1cqw solid transparent;border-bottom:1cqw solid transparent;margin-left:.4cqw}
+.start b{font-size:2cqw;font-weight:600}
+.start span{font-size:1.3cqw;color:var(--mist)}
+.concept{position:absolute;right:1.6cqw;top:3.1cqw;font-size:max(10px,1.1cqw);letter-spacing:.14em;text-transform:uppercase;color:var(--mist);background:rgba(6,20,26,.7);padding:.4cqw .8cqw;border-radius:.4cqw}
+
+/* scene drawing */
+.swell{fill:none;stroke:#9ED8D2;stroke-width:3;stroke-linecap:round;opacity:.38;animation:drift 7s linear infinite}
+.swell.b{animation-duration:11s;opacity:.26}
+@keyframes drift{to{transform:translateX(-80px)}}
+.sk{stroke:var(--jade);stroke-width:7;stroke-linecap:round;fill:none}
+.sd{fill:var(--paper)}
+.gh{stroke:var(--gold);stroke-width:5;stroke-dasharray:10 9;stroke-linecap:round;fill:none;opacity:.85}
+.med .ring{fill:rgba(6,20,26,.72);stroke:var(--line);stroke-width:3;transition:stroke .4s ease,fill .4s ease}
+.med.hit .ring{stroke:var(--gold);fill:rgba(242,193,78,.24)}
+.med text{font-family:var(--body);font-weight:600;font-size:22px;fill:var(--mist);text-anchor:middle}
+.med.hit text{fill:var(--gold)}
+.tgt path{fill:none;stroke:var(--paper);stroke-width:4;stroke-linejoin:round;stroke-dasharray:8 10;opacity:.5;transition:opacity .3s ease,stroke .3s ease,fill .3s ease}
+.tgt.next path{opacity:1;stroke:var(--gold)}
+.tgt.hit path{opacity:1;stroke:var(--gold);stroke-dasharray:none}
+.tgt.hit .core{fill:rgba(242,193,78,.2)}
+.rate{font-family:var(--display);font-size:34px;fill:var(--gold);paint-order:stroke;stroke:rgba(6,20,26,.85);stroke-width:8px}
+.tag2{font-family:var(--body);font-weight:600;font-size:24px;fill:var(--paper);text-anchor:middle}
+
+/* info panel */
+.hud{position:absolute;right:3cqw;top:6cqw;width:30cqw;height:37cqw;overflow:hidden;background:var(--panel);border:1px solid rgba(242,193,78,.3);border-radius:1.4cqw;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:var(--gold);font-family:var(--display)}
+.view,.sub{position:absolute;inset:2.2cqw;display:flex;flex-direction:column;gap:1.1cqw}
+.sub{inset:0}
+.hud .view{top:3.8cqw}
+.band{position:absolute;left:0;right:0;top:0;height:1.7cqw;background:#7A0F2E url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='28' shape-rendering='crispEdges'><rect width='64' height='28' fill='%237A0F2E'/><rect x='0' y='0' width='2' height='2' fill='%23F2C230'/><rect x='0' y='2' width='2' height='2' fill='%2317120E'/><rect x='0' y='4' width='2' height='2' fill='%2317120E'/><rect x='0' y='12' width='2' height='2' fill='%23F2C230'/><rect x='0' y='14' width='2' height='2' fill='%231AA7C9'/><rect x='0' y='16' width='2' height='2' fill='%23F2C230'/><rect x='0' y='22' width='2' height='2' fill='%2317120E'/><rect x='0' y='24' width='2' height='2' fill='%2317120E'/><rect x='0' y='26' width='2' height='2' fill='%23F2C230'/><rect x='2' y='0' width='2' height='2' fill='%2317120E'/><rect x='2' y='2' width='2' height='2' fill='%232FA84F'/><rect x='2' y='4' width='2' height='2' fill='%2317120E'/><rect x='2' y='14' width='2' height='2' fill='%23F2C230'/><rect x='2' y='22' width='2' height='2' fill='%2317120E'/><rect x='2' y='24' width='2' height='2' fill='%232FA84F'/><rect x='2' y='26' width='2' height='2' fill='%2317120E'/><rect x='4' y='0' width='2' height='2' fill='%2317120E'/><rect x='4' y='2' width='2' height='2' fill='%2317120E'/><rect x='4' y='4' width='2' height='2' fill='%23F2C230'/><rect x='4' y='22' width='2' height='2' fill='%23F2C230'/><rect x='4' y='24' width='2' height='2' fill='%2317120E'/><rect x='4' y='26' width='2' height='2' fill='%2317120E'/><rect x='6' y='0' width='2' height='2' fill='%2317120E'/><rect x='6' y='2' width='2' height='2' fill='%23F2C230'/><rect x='6' y='4' width='2' height='2' fill='%2317120E'/><rect x='6' y='22' width='2' height='2' fill='%2317120E'/><rect x='6' y='24' width='2' height='2' fill='%23F2C230'/><rect x='6' y='26' width='2' height='2' fill='%2317120E'/><rect x='8' y='0' width='2' height='2' fill='%23F2C230'/><rect x='8' y='2' width='2' height='2' fill='%2317120E'/><rect x='8' y='4' width='2' height='2' fill='%2317120E'/><rect x='8' y='22' width='2' height='2' fill='%2317120E'/><rect x='8' y='24' width='2' height='2' fill='%2317120E'/><rect x='8' y='26' width='2' height='2' fill='%23F2C230'/><rect x='10' y='0' width='2' height='2' fill='%2317120E'/><rect x='10' y='2' width='2' height='2' fill='%232FA84F'/><rect x='10' y='4' width='2' height='2' fill='%2317120E'/><rect x='10' y='14' width='2' height='2' fill='%23F2C230'/><rect x='10' y='22' width='2' height='2' fill='%2317120E'/><rect x='10' y='24' width='2' height='2' fill='%232FA84F'/><rect x='10' y='26' width='2' height='2' fill='%2317120E'/><rect x='12' y='0' width='2' height='2' fill='%2317120E'/><rect x='12' y='2' width='2' height='2' fill='%2317120E'/><rect x='12' y='4' width='2' height='2' fill='%23F2C230'/><rect x='12' y='12' width='2' height='2' fill='%23F2C230'/><rect x='12' y='16' width='2' height='2' fill='%23F2C230'/><rect x='12' y='22' width='2' height='2' fill='%23F2C230'/><rect x='12' y='24' width='2' height='2' fill='%2317120E'/><rect x='12' y='26' width='2' height='2' fill='%2317120E'/><rect x='14' y='0' width='2' height='2' fill='%2317120E'/><rect x='14' y='2' width='2' height='2' fill='%23F2C230'/><rect x='14' y='4' width='2' height='2' fill='%2317120E'/><rect x='14' y='10' width='2' height='2' fill='%23F2C230'/><rect x='14' y='14' width='2' height='2' fill='%231AA7C9'/><rect x='14' y='18' width='2' height='2' fill='%23F2C230'/><rect x='14' y='22' width='2' height='2' fill='%2317120E'/><rect x='14' y='24' width='2' height='2' fill='%23F2C230'/><rect x='14' y='26' width='2' height='2' fill='%2317120E'/><rect x='16' y='0' width='2' height='2' fill='%23F2C230'/><rect x='16' y='2' width='2' height='2' fill='%2317120E'/><rect x='16' y='4' width='2' height='2' fill='%2317120E'/><rect x='16' y='8' width='2' height='2' fill='%23F2C230'/><rect x='16' y='12' width='2' height='2' fill='%231AA7C9'/><rect x='16' y='14' width='2' height='2' fill='%23F26A1B'/><rect x='16' y='16' width='2' height='2' fill='%231AA7C9'/><rect x='16' y='20' width='2' height='2' fill='%23F2C230'/><rect x='16' y='22' width='2' height='2' fill='%2317120E'/><rect x='16' y='24' width='2' height='2' fill='%2317120E'/><rect x='16' y='26' width='2' height='2' fill='%23F2C230'/><rect x='18' y='0' width='2' height='2' fill='%2317120E'/><rect x='18' y='2' width='2' height='2' fill='%232FA84F'/><rect x='18' y='4' width='2' height='2' fill='%2317120E'/><rect x='18' y='10' width='2' height='2' fill='%23F2C230'/><rect x='18' y='14' width='2' height='2' fill='%231AA7C9'/><rect x='18' y='18' width='2' height='2' fill='%23F2C230'/><rect x='18' y='22' width='2' height='2' fill='%2317120E'/><rect x='18' y='24' width='2' height='2' fill='%232FA84F'/><rect x='18' y='26' width='2' height='2' fill='%2317120E'/><rect x='20' y='0' width='2' height='2' fill='%2317120E'/><rect x='20' y='2' width='2' height='2' fill='%2317120E'/><rect x='20' y='4' width='2' height='2' fill='%23F2C230'/><rect x='20' y='12' width='2' height='2' fill='%23F2C230'/><rect x='20' y='16' width='2' height='2' fill='%23F2C230'/><rect x='20' y='22' width='2' height='2' fill='%23F2C230'/><rect x='20' y='24' width='2' height='2' fill='%2317120E'/><rect x='20' y='26' width='2' height='2' fill='%2317120E'/><rect x='22' y='0' width='2' height='2' fill='%2317120E'/><rect x='22' y='2' width='2' height='2' fill='%23F2C230'/><rect x='22' y='4' width='2' height='2' fill='%2317120E'/><rect x='22' y='14' width='2' height='2' fill='%23F2C230'/><rect x='22' y='22' width='2' height='2' fill='%2317120E'/><rect x='22' y='24' width='2' height='2' fill='%23F2C230'/><rect x='22' y='26' width='2' height='2' fill='%2317120E'/><rect x='24' y='0' width='2' height='2' fill='%23F2C230'/><rect x='24' y='2' width='2' height='2' fill='%2317120E'/><rect x='24' y='4' width='2' height='2' fill='%2317120E'/><rect x='24' y='22' width='2' height='2' fill='%2317120E'/><rect x='24' y='24' width='2' height='2' fill='%2317120E'/><rect x='24' y='26' width='2' height='2' fill='%23F2C230'/><rect x='26' y='0' width='2' height='2' fill='%2317120E'/><rect x='26' y='2' width='2' height='2' fill='%232FA84F'/><rect x='26' y='4' width='2' height='2' fill='%2317120E'/><rect x='26' y='22' width='2' height='2' fill='%2317120E'/><rect x='26' y='24' width='2' height='2' fill='%232FA84F'/><rect x='26' y='26' width='2' height='2' fill='%2317120E'/><rect x='28' y='0' width='2' height='2' fill='%2317120E'/><rect x='28' y='2' width='2' height='2' fill='%2317120E'/><rect x='28' y='4' width='2' height='2' fill='%23F2C230'/><rect x='28' y='22' width='2' height='2' fill='%23F2C230'/><rect x='28' y='24' width='2' height='2' fill='%2317120E'/><rect x='28' y='26' width='2' height='2' fill='%2317120E'/><rect x='30' y='0' width='2' height='2' fill='%2317120E'/><rect x='30' y='2' width='2' height='2' fill='%23F2C230'/><rect x='30' y='4' width='2' height='2' fill='%2317120E'/><rect x='30' y='14' width='2' height='2' fill='%23F2C230'/><rect x='30' y='22' width='2' height='2' fill='%2317120E'/><rect x='30' y='24' width='2' height='2' fill='%23F2C230'/><rect x='30' y='26' width='2' height='2' fill='%2317120E'/><rect x='32' y='0' width='2' height='2' fill='%23F2C230'/><rect x='32' y='2' width='2' height='2' fill='%2317120E'/><rect x='32' y='4' width='2' height='2' fill='%2317120E'/><rect x='32' y='12' width='2' height='2' fill='%23F2C230'/><rect x='32' y='14' width='2' height='2' fill='%231AA7C9'/><rect x='32' y='16' width='2' height='2' fill='%23F2C230'/><rect x='32' y='22' width='2' height='2' fill='%2317120E'/><rect x='32' y='24' width='2' height='2' fill='%2317120E'/><rect x='32' y='26' width='2' height='2' fill='%23F2C230'/><rect x='34' y='0' width='2' height='2' fill='%2317120E'/><rect x='34' y='2' width='2' height='2' fill='%232FA84F'/><rect x='34' y='4' width='2' height='2' fill='%2317120E'/><rect x='34' y='14' width='2' height='2' fill='%23F2C230'/><rect x='34' y='22' width='2' height='2' fill='%2317120E'/><rect x='34' y='24' width='2' height='2' fill='%232FA84F'/><rect x='34' y='26' width='2' height='2' fill='%2317120E'/><rect x='36' y='0' width='2' height='2' fill='%2317120E'/><rect x='36' y='2' width='2' height='2' fill='%2317120E'/><rect x='36' y='4' width='2' height='2' fill='%23F2C230'/><rect x='36' y='22' width='2' height='2' fill='%23F2C230'/><rect x='36' y='24' width='2' height='2' fill='%2317120E'/><rect x='36' y='26' width='2' height='2' fill='%2317120E'/><rect x='38' y='0' width='2' height='2' fill='%2317120E'/><rect x='38' y='2' width='2' height='2' fill='%23F2C230'/><rect x='38' y='4' width='2' height='2' fill='%2317120E'/><rect x='38' y='22' width='2' height='2' fill='%2317120E'/><rect x='38' y='24' width='2' height='2' fill='%23F2C230'/><rect x='38' y='26' width='2' height='2' fill='%2317120E'/><rect x='40' y='0' width='2' height='2' fill='%23F2C230'/><rect x='40' y='2' width='2' height='2' fill='%2317120E'/><rect x='40' y='4' width='2' height='2' fill='%2317120E'/><rect x='40' y='22' width='2' height='2' fill='%2317120E'/><rect x='40' y='24' width='2' height='2' fill='%2317120E'/><rect x='40' y='26' width='2' height='2' fill='%23F2C230'/><rect x='42' y='0' width='2' height='2' fill='%2317120E'/><rect x='42' y='2' width='2' height='2' fill='%232FA84F'/><rect x='42' y='4' width='2' height='2' fill='%2317120E'/><rect x='42' y='14' width='2' height='2' fill='%23F2C230'/><rect x='42' y='22' width='2' height='2' fill='%2317120E'/><rect x='42' y='24' width='2' height='2' fill='%232FA84F'/><rect x='42' y='26' width='2' height='2' fill='%2317120E'/><rect x='44' y='0' width='2' height='2' fill='%2317120E'/><rect x='44' y='2' width='2' height='2' fill='%2317120E'/><rect x='44' y='4' width='2' height='2' fill='%23F2C230'/><rect x='44' y='12' width='2' height='2' fill='%23F2C230'/><rect x='44' y='16' width='2' height='2' fill='%23F2C230'/><rect x='44' y='22' width='2' height='2' fill='%23F2C230'/><rect x='44' y='24' width='2' height='2' fill='%2317120E'/><rect x='44' y='26' width='2' height='2' fill='%2317120E'/><rect x='46' y='0' width='2' height='2' fill='%2317120E'/><rect x='46' y='2' width='2' height='2' fill='%23F2C230'/><rect x='46' y='4' width='2' height='2' fill='%2317120E'/><rect x='46' y='10' width='2' height='2' fill='%23F2C230'/><rect x='46' y='14' width='2' height='2' fill='%232FA84F'/><rect x='46' y='18' width='2' height='2' fill='%23F2C230'/><rect x='46' y='22' width='2' height='2' fill='%2317120E'/><rect x='46' y='24' width='2' height='2' fill='%23F2C230'/><rect x='46' y='26' width='2' height='2' fill='%2317120E'/><rect x='48' y='0' width='2' height='2' fill='%23F2C230'/><rect x='48' y='2' width='2' height='2' fill='%2317120E'/><rect x='48' y='4' width='2' height='2' fill='%2317120E'/><rect x='48' y='8' width='2' height='2' fill='%23F2C230'/><rect x='48' y='12' width='2' height='2' fill='%232FA84F'/><rect x='48' y='14' width='2' height='2' fill='%23F26A1B'/><rect x='48' y='16' width='2' height='2' fill='%232FA84F'/><rect x='48' y='20' width='2' height='2' fill='%23F2C230'/><rect x='48' y='22' width='2' height='2' fill='%2317120E'/><rect x='48' y='24' width='2' height='2' fill='%2317120E'/><rect x='48' y='26' width='2' height='2' fill='%23F2C230'/><rect x='50' y='0' width='2' height='2' fill='%2317120E'/><rect x='50' y='2' width='2' height='2' fill='%232FA84F'/><rect x='50' y='4' width='2' height='2' fill='%2317120E'/><rect x='50' y='10' width='2' height='2' fill='%23F2C230'/><rect x='50' y='14' width='2' height='2' fill='%232FA84F'/><rect x='50' y='18' width='2' height='2' fill='%23F2C230'/><rect x='50' y='22' width='2' height='2' fill='%2317120E'/><rect x='50' y='24' width='2' height='2' fill='%232FA84F'/><rect x='50' y='26' width='2' height='2' fill='%2317120E'/><rect x='52' y='0' width='2' height='2' fill='%2317120E'/><rect x='52' y='2' width='2' height='2' fill='%2317120E'/><rect x='52' y='4' width='2' height='2' fill='%23F2C230'/><rect x='52' y='12' width='2' height='2' fill='%23F2C230'/><rect x='52' y='16' width='2' height='2' fill='%23F2C230'/><rect x='52' y='22' width='2' height='2' fill='%23F2C230'/><rect x='52' y='24' width='2' height='2' fill='%2317120E'/><rect x='52' y='26' width='2' height='2' fill='%2317120E'/><rect x='54' y='0' width='2' height='2' fill='%2317120E'/><rect x='54' y='2' width='2' height='2' fill='%23F2C230'/><rect x='54' y='4' width='2' height='2' fill='%2317120E'/><rect x='54' y='14' width='2' height='2' fill='%23F2C230'/><rect x='54' y='22' width='2' height='2' fill='%2317120E'/><rect x='54' y='24' width='2' height='2' fill='%23F2C230'/><rect x='54' y='26' width='2' height='2' fill='%2317120E'/><rect x='56' y='0' width='2' height='2' fill='%23F2C230'/><rect x='56' y='2' width='2' height='2' fill='%2317120E'/><rect x='56' y='4' width='2' height='2' fill='%2317120E'/><rect x='56' y='22' width='2' height='2' fill='%2317120E'/><rect x='56' y='24' width='2' height='2' fill='%2317120E'/><rect x='56' y='26' width='2' height='2' fill='%23F2C230'/><rect x='58' y='0' width='2' height='2' fill='%2317120E'/><rect x='58' y='2' width='2' height='2' fill='%232FA84F'/><rect x='58' y='4' width='2' height='2' fill='%2317120E'/><rect x='58' y='22' width='2' height='2' fill='%2317120E'/><rect x='58' y='24' width='2' height='2' fill='%232FA84F'/><rect x='58' y='26' width='2' height='2' fill='%2317120E'/><rect x='60' y='0' width='2' height='2' fill='%2317120E'/><rect x='60' y='2' width='2' height='2' fill='%2317120E'/><rect x='60' y='4' width='2' height='2' fill='%23F2C230'/><rect x='60' y='22' width='2' height='2' fill='%23F2C230'/><rect x='60' y='24' width='2' height='2' fill='%2317120E'/><rect x='60' y='26' width='2' height='2' fill='%2317120E'/><rect x='62' y='0' width='2' height='2' fill='%2317120E'/><rect x='62' y='2' width='2' height='2' fill='%23F2C230'/><rect x='62' y='4' width='2' height='2' fill='%2317120E'/><rect x='62' y='14' width='2' height='2' fill='%23F2C230'/><rect x='62' y='22' width='2' height='2' fill='%2317120E'/><rect x='62' y='24' width='2' height='2' fill='%23F2C230'/><rect x='62' y='26' width='2' height='2' fill='%2317120E'/></svg>") repeat-x left center/auto 100%;image-rendering:pixelated}
+.card .band{height:2.6cqw}
+.tree{width:12cqw;height:auto;flex:none}
+.tree path{fill:none;stroke:var(--paper);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+.tree .lf{fill:var(--paper);stroke:none}
+.mid.pap{color:var(--paper)}
+.krow{display:flex;align-items:center;gap:1cqw}
+.krow .wave{height:1.6cqw}
+.wave[hidden]{display:none}
+.stars{color:var(--gold);letter-spacing:.18em;font-size:2.1cqw}
+.pk{stroke:var(--paper);stroke-width:17;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.gold .pk{stroke:var(--gold)}
+.lanek{font-family:var(--body);font-weight:600;font-size:19px;letter-spacing:.14em;text-transform:uppercase;fill:var(--mist)}
+.k{font-family:var(--body);font-weight:600;font-size:1.2cqw;letter-spacing:.14em;text-transform:uppercase;color:var(--mist)}
+.big{font-size:4.6cqw;line-height:1}
+.mid{font-size:3cqw;line-height:1.08}
+.say{font-family:var(--body);font-weight:500;font-size:2.1cqw;line-height:1.3;color:var(--paper)}
+.sm{font-family:var(--body);font-weight:500;font-size:1.6cqw;line-height:1.35;color:var(--mist)}
+.rule{border-top:1px solid var(--line);padding-top:1.1cqw;display:flex;flex-direction:column;gap:.8cqw}
+.pick{display:flex;flex-direction:column;gap:.3cqw;padding:.9cqw 1.1cqw;border:1px solid var(--line);border-radius:.8cqw;font-size:2.2cqw;color:var(--mist);transition:border-color .4s ease,color .4s ease}
+.pick span{font-family:var(--body);font-weight:500;font-size:1.4cqw}
+.stage.is-late .pick.best{border-color:var(--gold);color:var(--gold)}
+.pair{display:flex;justify-content:space-between;gap:1cqw;font-family:var(--body);font-weight:500;font-size:1.6cqw;color:var(--mist);font-variant-numeric:tabular-nums}
+.track{height:1cqw;border-radius:1cqw;background:var(--line);overflow:hidden}
+.fill{height:100%;width:0;background:var(--jade);border-radius:1cqw}
+.ok{color:var(--jade)}
+.pair b{color:var(--gold);font-weight:600}
+.pair.top{font-size:1.9cqw}
+.rule.tray{margin-top:auto}
+.cols.c4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.cols.c4 .col h3{font-size:2.3cqw}
+.cols.c4 .col p{font-size:1.4cqw}
+.col .tr{width:100%;height:13.5cqw;object-fit:contain;display:block;margin:0 auto .3cqw;filter:drop-shadow(0 .4cqw 1cqw rgba(0,0,0,.55))}
+.check{display:flex;align-items:center;gap:1cqw;font-family:var(--body);font-weight:600;font-size:1.8cqw}
+.check i{width:1.3cqw;height:1.3cqw;border-radius:50%;background:currentColor;flex:none}
+.wave{display:flex;align-items:center;gap:.5cqw;height:2.6cqw}
+.wave b{width:.6cqw;background:var(--gold);border-radius:.3cqw;animation:wv 1s ease-in-out infinite}
+.wave b:nth-child(1){height:30%}.wave b:nth-child(2){height:80%;animation-delay:.1s}.wave b:nth-child(3){height:55%;animation-delay:.2s}.wave b:nth-child(4){height:100%;animation-delay:.3s}.wave b:nth-child(5){height:45%;animation-delay:.4s}.wave b:nth-child(6){height:70%;animation-delay:.5s}
+@keyframes wv{50%{transform:scaleY(.35)}}
+
+/* webcam inset */
+.cam{position:absolute;left:2.4cqw;bottom:2cqw;width:15cqw;padding:.8cqw;background:var(--panel);border:1px solid var(--line);border-radius:1cqw;display:flex;flex-direction:column;gap:.5cqw}
+.cam svg{width:100%;height:auto;display:block;background:#0A1B22;border-radius:.6cqw}
+.cam .k{font-size:1cqw;display:flex;align-items:center;gap:.6cqw}
+.cam .k i{width:.8cqw;height:.8cqw;border-radius:50%;background:var(--ember);flex:none}
+
+/* cards */
+.card{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.8cqw;background:radial-gradient(ellipse 66% 62% at 50% 50%,rgba(24,7,30,.95) 0%,rgba(24,7,30,.92) 58%,rgba(24,7,30,.3) 100%),#2A0C2E url(pis-art.png) center/cover;text-align:center;padding:4cqw}
+.mark{font-family:var(--display);font-size:8.6cqw;line-height:.95;color:var(--paper)}
+.tagl{font-size:2.4cqw;color:var(--gold);font-weight:500}
+.subt{font-size:1.6cqw;color:var(--mist)}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2cqw;width:100%;text-align:left}
+.col{border-top:.3cqw solid var(--gold);padding-top:1.2cqw;display:flex;flex-direction:column;gap:.7cqw}
+.col h3{margin:0;font-family:var(--display);font-weight:400;font-size:2.6cqw;color:var(--paper);line-height:1.05}
+.col p{margin:0;font-size:1.55cqw;color:var(--mist);line-height:1.35}
+.col .k{color:var(--gold)}
+.who{display:flex;align-items:center;gap:2.6cqw;text-align:left}
+.whot{display:flex;flex-direction:column;gap:.8cqw}
+.ava{width:13cqw;height:13cqw;object-fit:cover;border-radius:50%;flex:none;display:grid;place-items:center;font-family:var(--display);font-size:4.4cqw;color:var(--gold);background:#2A0C2E;border:.35cqw solid var(--gold)}
+.card .bio{margin:0;max-width:62cqw;font-size:1.9cqw;line-height:1.5;color:var(--paper);text-align:center}
+.hero{font-family:'Noto Naskh Arabic','Geeza Pro','Segoe UI','Noto Sans Arabic',serif;font-size:7.4cqw;line-height:1.25;color:var(--gold);display:flex;align-items:center;gap:2.4cqw;text-shadow:0 .3cqw 1.6cqw rgba(242,193,78,.35)}
+.hero i{width:1.5cqw;height:1.5cqw;background:var(--gold);transform:rotate(45deg);box-shadow:0 0 0 .35cqw #2A0C2E,0 0 0 .55cqw var(--gold);flex:none}
+.hero+.mark{font-size:6.4cqw}
+.duo{display:flex;align-items:baseline;gap:1.2cqw;font-size:1.7cqw;color:var(--mist)}
+.duo span[dir=rtl]{font-family:'Noto Naskh Arabic','Geeza Pro','Segoe UI',serif;font-size:2.4cqw;color:var(--gold)}
+.duo b{color:var(--paper);font-weight:600}
+.duo b::after{content:'·';margin-left:1.2cqw;color:var(--dim);font-weight:400}
+.sug{font-family:'Noto Naskh Arabic','Geeza Pro','Segoe UI','Noto Sans Arabic',serif;font-size:3.4cqw;line-height:1.5;color:var(--gold);direction:rtl;unicode-bidi:isolate}
+.sug.l{text-align:left}
+.sug.sm{font-size:2.1cqw;line-height:1.35}
+.sug[hidden]{display:none}
+.title2{font-family:var(--display);font-size:4cqw;color:var(--paper);line-height:1}
+.intro{flex-direction:row;gap:5cqw;text-align:left}
+.intro .map{width:30cqw;height:auto;flex:none;display:block}
+.intro .txt{position:relative;width:46cqw;height:38cqw}
+.intro .blk{position:absolute;inset:0;display:flex;flex-direction:column;gap:1.5cqw;justify-content:center;align-items:flex-start}
+.intro .mark{font-size:7.4cqw}
+.intro .say{font-size:2.3cqw;max-width:40cqw}
+.intro .sm{font-size:1.9cqw;max-width:40cqw}
+.row3{display:flex;flex-direction:column;gap:1.1cqw;width:100%}
+.row3 div{display:flex;gap:1.4cqw;align-items:baseline;border-top:1px solid rgba(242,193,78,.35);padding-top:.9cqw;font-size:1.9cqw;color:var(--mist)}
+.row3 b{font-family:var(--display);font-weight:400;font-size:2.5cqw;color:var(--gold);flex:none;width:15cqw}
+.isl{fill:#2F8C86;stroke:#F6EFDF;stroke-width:1.2;stroke-linejoin:round}
+.isl.dim{fill:#3A5560}
+.sulu{fill:var(--gold);stroke:#0B1418;stroke-width:1}
+.mlab{font-family:var(--body);font-weight:600;font-size:15px;fill:var(--mist)}
+.mlab.g{fill:var(--gold);font-size:19px}
+.ringp{fill:none;stroke:var(--gold);stroke-width:2.5;stroke-dasharray:7 7;animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+.keep{flex-direction:row;gap:5cqw;text-align:left}
+.snap{width:26cqw;flex:none;background:var(--paper);padding:1.2cqw 1.2cqw 1cqw;border-radius:.5cqw;transform:rotate(-3deg);box-shadow:0 2cqw 5cqw rgba(0,0,0,.55);display:flex;flex-direction:column;gap:.6cqw}
+.snap svg{width:100%;height:auto;display:block}
+.snap span{font-family:var(--display);font-size:2.6cqw;color:#0E2530;text-align:center}
+.keepside{display:flex;flex-direction:column;gap:1.4cqw;align-items:flex-start}
+.qr{width:11cqw;height:11cqw;background:var(--paper);padding:.8cqw;border-radius:.6cqw}
+.qr svg{width:100%;height:100%;display:block}
+
+/* transport */
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.bar button{font:inherit;font-weight:600;color:var(--night);background:var(--gold);border:0;border-radius:6px;padding:9px 16px;min-height:40px;cursor:pointer}
+.bar button.ghost{background:transparent;color:var(--mist);border:1px solid var(--line)}
+.bar input{flex:1 1 220px;min-width:0;accent-color:var(--gold)}
+.bar output{font-variant-numeric:tabular-nums;color:var(--dim);min-width:92px;text-align:right}
+button:focus-visible,input:focus-visible{outline:2px solid var(--ember);outline-offset:2px}
+.scenes{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px}
+.scenes button{font:inherit;text-align:left;color:var(--mist);background:transparent;border:1px solid var(--line);border-radius:6px;padding:8px 10px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.scenes button span{font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
+.scenes button[aria-current="true"]{border-color:var(--gold);color:var(--gold)}
+@media (prefers-reduced-motion:reduce){.ringp{animation:none}.sc,.late,.early,.dim,.wave b,.swell{transition:none;animation:none}}
+</style>
+
+<div class="wrap">
+  <h1>Pangalay Mirror</h1>
+
+  <div class="stage" id="stage" aria-label="Animated installation concept, 176 seconds">
+    <svg class="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <clipPath id="skirtclip"><path d="M-44 -178 H44 L60 -4 H-60 Z"/></clipPath>
+        <clipPath id="pisclip"><path d="M12 -420 L44 -452 L36 -404 Z M-38 -390 A38 38 0 0 1 38 -390 Q0 -404 -38 -390 Z"/></clipPath>
+        <clipPath id="medclip"><circle r="50"/></clipPath>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#10233F"/><stop offset=".55" stop-color="#5A3B63"/><stop offset=".85" stop-color="#E0795A"/><stop offset="1" stop-color="#FFC27A"/></linearGradient>
+        <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2B7F86"/><stop offset="1" stop-color="#0B3A47"/></linearGradient>
+        <radialGradient id="sun"><stop offset="0" stop-color="#FFF1C9"/><stop offset=".6" stop-color="#FFC66B"/><stop offset="1" stop-color="#FF9A5C"/></radialGradient>
+      </defs>
+      <rect width="1600" height="520" fill="url(#sky)"/>
+      <g id="stars" fill="#F6EFDF" opacity=".75"></g>
+      <circle cx="640" cy="520" r="118" fill="url(#sun)"/>
+      <rect y="520" width="1600" height="260" fill="url(#sea)"/>
+      <g stroke="#FFC66B" stroke-width="5" stroke-linecap="round" opacity=".55">
+        <line x1="560" y1="546" x2="720" y2="546"/><line x1="590" y1="574" x2="690" y2="574"/><line x1="610" y1="604" x2="670" y2="604"/>
+      </g>
+      <path class="swell" id="w0"/><path class="swell b" id="w1"/><path class="swell" id="w2"/>
+      <!-- house on stilts -->
+      <g stroke="#0A161B" stroke-width="8" stroke-linecap="round">
+        <line x1="1040" y1="500" x2="1040" y2="610"/><line x1="1110" y1="500" x2="1110" y2="610"/><line x1="1180" y1="500" x2="1180" y2="610"/><line x1="1250" y1="500" x2="1250" y2="610"/>
+      </g>
+      <rect x="1020" y="410" width="250" height="92" fill="#14262E"/>
+      <path d="M996 414 L1145 336 L1294 414 Z" fill="#0A161B"/>
+      <path d="M1145 338 q-6 -28 14 -34 q16 -3 14 11 q-2 9 -11 6 M1145 338 q6 -20 -10 -30" fill="none" stroke="#F2C14E" stroke-width="4" stroke-linecap="round"/>
+      <rect x="1050" y="440" width="34" height="38" fill="#FF8A5C" opacity=".85"/>
+      <rect x="1204" y="440" width="34" height="38" fill="#FF8A5C" opacity=".85"/>
+      <!-- vinta -->
+      <g id="vinta" transform="translate(110,500)">
+        <rect x="-30" y="-80" width="15" height="72" fill="#C8323C"/><rect x="-15" y="-80" width="15" height="72" fill="#F2C14E"/><rect x="0" y="-80" width="15" height="72" fill="#1F7A63"/><rect x="15" y="-80" width="15" height="72" fill="#2F6BB0"/>
+        <line x1="0" y1="0" x2="0" y2="-86" stroke="#1A0F0A" stroke-width="4"/>
+        <path d="M-52 0 Q0 18 52 0 L44 11 H-44 Z" fill="#1A0F0A"/>
+        <path d="M50 1 q16 -6 13 -21 q-3 -10 -11 -5 M-50 1 q-16 -6 -13 -21 q3 -10 11 -5" fill="none" stroke="#F2C14E" stroke-width="3" stroke-linecap="round"/>
+        <line x1="-64" y1="12" x2="64" y2="12" stroke="#1A0F0A" stroke-width="3"/>
+      </g>
+      <!-- deck -->
+      <rect y="770" width="1600" height="130" fill="#2A1B14"/>
+      <g stroke="#150C08" stroke-width="3"><line x1="0" y1="770" x2="1600" y2="770"/><line x1="0" y1="812" x2="1600" y2="812"/><line x1="0" y1="856" x2="1600" y2="856"/></g>
+
+      <!-- game: target rings and incoming objects -->
+      <g class="sc" data-on="play">
+        <g id="rings"></g>
+      </g>
+
+      <!-- trails -->
+      <g class="sc" data-on="mirror play" fill="none" stroke="#F2C14E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity=".55">
+        <polyline id="trL"/><polyline id="trR"/>
+      </g>
+
+      <!-- avatars -->
+      <g class="sc" data-on="choose"><g class="dim"><g id="boy" transform="translate(470,850)"></g><text class="tag2" x="470" y="890">Boy</text></g></g>
+      <g class="sc" data-on="choose"><ellipse class="late" cx="810" cy="846" rx="120" ry="16" fill="none" stroke="#F2C14E" stroke-width="5"/><text class="tag2" x="810" y="890">Girl</text></g>
+      <g class="sc" data-on="choose mirror play"><g id="girl" transform="translate(640,850)"></g></g>
+      <g class="sc" data-on="play">
+        <g class="med" id="n0"><circle class="ring" r="60"/>
+          <path d="M-44 14 H44 M-38 14 V30 M38 14 V30" stroke="#F6EFDF" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <g fill="#F2C14E" stroke="#0B1418" stroke-width="2"><circle cx="-36" cy="2" r="9"/><circle cx="-18" cy="2" r="9"/><circle cx="0" cy="2" r="9"/><circle cx="18" cy="2" r="9"/><circle cx="36" cy="2" r="9"/></g>
+          <g fill="#8A6A1C"><circle cx="-36" cy="2" r="3"/><circle cx="-18" cy="2" r="3"/><circle cx="0" cy="2" r="3"/><circle cx="18" cy="2" r="3"/><circle cx="36" cy="2" r="3"/></g></g>
+        <g class="med" id="n1"><circle class="ring" r="60"/>
+          <image href="pis-sw.png" x="-50" y="-50" width="100" height="100" preserveAspectRatio="xMidYMid slice" clip-path="url(#medclip)"/><circle r="50" fill="none" stroke="#F2C14E" stroke-width="3"/></g>
+        <g class="med" id="n2"><circle class="ring" r="60"/>
+          <path d="M0 -44 q9 8 0 16 q-9 8 0 16 q9 8 0 16 v8" fill="none" stroke="#F6EFDF" stroke-width="6" stroke-linecap="round"/>
+          <path d="M-14 14 H14 M0 14 V34" stroke="#F2C14E" stroke-width="6" stroke-linecap="round" fill="none"/><circle cy="38" r="6" fill="#F2C14E"/></g>
+        <g class="med" id="n3"><circle class="ring" r="60"/>
+          <path d="M-36 8 A36 34 0 0 1 36 8 Z" fill="#E9D9C2" stroke="#0B1418" stroke-width="3"/><path d="M0 8 V-24 M0 8 L-20 -16 M0 8 L20 -16" stroke="#0B1418" stroke-width="2.5" fill="none"/><circle cy="22" r="10" fill="#F6EFDF" stroke="#0B1418" stroke-width="3"/></g>
+        <text id="rate" class="rate" text-anchor="middle"></text>
+      </g>
+      <!-- move lane: pictograms scroll toward the marker, as in a dance game -->
+      <g class="sc" data-on="play">
+        <text x="1076" y="708" class="lanek">Next moves</text>
+        <rect x="1072" y="718" width="480" height="166" rx="22" fill="#06141A" fill-opacity=".84" stroke="#F2C14E" stroke-opacity=".35"/>
+        <clipPath id="laneclip"><rect x="1076" y="722" width="472" height="158" rx="18"/></clipPath>
+        <path d="M1140 744 L1190 801 L1140 858 L1090 801 Z" fill="#F2C14E" fill-opacity=".12" stroke="#F2C14E" stroke-width="4" stroke-linejoin="round"/>
+        <g clip-path="url(#laneclip)"><g id="lane"></g></g>
+      </g>
+    </svg>
+
+    <div class="lens sc" data-on="step choose mirror play"></div>
+    <div class="cap sc" data-on="step choose mirror play" id="cap"></div>
+
+    <div class="cam sc" data-on="step choose mirror play">
+      <svg viewBox="-220 -530 440 550" aria-hidden="true"><g id="skel"></g></svg>
+      <div class="k"><i></i>Webcam · you</div>
+    </div>
+
+    <div class="hud sc" data-on="step choose mirror play">
+      <div class="band"></div>
+      <div class="view sc" data-on="step">
+        <div class="k">The mirror is waiting</div>
+        <div class="say">Stand in front of the screen and raise your hand to begin.</div>
+        <div class="rule late">
+          <div class="check ok"><i></i>Body found</div>
+          <div class="sm">The webcam follows your body and both hands. Nothing to hold, nothing to click.</div>
+        </div>
+      </div>
+      <div class="view sc" data-on="choose">
+        <div class="k">Choose your avatar</div>
+        <div class="pick">Left hand · Boy <span>Badju lapi, sawwal kuput, pis syabit</span></div>
+        <div class="pick best">Right hand · Girl <span>Biyatawi, patadjung, janggay</span></div>
+        <div class="rule late">
+          <div class="check ok"><i></i>Girl chosen</div>
+          <div class="sm">Dressed in Tausug attire, drawn in ink.</div>
+        </div>
+      </div>
+      <div class="view sc" data-on="mirror">
+        <div class="k">The pangalay stance</div>
+        <div class="check ok"><i></i>Knees soft, with a small spring</div>
+        <div class="check ok"><i></i>Eyes lowered, face calm</div>
+        <div class="check ok late"><i></i>Fingers together, curled back to the wrist</div>
+        <div class="check ok late"><i></i>No hip sway. The arms tell the story.</div>
+        <div class="rule late"><div class="sm">Slow and continuous, with no clear beginning or end.</div></div>
+      </div>
+      <div class="view sc" data-on="play">
+        <div class="pair top"><span>Score <b id="score">0</b></span><span class="stars" id="starrow">☆☆☆☆☆</span></div>
+        <div class="k" id="gk"></div>
+        <div class="mid" id="gname"></div>
+        <div class="sm" id="gdesc"></div>
+        <div class="rule" id="prule"><div class="k krow">You caught<span class="wave" id="pwave" hidden><b></b><b></b><b></b><b></b><b></b><b></b></span></div><div class="mid pap" id="pname"></div><div class="sug sm l" dir="rtl" lang="tsg" id="par"></div><div class="sm" id="pdesc"></div></div>
+      </div>
+    </div>
+
+    <div class="card sc" data-on="title">
+      <div class="band"></div><svg class="tree" viewBox="-110 -200 220 210" aria-hidden="true"></svg>
+      <div class="hero" dir="rtl" lang="tsg"><i aria-hidden="true"></i>فَڠَلَيْ<i aria-hidden="true"></i></div>
+      <div class="mark">Pangalay Mirror</div>
+      <div class="duo"><span dir="rtl" lang="tsg">تَؤُ سُوْغْ</span><b>Tau Sūg</b><span>People of the current</span></div>
+      <div class="tagl">Step in. Move. Meet the Tausug.</div>
+      <div class="subt">A dance game that teaches pangalay and introduces Tausug culture</div>
+    </div>
+    <div class="card intro sc" data-on="who where today">
+      <div class="band"></div>
+      <svg class="map" viewBox="0 0 480 660" role="img" aria-label="Simplified map of the Philippines with the Sulu Archipelago highlighted">
+        <g id="mapland"></g>
+        <g class="sc" data-on="where today"><ellipse class="ringp" cx="196" cy="578" rx="84" ry="30" transform="rotate(-34 196 578)"/></g>
+        <g id="mapsulu"></g>
+        <text class="mlab" x="312" y="136">Luzon</text><text class="mlab" x="410" y="372">Visayas</text>
+        <text class="mlab" x="368" y="496" text-anchor="middle">Mindanao</text><text class="mlab" x="64" y="398" text-anchor="end">Palawan</text>
+        <text class="mlab" x="44" y="600" text-anchor="middle">Borneo</text>
+        <g class="sc" data-on="where today"><text class="mlab g" x="150" y="508" text-anchor="middle">Sulu Archipelago</text><path d="M150 514 L176 548" stroke="#F2C14E" stroke-width="2" fill="none"/><text class="mlab" x="222" y="596" fill="#F6EFDF">Jolo</text></g>
+        <text class="mlab" x="8" y="20" opacity=".7">Simplified map</text>
+      </svg>
+      <div class="txt">
+        <div class="blk sc" data-on="who">
+          <div class="k">Meet</div>
+          <div class="mark">The Tausug</div>
+          <div class="sug l" dir="rtl" lang="tsg">تَؤُ سُوْغْ</div>
+          <div class="tagl">People of the current</div>
+          <div class="subt">tau: people · sūg: current</div>
+          <div class="say late">A seafaring people from the far south of the Philippines.</div>
+        </div>
+        <div class="blk sc" data-on="where">
+          <div class="k">Their home</div>
+          <div class="title2">The Sulu Archipelago</div>
+          <div class="say">A chain of islands between Mindanao and Borneo, with Jolo at its heart.</div>
+          <div class="sm late">For centuries, the Sultanate of Sulu traded across these seas.</div>
+        </div>
+        <div class="blk sc" data-on="today">
+          <div class="k">Today</div>
+          <div class="title2">Step into their world</div>
+          <div class="row3">
+            <div><b>One dance</b>Pangalay, slow and flowing like the sea</div>
+            <div><b>Four treasures</b>Music, weaving, pearls and craft</div>
+            <div><b>One art</b>The colours and patterns all around you</div>
+          </div>
+          <div class="tagl late">Ready? Step in.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card sc" data-on="result">
+      <div class="band"></div>
+      <div class="k">Round complete · Score 1,300 · ★★★★★</div>
+      <div class="title2">Four gestures learned, four treasures met</div>
+      <div class="cols c4">
+        <div class="col"><img class="tr" src="tr0.png" alt=""><span class="k">Open arms</span><h3>Kulintangan</h3><div class="sug sm l" dir="rtl" lang="tsg">كُلِنْتَڠَنْ</div><p>A row of small gongs. Cousin of the gamelan.</p></div>
+        <div class="col"><img class="tr" src="tr1.png" alt=""><span class="k">Hands overhead</span><h3>Pis syabit</h3><div class="sug sm l" dir="rtl" lang="tsg">فِسْ سِيَبِتْ</div><p>A woven headcloth of squares, hooks and zigzags.</p></div>
+        <div class="col"><img class="tr" src="tr2.png" alt=""><span class="k">Crossed arms</span><h3>Pearl shell</h3><p>Sulu pearls once sailed to the markets of Singapore.</p></div>
+        <div class="col"><img class="tr" src="tr3.png" alt=""><span class="k">Wrist turn</span><h3>Kalis</h3><div class="sug sm l" dir="rtl" lang="tsg">كَلِسْ</div><p>The wavy-bladed Tausug sword. Cousin of the keris.</p></div>
+      </div>
+      <div class="subt">Each gesture carries a meaning, and each catch introduces a piece of Tausug culture.</div>
+    </div>
+    <div class="card keep sc" data-on="keep">
+      <div class="band"></div>
+      <div class="snap">
+        <svg viewBox="-240 -520 480 560" aria-hidden="true">
+          <rect x="-240" y="-520" width="480" height="560" fill="url(#sky)"/><circle cy="-170" r="110" fill="url(#sun)"/><rect x="-240" y="-170" width="480" height="210" fill="url(#sea)"/>
+          <g id="pola" transform="translate(0,20)"></g>
+        </svg>
+        <span>Magsukul</span>
+      </div>
+      <div class="keepside">
+        <div class="k">Your keepsake</div>
+        <div class="title2">Magsukul</div>
+        <div class="sug" dir="rtl" lang="tsg">مَغْسُكُلْ</div>
+        <div class="tagl">Thank you, in Bahasa Sūg</div>
+        <div class="qr"><svg id="qr" viewBox="0 0 13 13" aria-hidden="true"></svg></div>
+        <div class="subt">Scan to save your snapshot</div>
+      </div>
+    </div>
+    <div class="card sc" data-on="how">
+      <div class="band"></div>
+      <div class="title2">How it works</div>
+      <div class="cols">
+        <div class="col"><span class="k">The eyes</span><h3>Webcam tracking</h3><p>Follows your body and hands in the browser. A laptop is enough.</p></div>
+        <div class="col"><span class="k">The game</span><h3>Follow the coach</h3><p>Pictograms show the next move. Gold moves catch a Tausug treasure. The dance pauses while its story is told.</p></div>
+        <div class="col"><span class="k">The memory</span><h3>Recorded voices</h3><p>Each object says its name in Tausug and shows its cousin in the Malay world.</p></div>
+      </div>
+      <div class="subt">You learn the dance by playing, and meet the culture as you score.</div>
+    </div>
+    <div class="card sc" data-on="me">
+      <div class="band"></div>
+      <div class="k">The maker</div>
+      <div class="who">
+        <img class="ava" src="me.jpg" alt="Portrait of Aljabri Alam">
+        <div class="whot">
+          <div class="title2">Aljabri Alam</div>
+          <div class="tagl">Tausug · Filipino · based in Singapore</div>
+          <div class="subt">Technical Lead and AI Advocate at VISEO Asia</div>
+        </div>
+      </div>
+      <p class="bio">I am Tausug. For about ten years I have built software for banks, government, media and healthcare. Pangalay Mirror is my way of using that craft, that knowledge, and my pride in where I come from to share my people&rsquo;s dance and culture with the world.</p>
+      <div class="subt">linkedin.com/in/aljabri-alam</div>
+    </div>
+    <div class="card sc" data-on="end">
+      <div class="band"></div><svg class="tree" viewBox="-110 -200 220 210" aria-hidden="true"></svg>
+      <div class="hero" dir="rtl" lang="tsg"><i aria-hidden="true"></i>فَڠَلَيْ<i aria-hidden="true"></i></div>
+      <div class="mark">Pangalay Mirror</div>
+      <div class="tagl">Move like the current. Meet the Tausug.</div>
+      <div class="subt">Common Ground Makeathon · Culture × Tech</div>
+    </div>
+
+    <div class="concept">Concept · installation view simulated</div>
+    <button id="start" class="start"><span class="pl" aria-hidden="true"></span><b>Tap to play</b><span>Sound on</span></button>
+  </div>
+
+  <audio id="bgm" src="pangalay.mp3" preload="auto"></audio>
+  <div class="bar">
+    <button id="play">Pause</button>
+    <button id="restart" class="ghost">Restart</button>
+    <button id="snd" class="ghost" aria-pressed="true">Sound on</button>
+    <input id="seek" type="range" min="0" max="195" step="0.1" value="0" aria-label="Position in film">
+    <output id="time">0:00 / 2:56</output>
+  </div>
+  <div class="scenes" id="scenes"></div>
+  <p class="note">This is a concept animation of the installation, not the working build. The gestures and patterns follow published descriptions of pangalay and Tausug art. The gesture names are plain English descriptions, not Tausug terms. The attire and object names should be checked by the team before presenting. Sound is off until you turn it on. The music is the Pangalay track supplied by the team, and the spoken descriptions use a Philippine English voice (Rosa) standing in for a recorded Tausug speaker.</p>
+</div>
+
+<script>
+(function(){
+var SC=[
+ {id:'title',at:0,name:'Title',cap:''},
+ {id:'who',at:5,name:'Who are the Tausug',cap:''},
+ {id:'where',at:13.5,name:'Where they live',cap:''},
+ {id:'today',at:27.2,name:'Today',cap:''},
+ {id:'step',at:38,name:'Step in',cap:'Step in front of the mirror'},
+ {id:'choose',at:43,name:'Choose avatar',cap:'Raise a hand to choose'},
+ {id:'mirror',at:52.6,name:'The stance',cap:'First, the stance'},
+ {id:'play',at:63,name:'Play',cap:'Follow the coach. Gold moves catch a treasure.'},
+ {id:'result',at:143,name:'Round result',cap:''},
+ {id:'keep',at:155,name:'Keepsake',cap:''},
+ {id:'how',at:164.6,name:'How it works',cap:''},
+ {id:'me',at:178.8,name:'The maker',cap:''},
+ {id:'end',at:187.8,name:'End card',cap:''}
+],DUR=195,DANCE=37,INK='#0B1418',SKIN='#C98E63';
+function $(i){return document.getElementById(i)}
+var stage=$('stage'),seek=$('seek'),out=$('time'),playB=$('play'),cap=$('cap'),list=$('scenes');
+
+/* ---- avatar builder ---- */
+function arm(k,side,kind){
+  var S=side<0?'L':'R',up,fo,ha,i;
+  if(kind==='skel'){
+    up='<line y2="80" class="sk"/><circle r="9" class="sd"/>';
+    fo='<line y2="75" class="sk"/><circle r="9" class="sd"/>';
+    ha='<line y2="36" class="sk"/><circle r="9" class="sd"/><circle cy="36" r="7" class="sd"/>';
+  }else if(kind==='pic'){
+    up='<line y2="80" class="pk"/>';fo='<line y2="75" class="pk"/>';ha='<line y2="38" class="pk"/>';
+  }else if(kind==='ghost'){
+    up='<line y2="80" class="gh"/>';fo='<line y2="75" class="gh"/>';ha='<line y2="38" class="gh"/>';
+  }else{
+    var c=kind==='girl'?'#B32E63':'#17324A';
+    up='<line y2="80" stroke="'+INK+'" stroke-width="30" stroke-linecap="round"/><line y2="80" stroke="'+c+'" stroke-width="22" stroke-linecap="round"/>';
+    fo='<line y2="75" stroke="'+INK+'" stroke-width="26" stroke-linecap="round"/><line y2="75" stroke="'+c+'" stroke-width="18" stroke-linecap="round"/>';
+    ha='<line x1="'+(-side*6)+'" y1="6" x2="'+(-side*17)+'" y2="17" stroke="'+INK+'" stroke-width="11" stroke-linecap="round"/><line x1="'+(-side*6)+'" y1="6" x2="'+(-side*17)+'" y2="17" stroke="'+SKIN+'" stroke-width="5" stroke-linecap="round"/><ellipse cy="14" rx="9" ry="17" fill="'+SKIN+'" stroke="'+INK+'" stroke-width="3"/>';
+    if(kind==='girl')for(i=-1.5;i<=1.5;i++)ha+='<path d="M'+(i*4)+' 28 q'+(side*3)+' 18 '+(side*22)+' 26" fill="none" stroke="#F2C14E" stroke-width="3.5" stroke-linecap="round"/>';
+  }
+  return '<g id="'+k+S+'1">'+up+'<g id="'+k+S+'2">'+fo+'<g id="'+k+S+'3">'+ha+'</g></g></g>';
+}
+function body(kind){
+  var st=' stroke="'+INK+'" stroke-width="4" stroke-linejoin="round"',
+      feet='<ellipse cx="-24" cy="0" rx="20" ry="8" fill="'+INK+'"/><ellipse cx="24" cy="0" rx="20" ry="8" fill="'+INK+'"/>',
+      head='<rect x="-9" y="-352" width="18" height="24" fill="'+SKIN+'"'+st+'/><circle cy="-384" r="36" fill="'+SKIN+'"'+st+'/><path d="M-18 -381 q6 5 12 0 M6 -381 q6 5 12 0" fill="none" stroke="'+INK+'" stroke-width="3" stroke-linecap="round"/><path d="M-8 -366 q8 6 16 0" fill="none" stroke="'+INK+'" stroke-width="3" stroke-linecap="round"/>';
+  if(kind==='skel')return '<circle cy="-384" r="32" class="sk"/><line y1="-350" y2="-175" class="sk"/><line x1="-46" y1="-315" x2="46" y2="-315" class="sk"/><line x1="-28" y1="-175" x2="28" y2="-175" class="sk"/><line x1="-28" y1="-175" x2="-32" y2="-6" class="sk"/><line x1="28" y1="-175" x2="32" y2="-6" class="sk"/><circle cx="-28" cy="-175" r="9" class="sd"/><circle cx="28" cy="-175" r="9" class="sd"/><circle cx="-32" cy="-6" r="9" class="sd"/><circle cx="32" cy="-6" r="9" class="sd"/>';
+  if(kind==='pic')return '<circle cy="-384" r="34" class="pk"/><path class="pk" d="M0 -350 V-175 M-46 -315 H46 M-28 -175 H28 M-28 -175 L-32 -6 M28 -175 L32 -6"/>';
+  if(kind==='ghost')return '<circle cy="-384" r="36" class="gh"/><path d="M-46 -328 H46 L40 -172 L58 -4 H-58 L-40 -172 Z" class="gh"/>';
+  if(kind==='girl')return feet+
+    '<path d="M-44 -178 H44 L60 -4 H-60 Z" fill="#7A0F2E"/><image href="pis-sw.png" x="-62" y="-182" width="124" height="182" preserveAspectRatio="xMidYMid slice" clip-path="url(#skirtclip)"/><path d="M-44 -178 H44 L60 -4 H-60 Z" fill="none"'+st+'/>'+
+    '<path d="M-46 -328 Q0 -342 46 -328 L38 -172 H-38 Z" fill="#B32E63"'+st+'/>'+
+    '<path d="M-14 -334 L0 -302 L14 -334" fill="none" stroke="#F2C14E" stroke-width="4"/>'+
+    '<g fill="#F2C14E"><circle cy="-280" r="5"/><circle cy="-254" r="5"/><circle cy="-228" r="5"/><circle cy="-202" r="5"/></g>'+
+    head+'<circle cy="-430" r="16" fill="#17100D"/><path d="M-37 -384 A37 37 0 0 1 37 -384 Q20 -406 0 -406 Q-20 -406 -37 -384 Z" fill="#17100D"/>';
+  return feet+
+    '<path d="M-44 -178 H-2 L-8 -4 H-48 Z" fill="#3A2A55"'+st+'/><path d="M44 -178 H2 L8 -4 H48 Z" fill="#3A2A55"'+st+'/>'+
+    '<path d="M-48 -328 Q0 -342 48 -328 L42 -170 H-42 Z" fill="#17324A"'+st+'/>'+
+    '<line y1="-334" y2="-196" stroke="#F2C14E" stroke-width="3"/><g fill="#F2C14E"><circle cx="10" cy="-296" r="5"/><circle cx="10" cy="-268" r="5"/><circle cx="10" cy="-240" r="5"/><circle cx="10" cy="-212" r="5"/></g>'+
+    '<path d="M-30 -178 l-6 44 h16 l4 -44 Z" fill="#C8323C"'+st+'/><rect x="-44" y="-198" width="88" height="22" fill="#C8323C"'+st+'/>'+
+    head+'<path d="M12 -420 L44 -452 L36 -404 Z" fill="#7A0F2E"'+st+'/><path d="M-38 -390 A38 38 0 0 1 38 -390 Q0 -404 -38 -390 Z" fill="#7A0F2E"'+st+'/><image href="pis-sw.png" x="-42" y="-456" width="90" height="70" preserveAspectRatio="xMidYMid slice" clip-path="url(#pisclip)"/><path d="M12 -420 L44 -452 L36 -404 Z M-38 -390 A38 38 0 0 1 38 -390 Q0 -404 -38 -390 Z" fill="none"'+st+'/><g fill="#F2C14E"><circle cx="-18" cy="-410" r="3"/><circle cx="0" cy="-416" r="3"/><circle cx="18" cy="-410" r="3"/></g>';
+}
+function build(id,k,kind){$(id).innerHTML=body(kind)+arm(k,-1,kind)+arm(k,1,kind)}
+build('girl','g','girl');build('boy','b','boy');build('skel','k','skel');build('pola','p','girl');
+function setPose(k,p){
+  [['L',-1,p.l],['R',1,p.r]].forEach(function(a){
+    $(k+a[0]+'1').setAttribute('transform','translate('+a[1]*46+',-315) rotate('+a[2][0].toFixed(1)+')');
+    $(k+a[0]+'2').setAttribute('transform','translate(0,80) rotate('+a[2][1].toFixed(1)+')');
+    $(k+a[0]+'3').setAttribute('transform','translate(0,75) rotate('+a[2][2].toFixed(1)+')');
+  });
+}
+
+/* ---- poses (degrees; 0 = arm hanging down) ---- */
+function cl(x){return Math.max(0,Math.min(1,x))}
+function sm(x){return x*x*(3-2*x)}
+function mixA(a,b,w){return a.map(function(v,i){return v+(b[i]-v)*w})}
+function mix(a,b,w){return{l:mixA(a.l,b.l,w),r:mixA(a.r,b.r,w)}}
+var sin=Math.sin;
+function idle(x){return{l:[8+3*sin(x),6,0],r:[-8-3*sin(x+1),-6,0]}}
+function wave(x){return{l:[70+22*sin(1.3*x+2.2),30+28*sin(1.3*x+3),25+30*sin(2.1*x+1)],r:[-75+22*sin(1.3*x),-35+30*sin(1.3*x+1.1),-25+30*sin(2.1*x)]}}
+var G=[{l:[82,48,60],r:[-82,-48,-60]},{l:[48,40,50],r:[-132,-42,-55]},{l:[132,42,55],r:[-48,-40,-50]}];
+function guide(x){var u=Math.max(0,(x-DANCE)/3),i=Math.floor(u),p=mix(G[i%3],G[(i+1)%3],sm(cl((u-i-.6)/.4))),w=8*sin(x*2);p.l[2]+=w;p.r[2]-=w;return p}
+function at(x){var i=0;for(var j=0;j<SC.length;j++)if(x>=SC[j].at)i=j;var s=SC[i],end=i<SC.length-1?SC[i+1].at:DUR;return{i:i,id:s.id,loc:x-s.at,len:end-s.at,cap:s.cap}}
+var REACH_L={l:[95,0,12],r:[-28,-18,0]},REACH_R={l:[26,16,0],r:[-95,0,-12]};
+function poseAt(x){
+  var c=at(x),loc=c.loc,p;
+  if(c.id==='choose'){p=idle(x);p.r=mixA(p.r,[-158,-8,0],sm(cl((loc-3)/1.5)));return p}
+  if(c.id==='mirror')return mix(idle(x),wave(x),sm(cl(loc/1.5)));
+  if(c.id==='play')return playPose(x,loc);
+  return idle(x);
+}
+var NOTES=[
+ {hit:9.6,el:'n0',side:-1,pose:{l:[88,4,55],r:[-88,-4,-55]},g:'Open arms',gd:'A greeting of welcome and joy. It can also be waves or a bird\u2019s wings.',name:'Kulintangan',ar:'كُلِنْتَڠَنْ',desc:'A row of small gongs. Cousin of the gamelan.'},
+ {hit:25.5,el:'n1',side:1,pose:{l:[150,25,-70],r:[-150,-25,70]},g:'Hands overhead',gd:'Triumph and great happiness.',name:'Pis syabit',ar:'فِسْ سِيَبِتْ',desc:'A woven headcloth of squares, hooks and zigzags. Cousin of songket.'},
+ {hit:45.1,el:'n3',x:640,y:582,dy:124,pose:{l:[10,-125,-25],r:[-10,125,25]},g:'Crossed arms',gd:'Held at the chest, for protectiveness or playfulness.',name:'Pearl shell',desc:'Sulu pearls once sailed to the markets of Singapore.'},
+ {hit:62.1,el:'n2',side:1,turn:1,pose:{l:[35,30,40],r:[-92,-8,-55]},g:'Wrist turn',gd:'Arm positions change by turning the hand at the wrist.',name:'Kalis',ar:'كَلِسْ',desc:'The wavy-bladed Tausug sword. Cousin of the keris.'}
+];
+var inHold=false;
+/* each hold lasts as long as that treasure's voice clip */
+[6.6,8.5,5.6,6.5].forEach(function(h,i){NOTES[i].hold=h});
+/* each gold move starts with the coach teaching the gesture: say = when the narration starts, sd = its length */
+[[.6,7.2],[19.6,4.1],[37.4,5.9],[54.1,6.2]].forEach(function(p,i){NOTES[i].say=p[0];NOTES[i].sd=p[1]});
+var inSay=false,lastSay=-1;
+var MIDS=[{hit:18.4,pose:G[0],r:'Perfect'},{hit:36.2,pose:G[1],r:'Good'},{hit:52.9,pose:G[2],r:'Perfect'},{hit:72.6,pose:{l:[25,-138,-10],r:[-25,138,10]},r:'Magsukul!',end:1,a:3.2,h:11}];
+var FIN=68.8,inFin=false,lastFin=false;
+/* lane time stops while the coach holds a gold move and the object is described */
+function laneT(x){var s=x;NOTES.forEach(function(n){if(x>n.hit)s-=Math.min(x-n.hit,n.hold)});return s}
+var MOVES=NOTES.map(function(n){n.gold=1;return n}).concat(MIDS).sort(function(a,b){return a.hit-b.hit});
+function playPose(x,loc){
+  var p=mix(idle(x),wave(x),.5);
+  MOVES.forEach(function(n){var a=n.gold?1.6:(n.a||1.1),h=n.gold?n.hold-.2:(n.h||.7),rs=n.gold?n.say+.6:n.hit-a,w=sm(cl((loc-rs)/a))*(1-sm(cl((loc-(n.hit+h))/1.1))),q=n.pose;
+    if(n.turn&&loc<n.hit)q={l:q.l,r:[q.r[0],q.r[1],q.r[2]+38*(1-Math.cos((loc-n.say)*2.4))*(1-sm(cl((loc-(n.hit-1.2))/1.2)))]};
+    p=mix(p,q,w)});
+  return p;
+}
+function tip(p,side,ox,oy){
+  var a=side<0?p.l:p.r,r=Math.PI/180,a1=a[0]*r,a2=a1+a[1]*r,a3=a2+a[2]*r;
+  return (ox+side*46-80*Math.sin(a1)-75*Math.sin(a2)-40*Math.sin(a3)).toFixed(0)+','+(oy-315+80*Math.cos(a1)+75*Math.cos(a2)+40*Math.cos(a3)).toFixed(0);
+}
+
+/* ---- static pieces ---- */
+setPose('p',G[1]);setPose('b',idle(0));
+NOTES.forEach(function(n,i){if(n.x==null){var xy=tip(n.pose,n.side,640,850).split(',');n.x=+xy[0];n.y=+xy[1]}
+  $('rings').innerHTML+='<g class="tgt" id="r'+i+'" transform="translate('+n.x+','+n.y+')"><path class="core" d="M0 -80 L80 0 L0 80 L-80 0 Z"/><path d="M0 -80 l12 -12 h-12 M80 0 l12 12 v-12 M0 80 l-12 12 h12 M-80 0 l-12 -12 v12"/></g>'});
+MOVES.forEach(function(m,i){$('lane').innerHTML+='<g id="q'+i+'" class="pic'+(m.gold?' gold':'')+'">'+body('pic')+arm('q'+i,-1,'pic')+arm('q'+i,1,'pic')+'</g>'});
+MOVES.forEach(function(m,i){setPose('q'+i,m.pose)});
+(function(){
+  var st='';[[120,90,9],[300,170,6],[520,70,8],[780,130,6],[960,60,9],[1180,150,7],[1420,90,8],[1520,220,6]].forEach(function(p){
+    var d='';for(var k=0;k<10;k++){var r=k%2?p[2]*.42:p[2],a=Math.PI*(k/5-.5);d+=(k?'L':'M')+(p[0]+r*Math.cos(a)).toFixed(1)+' '+(p[1]+r*Math.sin(a)).toFixed(1)}
+    st+='<path d="'+d+'Z"/>'});$('stars').innerHTML=st;
+  [600,660,720].forEach(function(y,i){var d='M-80 '+y+' q20 -9 40 0';for(var k=0;k<46;k++)d+=' t40 0';$('w'+i).setAttribute('d',d)});
+  var s='<path d="M0 0 V-150 M-26 0 H26"/>';
+  [[-20,62],[-58,52],[-96,40],[-130,26]].forEach(function(b){[-1,1].forEach(function(d){var W=b[1]*d,y=b[0];
+    s+='<path d="M0 '+y+' q'+(W*.55)+' -4 '+(W*.8)+' -24 q'+(W*.18)+' -20 '+(-W*.1)+' -24 q'+(-W*.22)+' 0 '+(-W*.16)+' 12"/>';
+    s+='<ellipse class="lf" cx="'+(W*.5)+'" cy="'+(y+9)+'" rx="9" ry="4.5" transform="rotate('+(d*25)+' '+(W*.5)+' '+(y+9)+')"/>'})});
+  s+='<path class="lf" d="M0 -150 q-16 -18 0 -42 q16 24 0 42 Z"/><path d="M-4 -152 q-22 -6 -24 -26 M4 -152 q22 -6 24 -26"/>';
+  [].forEach.call(document.querySelectorAll('.tree'),function(e){e.innerHTML=s});
+})();
+(function(){
+  var P=function(a){return a.map(function(p){return ((p[0]-115.8)*40).toFixed(1)+' '+((20.2-p[1])*40).toFixed(1)}).join(' L')};
+  var land=[
+   [[120.6,18.5],[122.2,18.4],[122.3,17],[121.6,15.8],[121.6,14.8],[122.6,14.2],[124,13.9],[124.1,12.6],[123.3,13.2],[122.2,13.6],[121,13.7],[120.6,14.4],[120.9,14.6],[120.3,14.8],[119.9,15.9],[120.3,16.6],[120.4,17.6]],
+   [[120.4,13.4],[121.2,13.4],[121.5,12.6],[121.1,12.2],[120.6,12.6]],
+   [[119.5,11.4],[119.9,10.6],[118.8,9.6],[117.9,8.9],[117.2,8.4],[117.4,8.9],[118.5,10],[119.2,11]],
+   [[122,11.9],[123.1,11.5],[122.9,10.9],[122,10.4],[121.9,11.4]],
+   [[123.1,10.9],[123.5,10.8],[123.3,9.4],[122.9,9.1],[122.4,9.8],[122.8,10.5]],
+   [[124,11.2],[123.9,10.6],[123.6,9.9],[123.3,9.5],[123.6,10]],
+   [[123.9,10.1],[124.5,10.1],[124.6,9.7],[124,9.6]],
+   [[124.3,12.5],[125.3,12.5],[125.7,11.2],[125.2,11.1],[124.9,11.8]],
+   [[124.4,11.4],[125,11.2],[125.2,10.2],[124.8,10],[124.7,10.8]],
+   [[125.5,9.8],[126.3,9],[126.6,7.3],[126.2,6.3],[125.7,7],[125.4,6.8],[125.2,5.9],[124.2,6.2],[124,7.2],[123.4,7.4],[122.9,7.5],[122.1,6.9],[122,7.3],[122.3,8],[123,8.5],[123.8,8.2],[124.3,8.6],[124.8,9]]
+  ],h='';
+  land.forEach(function(a){h+='<path class="isl" d="M'+P(a)+' Z"/>'});
+  h+='<path class="isl dim" d="M'+P([[115.8,7],[116.7,7],[117.3,6.6],[117.7,6.4],[118.1,5.9],[119.2,5.3],[118.6,4.9],[118.1,4.4],[117.6,4],[115.8,4]])+' Z"/>';
+  $('mapland').innerHTML=h;
+  var E=function(lon,lat,rx,ry,rot){var x=(lon-115.8)*40,y=(20.2-lat)*40;return '<ellipse class="sulu" cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" rx="'+rx+'" ry="'+ry+'"'+(rot?' transform="rotate('+rot+' '+x.toFixed(1)+' '+y.toFixed(1)+')"':'')+'/>'};
+  $('mapsulu').innerHTML=E(122,6.55,10,7)+E(121,6,10,6)+E(120.55,6.3,3,3)+E(120.85,5.55,4,4)+E(120,5.15,12,4,-30)+E(119.4,4.8,3,3);
+})();
+var shown='';
+function panel(j,on,idx,say,fin){
+  var key=j+'|'+on+'|'+idx+'|'+say+'|'+fin;if(key===shown)return;shown=key;var g=NOTES[j],n=NOTES[idx],sc=0;for(var k=0;k<=idx;k++)sc+=100*(k+1);
+  $('gk').textContent=on?'Hold the pose and listen':(say?'Learn the gesture':'Next gesture');$('gname').textContent=g.g;$('gdesc').textContent=g.gd;
+  if(fin){$('gk').textContent='Closing gesture';$('gname').textContent='Hands to heart';$('gdesc').textContent='Lower your arms, bring your hands to your chest, and bow. The dance ends as gently as it began.'}
+  $('prule').hidden=!n;if(n){$('pname').textContent=n.name;$('par').textContent=n.ar||'';$('par').hidden=!n.ar;$('pdesc').textContent=n.desc}
+}
+function game(c){
+  var loc=c.id==='play'?c.loc:(c.i>7?99:-9),idx=-1,j=-1,rate='';
+  NOTES.forEach(function(n,i){
+    var u=(loc-(n.hit-2.8))/2.8,g=$(n.el),r=$('r'+i),on=loc>=n.hit;
+    if(on)idx=i;if(j<0&&loc<n.hit+n.hold+.2)j=i;
+    if(u<0||loc>n.hit+n.hold){g.setAttribute('opacity',0)}
+    else{var e=on?1:sm(cl(u)),k=on?1+.12*Math.max(0,1-(loc-n.hit)*2):.15+.85*e,o=on?cl((n.hit+n.hold-loc)/.6):cl(u*5);
+      g.setAttribute('opacity',o.toFixed(2));
+      g.setAttribute('transform','translate('+(640+(n.x-640)*e).toFixed(1)+','+(500+(n.y-500)*e).toFixed(1)+') scale('+k.toFixed(3)+')')}
+    g.classList.toggle('hit',on);
+    r.classList.toggle('hit',on&&loc<n.hit+n.hold);r.classList.toggle('next',!on&&u>=0);
+    if(on&&loc<n.hit+1.5){rate='Marayaw!';$('rate').setAttribute('x',n.x);$('rate').setAttribute('y',n.y+(n.dy||-104))}
+  });
+  if(j<0)j=NOTES.length-1;
+  inHold=NOTES.some(function(n){return loc>=n.hit&&loc<n.hit+n.hold});$('pwave').hidden=!inHold;
+  $('rate').textContent=rate;
+  if(idx!==lastIdx){if(idx>lastIdx&&playing&&c.id==='play'&&loc<NOTES[idx].hit+1)caught(NOTES[idx],idx);lastIdx=idx}
+  var sayI=-1,sayNow=false;
+  if(c.id==='play')NOTES.forEach(function(n,i){if(loc>=n.say){sayI=i;sayNow=loc<n.say+n.sd}});
+  if(sayI!==lastSay){if(sayI>lastSay&&playing&&loc<NOTES[sayI].say+1)gsay(sayI);lastSay=sayI}
+  var fin=c.id==='play'&&loc>=FIN;inFin=fin&&loc<FIN+10.7;
+  if(fin!==lastFin){if(fin&&playing&&loc<FIN+1)fsay();lastFin=fin}
+  inSay=sayNow;panel(j,loc>=NOTES[j].hit,idx,sayNow&&sayI===j,fin);
+  var sc=0,rt='';
+  MOVES.forEach(function(m,i){
+    var q=$('q'+i),past=loc>=m.hit;
+    q.setAttribute('transform','translate('+(1140+(laneT(m.hit)-laneT(loc))*105).toFixed(1)+',864) scale(.24)');
+    q.setAttribute('opacity',past?cl(1-(loc-m.hit)*1.6).toFixed(2):1);
+    if(past){sc+=m.gold?250:(m.end?0:100);if(!m.gold&&loc<m.hit+(m.end?4:1.3))rt=m.r}
+  });
+  if(rt&&!rate){$('rate').textContent=rt;$('rate').setAttribute('x',640);$('rate').setAttribute('y',262)}
+  var s5=Math.round(sc/1300*5);
+  $('score').textContent=sc.toLocaleString('en-US');$('starrow').textContent='★★★★★'.slice(0,s5)+'☆☆☆☆☆'.slice(s5);
+}
+(function(){var q='',s=7;for(var y=0;y<13;y++)for(var x=0;x<13;x++){
+  var f=function(cx,cy){var dx=Math.abs(x-cx),dy=Math.abs(y-cy),m=Math.max(dx,dy);return m<=3?(m!==2?1:0):-1},
+      v=Math.max(f(3,3),f(9,3),f(3,9));s=(s*73+11)%101;
+  if(v===1||(v===-1&&s%2&&!(x<7&&y<7)&&!(x>5&&y<7)&&!(x<7&&y>5)))q+='<rect x="'+x+'" y="'+y+'" width="1" height="1" fill="#0E2530"/>'}
+  $('qr').innerHTML=q})();
+
+/* ---- playback ---- */
+var els=[].slice.call(stage.querySelectorAll('[data-on]')).map(function(e){return [e,e.getAttribute('data-on').split(' ')]});
+var t=0,playing=false,last=0,cur=-1;
+function fmt(s){s=Math.floor(s);return Math.floor(s/60)+':'+('0'+s%60).slice(-2)}
+list.innerHTML=SC.map(function(s,i){return '<button data-i="'+i+'">'+s.name+'<span>'+fmt(s.at)+'</span></button>'}).join('');
+var btns=[].slice.call(list.children);
+function show(){
+  var c=at(t),late=c.loc/c.len>.45;
+  if(c.i!==cur){cur=c.i;if(c.id==='end'&&playing)count('finished');narrate(c.id);els.forEach(function(p){p[0].classList.toggle('on',p[1].indexOf(c.id)>-1)});cap.textContent=c.cap;btns.forEach(function(b,k){b.setAttribute('aria-current',k===c.i)})}
+  stage.classList.toggle('is-late',late);
+  var p=poseAt(t),gx=c.id==='choose'?810:640,bob=inHold?0:3*sin(t*1.6);
+  if(c.id==='play'){bob+=16*sm(cl((c.loc-73.4)/1.1))*(1-sm(cl((c.loc-76)/1.1)));cap.textContent=c.loc>=FIN?'Closing gesture: hands to heart, then bow':c.cap}
+  $('girl').setAttribute('transform','translate('+gx+','+(850+bob).toFixed(1)+')');
+  setPose('g',p);setPose('k',c.id==='play'?poseAt(Math.max(SC[c.i].at,t-.3)):p);game(c);
+  var L=[],R=[];for(var k=0;k<12;k++){var q=poseAt(Math.max(SC[cur].at,t-k*.07));L.push(tip(q,-1,gx,850));R.push(tip(q,1,gx,850))}
+  $('trL').setAttribute('points',L.join(' '));$('trR').setAttribute('points',R.join(' '));
+  $('vinta').setAttribute('transform','translate('+(110+t*2.2).toFixed(1)+','+(500+2*sin(t)).toFixed(1)+')');
+  seek.value=t;out.textContent=fmt(t)+' / '+fmt(DUR);
+}
+/* ---- sound: generated gong pattern + spoken names (starts only after the viewer turns it on) ---- */
+var AC=null,sndOn=false,lastBeat=-1,lastIdx=-1,
+    SCALE=[392,440,523.25,587.33,659.25,783.99,880,1046.5],
+    PAT=[0,2,3,2,4,3,2,-1,0,2,4,5,4,3,2,-1,3,4,5,7,5,4,3,-1,2,3,4,3,2,0,2,-1];
+function gong(f,v,d){
+  if(!AC)return;var n=AC.currentTime;
+  [[1,1],[2.01,.35],[2.76,.22],[5.4,.08]].forEach(function(p){
+    var o=AC.createOscillator(),g=AC.createGain(),len=d/Math.sqrt(p[0]);
+    o.type='sine';o.frequency.value=f*p[0];
+    g.gain.setValueAtTime(0.0001,n);g.gain.linearRampToValueAtTime(v*p[1],n+.006);g.gain.exponentialRampToValueAtTime(.0001,n+len);
+    o.connect(g);g.connect(AC.destination);o.start(n);o.stop(n+len+.05)});
+}
+var bgm=$('bgm'),bgGain=null;try{bgm.volume=.7}catch(e){}
+function setVol(v){try{if(bgGain)bgGain.gain.value=v;else bgm.volume=v}catch(e){}}
+function music(){
+  try{
+    var sc0=SC[cur];setVol((inHold||inSay||inFin||(sc0&&NARR[sc0.id]))?.18:.7);
+    if(sndOn&&playing){
+      wake();
+      if(!bgm.seeking&&Math.abs(bgm.currentTime-t)>.4)bgm.currentTime=t;
+      if(bgm.paused){var p=bgm.play();if(p&&p.catch)p.catch(function(){})}
+    }else{if(!bgm.paused)bgm.pause();if(voNow&&!voNow.paused)voNow.pause()}
+  }catch(e){}
+}
+function beat(){music()}
+var voice=new Audio(),voNow=voice,VURL={},SIL='data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
+voice.preload='auto';
+/* one shared player for every voice clip: a phone lets a player speak later only if a tap started it once, so one player is unlocked once and reused */
+['vo0','vo1','vo2','vo3','g0','g1','g2','g3','exit','intro0','intro1','intro2','step','choose','stance','result','keep','how','end'].forEach(function(f){
+  VURL[f]=f+'.mp3';
+  try{fetch(f+'.mp3').then(function(r){if(!r.ok)throw 0;return r.blob()}).then(function(b){VURL[f]=URL.createObjectURL(b)}).catch(function(){})}catch(e){}
+});
+var vSeek=null;
+function vplay(f,off){
+  try{voice.pause();if(vSeek){voice.removeEventListener('loadedmetadata',vSeek);vSeek=null}
+    voice.muted=false;voice.src=VURL[f];
+    if(off){vSeek=function(){voice.removeEventListener('loadedmetadata',vSeek);vSeek=null;try{voice.currentTime=off}catch(e){}};voice.addEventListener('loadedmetadata',vSeek)}
+    var p=voice.play();if(p&&p.catch)p.catch(function(){})}catch(e){}
+}
+var NARR={
+ who:'Meet the Tausug, the people of the current. They are a seafaring people from the far south of the Philippines.',
+ where:'Their home is the Sulu Archipelago, a chain of islands between Mindanao and Borneo, with Jolo at its heart. For centuries, the Sultanate of Sulu traded across these seas.',
+ today:'Today, you will step into their world. You will learn pangalay, one of their dances, and meet the treasures of their culture along the way.',
+ step:'Step in front of the mirror, and raise your hand to begin.',
+ choose:'Choose your avatar. Raise your left hand for the boy, or your right hand for the girl.',
+ mirror:'First, the stance. Keep your knees soft, your eyes lowered, and your fingers curled back. Let your arms tell the story.',
+ result:'Round complete. You learned four gestures, and met four treasures of the Tausug: the kulintangan, the pis syabit, the pearl shell, and the kalis.',
+ keep:'Magsukul. That means thank you, in the Tausug language. Scan the code to take your snapshot home.',
+ how:'Here is how it works. A webcam follows your body and hands. You follow the coach, and each gold move catches a treasure. Then every treasure tells its story.',
+ end:'Pangalay Mirror. Move like the current, and meet the Tausug.'
+},NA={},NFILE={who:'intro0',where:'intro1',today:'intro2',step:'step',choose:'choose',mirror:'stance',result:'result',keep:'keep',how:'how',end:'end'};
+
+function narrate(id,off){
+  if(!sndOn||!playing||!NARR[id])return;
+  if(off>14)return;vplay(NFILE[id],off);
+
+
+}
+function speak(n){try{var u=new SpeechSynthesisUtterance((n.name?n.name+'. ':'')+n.desc);u.rate=.9;window.speechSynthesis.cancel();window.speechSynthesis.speak(u)}catch(e){}}
+
+function gsay(i){
+  if(!sndOn)return;vplay('g'+i);
+
+}
+
+function fsay(){
+  if(!sndOn)return;vplay('exit');
+}
+function caught(n,i){
+  if(!sndOn)return;gong(1318.5,.14,1.4);gong(1568,.1,1.6);
+  vplay('vo'+i);
+
+}
+var unlocked=false;
+/* phones only let a clip play if it was first started inside a tap: start every voice clip muted, then stop it */
+function unlock(){
+  if(unlocked)return;unlocked=true;
+  try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+  try{voice.muted=false;voice.src=SIL;var p=voice.play();if(p&&p.catch)p.catch(function(){})}catch(e){}
+  /* iPhone ignores element volume, so the music could not duck under the voice: route it through a gain node there */
+  try{bgm.volume=.5;if(bgm.volume!==.5&&AC&&!bgGain){var src=AC.createMediaElementSource(bgm);bgGain=AC.createGain();src.connect(bgGain);bgGain.connect(AC.destination)}}catch(e){bgGain=null}
+}
+function wake(){try{if(AC&&AC.state!=='running')AC.resume()}catch(e){}}
+document.addEventListener('visibilitychange',function(){if(!document.hidden)wake()});
+function setSnd(on){
+  sndOn=on;
+  if(sndOn){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();AC.resume()}catch(e){}unlock();
+    var c0=at(t);if(playing&&c0.loc>.3)narrate(c0.id,c0.loc)}
+  $('snd').textContent=sndOn?'Sound on':'Sound off';$('snd').setAttribute('aria-pressed',sndOn);music();
+}
+$('snd').addEventListener('click',function(){setSnd(!sndOn)});
+/* sound is on by default; browsers only allow it after one tap, so the film waits behind a start button */
+/* anonymous counters: how many opened the page, pressed play, and reached the end card. No cookies, nothing personal. Only counts on the live site. */
+var LIVE=/github\.io$/.test(location.hostname),counted={};
+function count(k){if(!LIVE||counted[k])return;counted[k]=1;try{fetch('https://abacus.jasoncameron.dev/hit/aljabrialam-pangalay-mirror/'+k,{mode:'cors',keepalive:true}).catch(function(){})}catch(e){}}
+count('visits');
+var started=false;
+function begin(){if(started)return;started=true;count('plays');$('start').hidden=true;setSnd(true)}
+$('start').addEventListener('click',function(){begin();setPlay(true)});
+function setPlay(p){playing=p;music();playB.textContent=p?'Pause':(t>=DUR?'Replay':'Play');if(p){last=performance.now();requestAnimationFrame(tick)}}
+function tick(now){if(!playing)return;t+=(now-last)/1000;last=now;if(t>=DUR){t=DUR;show();setPlay(false);return}show();beat();requestAnimationFrame(tick)}
+playB.addEventListener('click',function(){begin();wake();if(!playing&&t>=DUR)t=0;setPlay(!playing)});
+$('restart').addEventListener('click',function(){begin();t=0;show();setPlay(true)});
+seek.addEventListener('input',function(){t=+seek.value;show();if(!playing)playB.textContent=t>=DUR?'Replay':'Play'});
+list.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;t=SC[+b.dataset.i].at+.01;show();if(!playing)playB.textContent='Play'});
+show();
+setPlay(false);
+})();
+</script>

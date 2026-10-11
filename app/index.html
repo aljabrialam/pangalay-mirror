@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pangalay Mirror</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Albert+Sans:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@500&display=swap">
+<style>
+:root{--night:#1A0820;--deep:#2A0C2E;--gold:#F2C14E;--paper:#F6EFDF;--mist:#C9D8D6;--jade:#5FD0A8;--ink:#0B1418}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#0d0412;color:var(--paper);font-family:'Albert Sans',system-ui,sans-serif}
+#app{position:relative;width:100vw;height:100vh;overflow:hidden;display:grid;place-items:center}
+#stage{position:relative;width:min(100vw,177.78vh);aspect-ratio:16/9;container-type:inline-size;overflow:hidden;background:var(--night)}
+#scene{position:absolute;inset:0;width:100%;height:100%}
+.strip{position:absolute;left:0;top:0;width:100%;height:2.6cqw;background:url(../film/pis-art.png) 0 -8px/40cqw auto;border-bottom:.3cqw solid var(--gold)}
+.cap{position:absolute;left:3cqw;top:4.2cqw;font-family:'Gloock',Georgia,serif;font-size:2.4cqw;text-shadow:0 .2cqw .8cqw #000}
+.panel{position:absolute;right:2.4cqw;top:5cqw;width:27cqw;background:rgba(6,20,26,.86);border:1px solid rgba(242,193,78,.35);border-radius:1.2cqw;padding:1.6cqw;display:flex;flex-direction:column;gap:.8cqw}
+.row{display:flex;justify-content:space-between;align-items:baseline;font-size:1.7cqw}
+.row b{color:var(--gold)}
+.k{font-size:1.05cqw;letter-spacing:.16em;text-transform:uppercase;color:var(--mist);font-weight:700}
+.big{font-family:'Gloock',Georgia,serif;font-size:2.8cqw;color:var(--gold);line-height:1.05}
+.sm{font-size:1.4cqw;line-height:1.35;color:var(--paper)}
+.rule{border-top:1px solid rgba(201,216,214,.25);padding-top:.9cqw;display:flex;gap:1cqw;align-items:center}
+.rule img{width:7cqw;height:7cqw;object-fit:contain;flex:none}
+.name{font-family:'Gloock',Georgia,serif;font-size:2.2cqw;line-height:1.05}
+.sug{font-family:'Noto Naskh Arabic','Geeza Pro',serif;font-size:1.9cqw;color:var(--gold);direction:rtl;text-align:left;line-height:1.4}
+.bar{height:.8cqw;border-radius:1cqw;background:rgba(255,255,255,.14);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--gold)}
+#ghostwrap{display:flex;justify-content:center}
+#ghostwrap svg{width:11cqw;height:auto}
+.cam{position:absolute;left:2.4cqw;bottom:2.4cqw;width:19cqw;aspect-ratio:4/3;border-radius:1cqw;overflow:hidden;border:1px solid rgba(95,208,168,.6);background:#06141a}
+.cam video,.cam canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.cam span{position:absolute;left:.7cqw;bottom:.5cqw;font-size:.95cqw;letter-spacing:.14em;text-transform:uppercase;color:var(--mist)}
+#rate{position:absolute;left:50%;top:22%;transform:translateX(-50%);font-family:'Gloock',Georgia,serif;font-size:5cqw;color:var(--gold);text-shadow:0 .3cqw 1.4cqw #000;opacity:0;transition:opacity .25s}
+#rate.on{opacity:1}
+#debugOverlay{position:absolute;left:2.4cqw;top:9cqw;font:1cqw/1.4 ui-monospace,monospace;color:var(--jade);white-space:pre;background:rgba(0,0,0,.45);padding:.5cqw .8cqw;border-radius:.5cqw}
+#debugOverlay[hidden],#cover[hidden],#intro[hidden],#choice[hidden],#panel[hidden],.rule[hidden],#result[hidden]{display:none}
+#cover,#result{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6cqw;text-align:center;background:radial-gradient(ellipse 70% 70% at 50% 50%,rgba(24,7,30,.96),rgba(24,7,30,.82)),url(../film/pis-art.png) center/cover}
+.mark{font-family:'Gloock',Georgia,serif;font-size:7cqw;line-height:1}
+.hero{font-family:'Noto Naskh Arabic','Geeza Pro',serif;font-size:6cqw;line-height:1.2;color:var(--gold);direction:rtl}
+.tag{font-size:2.2cqw;color:var(--gold);font-weight:600}
+.pick{display:flex;gap:1.4cqw}
+button{font:inherit;font-size:1.7cqw;font-weight:600;padding:1cqw 2.2cqw;border-radius:.8cqw;border:2px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer}
+button.on,button.go{background:var(--gold);color:var(--night)}
+.note{font-size:1.2cqw;color:var(--mist);max-width:60cqw;line-height:1.5}
+#choice{position:absolute;z-index:3;left:22cqw;top:13cqw;width:56cqw;padding:2cqw;border:1px solid rgba(242,193,78,.55);border-radius:1.2cqw;background:rgba(26,8,32,.94);text-align:center;box-shadow:0 1cqw 3cqw #0008}
+.choice-title{font-family:'Gloock',Georgia,serif;font-size:3cqw;color:var(--gold)}
+.choice-hint{margin:.7cqw 0 1.3cqw;font-size:1.4cqw;color:var(--paper)}
+.choice-options{display:flex;justify-content:center;gap:2cqw}
+.avatar-option{width:20cqw;padding:.7cqw .8cqw;border:2px solid rgba(242,193,78,.28);border-radius:1cqw;color:var(--mist);font-size:1.15cqw;letter-spacing:.08em;transition:border-color .12s,background .12s}
+.avatar-option.holding{border-color:var(--gold);background:rgba(242,193,78,.14);color:var(--gold)}
+.avatar-option img{display:block;width:100%;height:18cqw;object-fit:contain}
+.choice-bar{height:.5cqw;background:#ffffff24;border-radius:1cqw;overflow:hidden;margin-top:.65cqw}
+.choice-bar i{display:block;width:0;height:100%;background:var(--gold)}
+#intro{position:absolute;z-index:4;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;background:radial-gradient(ellipse 70% 70% at 50% 50%,rgba(24,7,30,.97),rgba(24,7,30,.9)),url(../film/pis-art.png) center/cover}
+.intro-card{width:64cqw;padding:4cqw;border:1px solid rgba(242,193,78,.55);border-radius:1.4cqw;background:rgba(26,8,32,.76);box-shadow:0 1cqw 3cqw #0008}
+.intro-k{font-size:1.2cqw;letter-spacing:.18em;text-transform:uppercase;color:var(--mist);font-weight:700}
+.intro-title{margin:1cqw 0;font-family:'Gloock',Georgia,serif;font-size:4.5cqw;line-height:1.05;color:var(--gold)}
+.intro-copy{font-size:2cqw;line-height:1.45;color:var(--paper)}
+.intro-actions{margin-top:2cqw}
+.got{display:flex;gap:2cqw}
+.got div{width:14cqw;display:flex;flex-direction:column;align-items:center;gap:.4cqw;font-size:1.3cqw}
+.got img{width:9cqw;height:9cqw;object-fit:contain}
+</style>
+</head>
+<body>
+<div id="app"><div id="stage">
+  <svg id="scene" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#150618"/><stop offset=".35" stop-color="#3A1240"/><stop offset=".62" stop-color="#B8473F"/><stop offset=".8" stop-color="#F08A4B"/><stop offset="1" stop-color="#F7B565"/></linearGradient>
+      <radialGradient id="sun"><stop offset="0" stop-color="#FFE9A8"/><stop offset=".55" stop-color="#FFC861"/><stop offset="1" stop-color="#FF9A52" stop-opacity="0"/></radialGradient>
+      <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1C6E77"/><stop offset="1" stop-color="#072C33"/></linearGradient>
+      <clipPath id="skirtclip"><path d="M-44 -178 H44 L60 -4 H-60 Z"/></clipPath>
+      <clipPath id="pisclip"><path d="M12 -420 L44 -452 L36 -404 Z M-38 -390 A38 38 0 0 1 38 -390 Q0 -404 -38 -390 Z"/></clipPath>
+    </defs>
+    <rect width="1280" height="470" fill="url(#sky)"/>
+    <circle cx="640" cy="470" r="230" fill="url(#sun)"/>
+    <rect y="470" width="1280" height="170" fill="url(#sea)"/>
+    <rect y="630" width="1280" height="90" fill="#22102A"/><rect y="630" width="1280" height="4" fill="#F2C14E"/>
+    <g id="avatar" transform="translate(560,655) scale(1.02)"></g>
+  </svg>
+  <div class="strip"></div>
+  <div class="cap" id="cap">Follow the coach. Hold each gesture to catch a treasure.</div>
+  <div id="rate"></div>
+  <pre id="debugOverlay" hidden></pre>
+
+  <div class="cam"><video id="video" playsinline muted></video><canvas id="overlay"></canvas><span>Webcam · you</span></div>
+
+  <div id="choice" hidden aria-live="polite">
+    <div class="choice-title">Choose your avatar</div>
+    <div class="choice-hint" id="choiceHint">Raise one hand and hold it above your shoulder.</div>
+    <div class="choice-options">
+      <div class="avatar-option" id="choiceBoy"><img src="../assets/avatar_boy.png" alt="Boy avatar"><b>LEFT HAND · BOY</b><div class="choice-bar"><i id="choiceBoyBar"></i></div></div>
+      <div class="avatar-option" id="choiceGirl"><img src="../assets/avatar_girl.png" alt="Girl avatar"><b>RIGHT HAND · GIRL</b><div class="choice-bar"><i id="choiceGirlBar"></i></div></div>
+    </div>
+  </div>
+
+  <div id="intro" hidden aria-live="polite">
+    <div class="intro-card">
+      <div class="intro-k" id="introK">A people of the current</div>
+      <div class="intro-title" id="introTitle">Meet the Tausug</div>
+      <div class="intro-copy" id="introCopy"></div>
+      <div class="intro-actions"><button class="go" id="skipIntro">Skip intro</button></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel">
+    <div class="row"><span>Score <b id="score">0</b></span><span id="stars">☆☆☆☆☆</span></div>
+    <div class="k" id="gk">Get ready</div>
+    <div class="big" id="gname">—</div>
+    <div class="sm" id="gdesc"></div>
+    <div id="ghostwrap"><svg viewBox="-230 -520 460 540"><g id="ghost"></g></svg></div>
+    <div class="bar"><i id="hold"></i></div>
+    <div class="rule" id="card" hidden><img id="timg" alt=""><div><div class="k">You caught</div><div class="name" id="tname"></div><div class="sug" id="tar" lang="tsg"></div><div class="sm" id="tdesc"></div></div></div>
+  </div>
+
+  <div id="result" hidden>
+    <div class="k">Round complete</div>
+    <div class="mark" style="font-size:5cqw">Magsukul</div>
+    <div class="hero" style="font-size:4cqw" lang="tsg">مَغْسُكُلْ</div>
+    <div class="tag">Thank you, in the Tausug language</div>
+    <div class="got" id="got"></div>
+    <div class="row" style="gap:3cqw"><span>Score <b id="score2">0</b></span><span id="stars2"></span></div>
+    <button class="go" id="downloadSnapshot">Download my snapshot</button>
+    <button class="go" id="again">Play again</button>
+  </div>
+
+  <div id="cover">
+    <div class="hero" lang="tsg">فَڠَلَيْ</div>
+    <div class="mark" id="coverTitle">Pangalay Mirror</div>
+    <div class="tag" id="tagline">Step in. Move. Meet the Tausug.</div>
+    <button class="go" id="start">Start with camera</button>
+    <div class="note" id="msg">Stand back so the camera sees you from the waist up. Keys: 1–4 and 5 force a gesture, D shows the debug numbers. Add <b>?demo=1</b> to the address to run without a camera.</div>
+  </div>
+</div></div>
+
+<audio id="bgm" src="../film/pangalay.mp3" loop preload="auto"></audio>
+
+<script type="module">
+/* Pangalay Mirror — playable prototype.
+   webcam -> MediaPipe pose landmarks -> arm angles -> SVG avatar + gesture matcher -> catch -> voice + treasure card.
+   The avatar rig, poses, texts and audio all come from ../film (see AGENTS.md). */
+const $=id=>document.getElementById(id), DEMO=new URLSearchParams(location.search).has('demo');
+const INK='#0B1418', SKIN='#C98E63', FILM='../film/';
+
+/* ---------- avatar rig (same as the film) ---------- */
+function arm(k,side,kind){
+  const S=side<0?'L':'R';let up,fo,ha;
+  if(kind==='ghost'){const c='stroke="#F2C14E" stroke-width="16" stroke-linecap="round"';up=`<line y2="80" ${c}/>`;fo=`<line y2="75" ${c}/>`;ha=`<line y2="38" ${c}/>`}
+  else{const c=kind==='girl'?'#B32E63':'#17324A';
+    up=`<line y2="80" stroke="${INK}" stroke-width="30" stroke-linecap="round"/><line y2="80" stroke="${c}" stroke-width="22" stroke-linecap="round"/>`;
+    fo=`<line y2="75" stroke="${INK}" stroke-width="26" stroke-linecap="round"/><line y2="75" stroke="${c}" stroke-width="18" stroke-linecap="round"/>`;
+    ha=`<ellipse cy="14" rx="9" ry="17" fill="${SKIN}" stroke="${INK}" stroke-width="3"/>`;
+    if(kind==='girl')for(let i=-1.5;i<=1.5;i++)ha+=`<path d="M${i*4} 28 q${side*3} 18 ${side*22} 26" fill="none" stroke="#F2C14E" stroke-width="3.5" stroke-linecap="round"/>`}
+  return `<g id="${k}${S}1">${up}<g id="${k}${S}2">${fo}<g id="${k}${S}3">${ha}</g></g></g>`;
+}
+function body(kind){
+  const st=` stroke="${INK}" stroke-width="4" stroke-linejoin="round"`,
+    feet=`<ellipse cx="-24" cy="0" rx="20" ry="8" fill="${INK}"/><ellipse cx="24" cy="0" rx="20" ry="8" fill="${INK}"/>`,
+    head=`<rect x="-9" y="-352" width="18" height="24" fill="${SKIN}"${st}/><circle cy="-384" r="36" fill="${SKIN}"${st}/><path d="M-18 -381 q6 5 12 0 M6 -381 q6 5 12 0" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/><path d="M-8 -366 q8 6 16 0" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>`;
+  if(kind==='ghost')return `<circle cy="-384" r="34" fill="none" stroke="#F2C14E" stroke-width="14"/><path d="M0 -350 V-175 M-46 -315 H46 M-28 -175 H28 M-28 -175 L-32 -6 M28 -175 L32 -6" fill="none" stroke="#F2C14E" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>`;
+  if(kind==='girl')return feet+
+    `<path d="M-44 -178 H44 L60 -4 H-60 Z" fill="#7A0F2E"/><image href="${FILM}pis-sw.png" x="-62" y="-182" width="124" height="182" preserveAspectRatio="xMidYMid slice" clip-path="url(#skirtclip)"/><path d="M-44 -178 H44 L60 -4 H-60 Z" fill="none"${st}/>`+
+    `<path d="M-46 -328 Q0 -342 46 -328 L38 -172 H-38 Z" fill="#B32E63"${st}/><path d="M-14 -334 L0 -302 L14 -334" fill="none" stroke="#F2C14E" stroke-width="4"/>`+
+    `<g fill="#F2C14E"><circle cy="-280" r="5"/><circle cy="-254" r="5"/><circle cy="-228" r="5"/><circle cy="-202" r="5"/></g>`+
+    head+`<circle cy="-430" r="16" fill="#17100D"/><path d="M-37 -384 A37 37 0 0 1 37 -384 Q20 -406 0 -406 Q-20 -406 -37 -384 Z" fill="#17100D"/>`;
+  return feet+
+    `<path d="M-44 -178 H-2 L-8 -4 H-48 Z" fill="#3A2A55"${st}/><path d="M44 -178 H2 L8 -4 H48 Z" fill="#3A2A55"${st}/>`+
+    `<path d="M-48 -328 Q0 -342 48 -328 L42 -170 H-42 Z" fill="#17324A"${st}/>`+
+    `<line y1="-334" y2="-196" stroke="#F2C14E" stroke-width="3"/><g fill="#F2C14E"><circle cx="10" cy="-296" r="5"/><circle cx="10" cy="-268" r="5"/><circle cx="10" cy="-240" r="5"/><circle cx="10" cy="-212" r="5"/></g>`+
+    `<path d="M-30 -178 l-6 44 h16 l4 -44 Z" fill="#C8323C"${st}/><rect x="-44" y="-198" width="88" height="22" fill="#C8323C"${st}/>`+
+    head+`<path d="M12 -420 L44 -452 L36 -404 Z" fill="#7A0F2E"${st}/><path d="M-38 -390 A38 38 0 0 1 38 -390 Q0 -404 -38 -390 Z" fill="#7A0F2E"${st}/><image href="${FILM}pis-sw.png" x="-42" y="-456" width="90" height="70" preserveAspectRatio="xMidYMid slice" clip-path="url(#pisclip)"/>`;
+}
+function build(id,k,kind){$(id).innerHTML=body(kind)+arm(k,-1,kind)+arm(k,1,kind)}
+function setPose(k,p){[['L',-1,p.l],['R',1,p.r]].forEach(a=>{
+  $(k+a[0]+'1').setAttribute('transform',`translate(${a[1]*46},-315) rotate(${a[2][0].toFixed(1)})`);
+  $(k+a[0]+'2').setAttribute('transform',`translate(0,80) rotate(${a[2][1].toFixed(1)})`);
+  $(k+a[0]+'3').setAttribute('transform',`translate(0,75) rotate(${a[2][2].toFixed(1)})`)})}
+
+/* ---------- content (from the film) ---------- */
+const IDLE={l:[8,6,0],r:[-8,-6,0]};
+const STEPS=[
+ {key:'open', g:'Open arms',gd:'A greeting of welcome and joy.',pose:{l:[88,4,55],r:[-88,-4,-55]},teach:'g0',vo:'vo0',name:'Kulintangan',ar:'كُلِنْتَڠَنْ',desc:'A row of small gongs. Cousin of the gamelan.',img:'tr0.png'},
+ {key:'overhead',g:'Hands overhead',gd:'Triumph and great happiness.',pose:{l:[150,25,-70],r:[-150,-25,70]},teach:'g1',vo:'vo1',name:'Pis syabit',ar:'فِسْ سِيَبِتْ',desc:'A woven headcloth. Cousin of songket.',img:'tr1.png'},
+ {key:'crossed',g:'Crossed arms',gd:'Held at the chest, for protectiveness or playfulness.',pose:{l:[10,-125,-25],r:[-10,125,25]},teach:'g2',vo:'vo2',name:'Pearl shell',ar:'',desc:'Sulu pearls once sailed to the markets of Singapore.',img:'tr2.png'},
+ {key:'kalis',g:'One arm out',gd:'Reach one arm out to the side and turn the wrist.',pose:{l:[35,30,40],r:[-92,-8,-55]},teach:'g3',vo:'vo3',name:'Kalis',ar:'كَلِسْ',desc:'The wavy-bladed Tausug sword. Cousin of the keris.',img:'tr3.png'},
+ {key:'heart',g:'Hands to heart',gd:'The closing gesture. Bring your hands to your chest.',pose:{l:[25,-138,-10],r:[-25,138,10]},teach:'exit',vo:null,closing:true}
+];
+
+/* ---------- landmarks -> rig angles ---------- */
+const wrap=a=>((a+540)%360)-180, deg=(a,b)=>Math.atan2(-(b.x-a.x),b.y-a.y)*180/Math.PI;
+/* returns mirrored points in a square-ish space, so the player's left arm drives the avatar's screen-left arm */
+function points(lm,aspect){const p=i=>({x:(1-lm[i].x)*aspect,y:lm[i].y,v:lm[i].visibility??1});
+  return{shL:p(11),shR:p(12),elL:p(13),elR:p(14),wrL:p(15),wrR:p(16),inL:p(19),inR:p(20),hipL:p(23),hipR:p(24)}}
+function angles(P){
+  const one=(sh,el,wr,inx,side)=>{let a1=deg(sh,el);const f=deg(el,wr);
+    if(side<0&&a1<-90)a1+=360;if(side>0&&a1>90)a1-=360;            /* keep straight-up arms continuous */
+    const a2=wrap(f-a1),a3=inx.v>.4?Math.max(-80,Math.min(80,wrap(deg(wr,inx)-f))):0;return[a1,a2,a3]};
+  return{l:one(P.shL,P.elL,P.wrL,P.inL,-1),r:one(P.shR,P.elR,P.wrR,P.inR,1)}}
+/* ---------- gesture rules (loose on purpose: it is a dance, not a test) ---------- */
+function handFacesCamera(hand){
+  if(!hand||hand.length<18)return false;
+  const w=hand[0],i=hand[5],p=hand[17],ax=i.x-w.x,ay=i.y-w.y,az=(i.z||0)-(w.z||0),bx=p.x-w.x,by=p.y-w.y,bz=(p.z||0)-(w.z||0);
+  const nx=ay*bz-az*by,ny=az*bx-ax*bz,nz=ax*by-ay*bx,mag=Math.hypot(nx,ny,nz);
+  return mag>0&&Math.abs(nz)/mag>.62;
+}
+function detect(P,A,hands=null,aspect=1){
+  const SW=Math.abs(P.shR.x-P.shL.x)||.2,d=(P.wrL.x-P.wrR.x)/SW,midY=(P.shL.y+P.shR.y)/2,
+    chest=w=>w.y>midY-.25*SW&&w.y<midY+1.25*SW, inside=w=>w.x>P.shL.x-.25*SW&&w.x<P.shR.x+.25*SW,
+    outL=A.l[0]>55&&A.l[0]<125&&Math.abs(A.l[1])<55, outR=A.r[0]<-55&&A.r[0]>-125&&Math.abs(A.r[1])<55,
+    downL=A.l[0]<50&&P.wrL.y>P.shL.y, downR=A.r[0]>-50&&P.wrR.y>P.shR.y,
+    oneOut=outR?P.wrR:outL?P.wrL:null;
+  let kalis=(outR&&downL)||(outL&&downR);
+  if(oneOut&&hands&&hands.length){
+    const nearest=hands.map(h=>({h,d:Math.hypot((1-h[0].x)*aspect-oneOut.x,h[0].y-oneOut.y)/SW})).sort((a,b)=>a.d-b.d)[0];
+    if(nearest&&nearest.d<.48)kalis=handFacesCamera(nearest.h);
+  }
+  return{
+    open:outL&&outR,
+    overhead:P.wrL.y<P.shL.y-.55*SW&&P.wrR.y<P.shR.y-.55*SW,
+    crossed:d>.08&&chest(P.wrL)&&chest(P.wrR),
+    kalis,
+    heart:d>-.55&&d<=.08&&chest(P.wrL)&&chest(P.wrR)&&inside(P.wrL)&&inside(P.wrR)
+  }}
+/* forward kinematics: a rig pose -> fake landmarks (used by demo mode, keys 1-5, and the self-test) */
+function fake(pose){const r=Math.PI/180,lm=[];for(let i=0;i<33;i++)lm.push({x:.5,y:.5,visibility:1});
+  const S=.0016,cx=.5,cy=.62,put=(i,x,y)=>{lm[i]={x:1-(cx+x*S),y:cy+y*S,visibility:1}};   /* stored un-mirrored, like a real camera */
+  [['l',-1,11,13,15,19],['r',1,12,14,16,20]].forEach(([k,side,sh,el,wr,inx])=>{const a=pose[k],a1=a[0]*r,a2=a1+a[1]*r,a3=a2+a[2]*r;
+    let x=side*46,y=-315;put(sh,x,y);x-=80*Math.sin(a1);y+=80*Math.cos(a1);put(el,x,y);x-=75*Math.sin(a2);y+=75*Math.cos(a2);put(wr,x,y);x-=40*Math.sin(a3);y+=40*Math.cos(a3);put(inx,x,y)});
+  put(23,-28,-175);put(24,28,-175);put(0,0,-384);return lm}
+const mix=(a,b,w)=>({l:a.l.map((v,i)=>v+(b.l[i]-v)*w),r:a.r.map((v,i)=>v+(b.r[i]-v)*w)});
+
+/* ---------- audio: one shared voice player, unlocked by the Start tap ---------- */
+const voice=new Audio(),bgm=$('bgm');let voiceDone=null;
+function say(name,done){voiceDone=done||null;try{voice.pause();voice.src=FILM+name+'.mp3';bgm.volume=.15;voice.play().catch(()=>finishVoice())}catch(e){finishVoice()}}
+function finishVoice(){bgm.volume=.5;const d=voiceDone;voiceDone=null;if(d)d()}
+voice.addEventListener('ended',finishVoice);voice.addEventListener('error',finishVoice);
+
+/* ---------- game state ---------- */
+let kind='girl',step=-1,phase='idle',heldMs=0,lostMs=0,score=0,caught=[],pose=IDLE,forced=null,demoPose=IDLE,phaseAt=0,last=performance.now(),bodyVisibleSince=null,choiceSince={boy:null,girl:null},introIndex=-1,attractHandSince=null,restartTimer=null;
+const HOLD=650;
+function show(i){step=i;phase='teach';heldMs=0;phaseAt=performance.now();const s=STEPS[i];
+  $('gk').textContent=s.closing?'Closing gesture':`Gesture ${i+1} of 4 · learn it`;$('gname').textContent=s.g;$('gdesc').textContent=s.gd;setPose('h',s.pose);$('card').hidden=true;
+  say(s.teach,()=>{if(step===i&&phase==='teach'){phase='try';$('gk').textContent=s.closing?'Closing gesture · your turn':`Gesture ${i+1} of 4 · your turn`}});
+  setTimeout(()=>{if(step===i&&phase==='teach'){phase='try'}},9000)}
+function hit(){const s=STEPS[step];phase='hold';$('hold').style.width='100%';
+  if(s.closing){flash('Magsukul!');setTimeout(finish,1800);return}
+  score+=250;caught.push(s);flash('Marayaw!');$('score').textContent=score.toLocaleString();const n=caught.length;$('stars').textContent='★★★★★'.slice(0,n+1>4?5:n)+'☆☆☆☆☆'.slice(n+1>4?5:n);
+  $('gk').textContent='Hold the pose and listen';$('timg').src=FILM+s.img;$('tname').textContent=s.name;$('tar').textContent=s.ar;$('tdesc').textContent=s.desc;$('card').hidden=false;
+  const i=step;let moved=false;const next=()=>{if(moved)return;moved=true;if(step===i)show(i+1)};say(s.vo,next);setTimeout(next,11000)}
+function flash(t){const r=$('rate');r.textContent=t;r.classList.add('on');setTimeout(()=>r.classList.remove('on'),1600)}
+function finish(){phase='done';$('score2').textContent=score.toLocaleString();$('stars2').textContent=$('stars').textContent;
+  $('got').innerHTML=caught.map(s=>`<div><img src="${FILM}${s.img}" alt=""><b>${s.name}</b></div>`).join('');$('result').hidden=false;say('result');clearTimeout(restartTimer);
+  restartTimer=setTimeout(()=>{if(phase!=='done')return;$('result').hidden=true;$('coverTitle').textContent='Pangalay Mirror';$('tagline').textContent='Raise your hand to begin';$('start').textContent='Raise your hand to begin';$('msg').textContent='Hold either hand above your shoulder for a moment.';$('cover').hidden=false;phase='attract';attractHandSince=null},20000)}
+async function downloadSnapshot(){
+  const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;const c=canvas.getContext('2d');
+  const sky=c.createLinearGradient(0,0,0,1350);sky.addColorStop(0,'#150618');sky.addColorStop(.42,'#B8473F');sky.addColorStop(.66,'#F08A4B');sky.addColorStop(.67,'#1C6E77');sky.addColorStop(1,'#072C33');c.fillStyle=sky;c.fillRect(0,0,1080,1350);
+  c.fillStyle='#F2C14E';c.globalAlpha=.72;c.beginPath();c.arc(540,600,190,0,Math.PI*2);c.fill();c.globalAlpha=1;
+  c.fillStyle='#F2C14E';c.fillRect(0,1000,1080,8);
+  const transforms={aL1:'translate(-46,-315) rotate(150)',aL2:'translate(0,80) rotate(25)',aL3:'translate(0,75) rotate(-70)',aR1:'translate(46,-315) rotate(-150)',aR2:'translate(0,80) rotate(-25)',aR3:'translate(0,75) rotate(70)'};
+  let rig=body(kind)+arm('a',-1,kind)+arm('a',1,kind);for(const [id,t] of Object.entries(transforms))rig=rig.replace(`id="${id}"`,`id="${id}" transform="${t}"`);
+  const base=new URL(FILM,location.href).href;rig=rig.replaceAll('../film/',base);
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="460" height="540" viewBox="-230 -520 460 540"><defs><clipPath id="skirtclip"><path d="M-44 -178 H44 L60 -4 H-60 Z"/></clipPath><clipPath id="pisclip"><path d="M12 -420 L44 -452 L36 -404 Z M-38 -390 A38 38 0 0 1 38 -390 Q0 -404 -38 -390 Z"/></clipPath></defs><g transform="translate(0,0)">${rig}</g></svg>`;
+  const img=new Image();img.src=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
+  try{await img.decode()}catch(e){URL.revokeObjectURL(img.src);throw e}
+  c.drawImage(img,260,270,560,660);URL.revokeObjectURL(img.src);
+  c.textAlign='center';c.fillStyle='#F6EFDF';c.font='600 30px "Albert Sans",sans-serif';c.fillText('PANGALAY MIRROR',540,110);
+  c.font='76px "Gloock",Georgia,serif';c.fillText('Magsukul',540,1100);
+  c.direction='rtl';c.font='64px "Noto Naskh Arabic",serif';c.fillText('مَغْسُكُلْ',540,1180);c.direction='ltr';
+  c.font='600 34px "Albert Sans",sans-serif';c.fillText(`Score  ${score.toLocaleString()}`,540,1270);
+  const a=document.createElement('a');a.download='pangalay-mirror-keepsake.png';a.href=canvas.toDataURL('image/png');a.click();
+}
+function reset(){score=0;caught=[];$('score').textContent='0';$('stars').textContent='☆☆☆☆☆';$('result').hidden=true;show(0)}
+
+function frame(lm,aspect,now,hands=null){
+  const dt=Math.min(100,now-last);last=now;
+  if(forced){lm=fake(forced.pose);aspect=1;if(now>forced.until)forced=null}
+  let D=null,P=null;
+  if(lm){P=points(lm,aspect);const A=angles(P);pose=mix(pose,A,.45);D=detect(P,A,hands,aspect)}else pose=mix(pose,IDLE,.1);
+  setPose('a',pose);
+  if(phase==='try'&&D){const want=STEPS[step].key;
+    if(D[want]){heldMs+=dt;lostMs=0}else{lostMs+=dt;if(lostMs>250)heldMs=Math.max(0,heldMs-dt*2)}
+    $('hold').style.width=Math.min(100,heldMs/HOLD*100)+'%';if(heldMs>=HOLD)hit()}
+  else if(phase==='teach')$('hold').style.width='0%';
+  if(!$('debugOverlay').hidden)$('debugOverlay').textContent=D?`L ${pose.l.map(v=>v.toFixed(0)).join(' ')}\nR ${pose.r.map(v=>v.toFixed(0)).join(' ')}\n`+Object.keys(D).map(k=>(D[k]?'● ':'○ ')+k).join('\n')+`\nphase ${phase} step ${step}`:'no body found';
+  return P}
+
+/* ---------- camera framing gate ---------- */
+function waitForBody(lm,now){
+  const visible=i=>{const p=lm&&lm[i];return !!p&&Number.isFinite(p.visibility)&&p.visibility>=.5&&p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1};
+  const cap=$('cap');
+  if(!visible(11)||!visible(12)){$('cap').textContent='Step into view so I can see your arms.';bodyVisibleSince=null;return}
+  if(![13,14,15,16].every(visible)){$('cap').textContent='Take a step back.';bodyVisibleSince=null;return}
+  if(bodyVisibleSince===null){bodyVisibleSince=now;cap.textContent='Hold still and keep your arms in view.';return}
+  if(now-bodyVisibleSince<1000)return;
+  bodyVisibleSince=null;cap.textContent='Body found ✓';beginIntroduction()
+}
+
+const INTRO=[
+  {k:'Who are the Tausug?',title:'Meet the Tausug',copy:'The people of the current. They are a seafaring people from the far south of the Philippines.',audio:'intro0'},
+  {k:'Where do they live?',title:'The Sulu Archipelago',copy:'A chain of islands between Mindanao and Borneo, with Jolo at its heart. For centuries, the Sultanate of Sulu traded across these seas.',audio:'intro1'},
+  {k:'What will you learn?',title:'Step into their world',copy:'Learn pangalay, one of their dances, and meet the treasures of their culture along the way.',audio:'intro2'}
+];
+function beginIntroduction(){phase='intro';introIndex=-1;$('panel').hidden=true;$('choice').hidden=true;$('intro').hidden=false;showIntro(0)}
+function showIntro(i){introIndex=i;const card=INTRO[i];$('introK').textContent=card.k;$('introTitle').textContent=card.title;$('introCopy').textContent=card.copy;
+  let advanced=false;const advance=()=>{if(advanced||phase!=='intro'||introIndex!==i)return;advanced=true;if(i<INTRO.length-1)showIntro(i+1);else finishIntroduction()};
+  say(card.audio,advance);setTimeout(advance,15000)}
+function finishIntroduction(){if(phase!=='intro')return;$('intro').hidden=true;introIndex=-1;
+  if(DEMO){pick('girl');beginStance()}else beginAvatarChoice()}
+function skipIntroduction(){if(phase!=='intro')return;voice.pause();voiceDone=null;bgm.volume=.5;finishIntroduction()}
+function beginStance(){phase='stance';$('choice').hidden=true;$('panel').hidden=true;$('intro').hidden=false;
+  $('introK').textContent='Before you begin';$('introTitle').textContent='Find your stance';$('introCopy').textContent='First, the stance. Keep your knees soft, your eyes lowered, and your fingers curled back.';
+  let advanced=false;const advance=()=>{if(advanced||phase!=='stance')return;advanced=true;$('intro').hidden=true;$('panel').hidden=false;reset()};
+  say('stance',advance);setTimeout(advance,15000)}
+function beginAvatarChoice(){phase='choose';choiceSince={boy:null,girl:null};$('intro').hidden=true;$('choice').hidden=false;$('panel').hidden=true;
+  $('choiceHint').textContent='Raise one hand and hold it above your shoulder.';$('cap').textContent='Body found ✓';say('choose');
+  setTimeout(()=>{if(phase==='choose')$('cap').textContent='Left hand for Boy · right hand for Girl'},1000)}
+function beginRound(){
+  clearTimeout(restartTimer);$('intro').hidden=true;$('choice').hidden=true;$('result').hidden=true;$('cover').hidden=true;$('tagline').textContent='Step in. Move. Meet the Tausug.';
+  if(DEMO){beginIntroduction();return}
+  phase='body';bodyVisibleSince=null;$('panel').hidden=false;$('cap').textContent='Step into view so I can see your arms.'
+}
+
+function chooseAvatar(lm,now){
+  const visible=i=>{const p=lm&&lm[i];return !!p&&Number.isFinite(p.visibility)&&p.visibility>=.5&&p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1};
+  const boy=visible(11)&&visible(15)&&lm[15].y<lm[11].y;
+  const girl=visible(12)&&visible(16)&&lm[16].y<lm[12].y;
+  const setProgress=(side,start)=>{const id=side==='boy'?'choiceBoy':'choiceGirl',bar=side==='boy'?'choiceBoyBar':'choiceGirlBar';
+    $(id).classList.toggle('holding',start!==null);$(bar).style.width=start===null?'0%':Math.min(100,(now-start)/800*100)+'%'};
+  if(boy&&girl){choiceSince={boy:null,girl:null};setProgress('boy',null);setProgress('girl',null);$('choiceHint').textContent='Raise one hand at a time: left for Boy, right for Girl.';return}
+  if(boy){choiceSince.girl=null;setProgress('girl',null);if(choiceSince.boy===null)choiceSince.boy=now;setProgress('boy',choiceSince.boy);$('choiceHint').textContent='Hold your left hand up for Boy.';
+    if(now-choiceSince.boy>=800)selectAvatar('boy');return}
+  if(girl){choiceSince.boy=null;setProgress('boy',null);if(choiceSince.girl===null)choiceSince.girl=now;setProgress('girl',choiceSince.girl);$('choiceHint').textContent='Hold your right hand up for Girl.';
+    if(now-choiceSince.girl>=800)selectAvatar('girl');return}
+  choiceSince={boy:null,girl:null};setProgress('boy',null);setProgress('girl',null);$('choiceHint').textContent='Raise one hand and hold it above your shoulder.';
+}
+function checkAttract(lm,now){
+  const raised=i=>{const w=lm&&lm[i],s=lm&&lm[i-4];return !!w&&!!s&&w.visibility>=.5&&s.visibility>=.5&&w.y<s.y&&w.x>=0&&w.x<=1&&w.y>=0&&w.y<=1};
+  if(raised(15)||raised(16)){if(attractHandSince===null)attractHandSince=now;if(now-attractHandSince>=800){attractHandSince=null;beginRound()}}
+  else attractHandSince=null;
+}
+function selectAvatar(k){pick(k);$('choice').hidden=true;choiceSince={boy:null,girl:null};$('cap').textContent='Follow the coach. Hold each gesture to catch a treasure.';beginStance()}
+
+/* ---------- camera + MediaPipe ---------- */
+const video=$('video'),ov=$('overlay'),ctx=ov.getContext('2d');let landmarker=null,handLandmarker=null,lastHandDetect=0,cachedHands=null;
+async function initCamera(){
+  const stream=await navigator.mediaDevices.getUserMedia({video:{width:640,height:480,facingMode:'user'},audio:false});
+  const {FilesetResolver,PoseLandmarker}=await import('./vendor/vision_bundle.mjs').catch(()=>import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs'));
+  let wasm='./vendor/wasm';try{const r=await fetch(wasm+'/vision_wasm_internal.js',{method:'HEAD'});if(!r.ok)throw 0}catch(e){wasm='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'}
+  const fs=await FilesetResolver.forVisionTasks(wasm);
+  let model='./models/pose_landmarker_lite.task';try{const r=await fetch(model,{method:'HEAD'});if(!r.ok)throw 0}catch(e){model='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task'}
+  landmarker=await PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:model,delegate:'GPU'},runningMode:'VIDEO',numPoses:1});
+  try{
+    const {HandLandmarker}=await import('./vendor/vision_bundle.mjs').catch(()=>import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs'));
+    let handModel='./models/hand_landmarker.task';try{const r=await fetch(handModel,{method:'HEAD'});if(!r.ok)throw 0}catch(e){handModel='https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task'}
+    handLandmarker=await HandLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:handModel,delegate:'GPU'},runningMode:'VIDEO',numHands:2});
+  }catch(e){handLandmarker=null;console.warn('Hand tracking unavailable; one-arm wrist-turn fallback remains enabled.',e)}
+  video.srcObject=stream;await video.play();ov.width=video.videoWidth;ov.height=video.videoHeight}
+function drawSkeleton(lm){ctx.clearRect(0,0,ov.width,ov.height);if(!lm)return;ctx.strokeStyle='#5FD0A8';ctx.lineWidth=5;ctx.lineCap='round';
+  [[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24]].forEach(([a,b])=>{ctx.beginPath();ctx.moveTo(lm[a].x*ov.width,lm[a].y*ov.height);ctx.lineTo(lm[b].x*ov.width,lm[b].y*ov.height);ctx.stroke()})}
+function loop(now){
+  let lm=null,aspect=1,hands=null;
+  if(DEMO){/* no camera: drift toward the wanted pose so the whole flow can be shown and tested */
+    const target=(phase==='try'||phase==='hold')&&step>=0?STEPS[step].pose:IDLE;demoPose=mix(demoPose,target,phase==='try'&&now-phaseAt>1500?.06:.03);lm=fake(demoPose)}
+  else if(landmarker&&video.readyState>=2){const r=landmarker.detectForVideo(video,now);lm=r.landmarks&&r.landmarks[0]||null;aspect=video.videoWidth/video.videoHeight;if(handLandmarker){if(now-lastHandDetect>=66){const hr=handLandmarker.detectForVideo(video,now);cachedHands=hr.landmarks||null;lastHandDetect=now}hands=cachedHands}drawSkeleton(lm)}
+  if(!DEMO&&phase==='body'){waitForBody(lm,now);pose=IDLE;setPose('a',pose);requestAnimationFrame(loop);return}
+  if(phase==='attract'){checkAttract(lm,now);requestAnimationFrame(loop);return}
+  frame(lm,aspect,now,hands);
+  if(phase==='choose'){chooseAvatar(lm,now);requestAnimationFrame(loop);return}
+  requestAnimationFrame(loop)}
+
+/* ---------- start-up ---------- */
+function pick(k){kind=k;build('avatar','a',k);setPose('a',pose)}
+build('ghost','h','ghost');setPose('h',IDLE);pick('girl');
+$('start').onclick=async()=>{
+  if(phase==='attract'){beginRound();return}
+  try{voice.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';voice.play().catch(()=>{})}catch(e){}   /* unlock the voice player inside the tap */
+  bgm.volume=.5;bgm.play().catch(()=>{});
+  if(!DEMO){$('msg').textContent='Starting the camera and loading the pose model…';
+    try{await initCamera()}catch(e){$('msg').innerHTML='Could not start the camera or the pose model ('+(e&&e.message||e)+'). Check camera permission, or add <b>?demo=1</b> to the address.';return}}
+  $('cover').hidden=true;last=performance.now();
+  beginRound();
+  requestAnimationFrame(loop)};
+$('skipIntro').onclick=skipIntroduction;
+$('again').onclick=beginRound;
+$('downloadSnapshot').onclick=()=>downloadSnapshot().catch(e=>{console.error('Snapshot failed',e);$('msg').textContent='Could not create the snapshot. Please try again.'});
+addEventListener('keydown',e=>{const n=+e.key;if(phase==='attract'&&n>=1&&n<=5)beginRound();if(n>=1&&n<=5){if(phase==='body'||phase==='choose'){bodyVisibleSince=null;$('choice').hidden=true;$('panel').hidden=false;$('cap').textContent='Follow the coach. Hold each gesture to catch a treasure.';reset()}forced={pose:STEPS[n-1].pose,until:performance.now()+1500}}if(e.key==='d'||e.key==='D')$('debugOverlay').hidden=!$('debugOverlay').hidden});
+if(DEMO)$('start').textContent='Start demo (no camera)';
+/* self-test hook: every target pose must satisfy its own rule and no other gold rule */
+window.__selftest=()=>STEPS.map(s=>{const P=points(fake(s.pose),1),D=detect(P,angles(P));return s.key+': '+Object.keys(D).filter(k=>D[k]).join(',')});
+window.__state=()=>({phase,step,score,caught:caught.length});
+</script>
+</body>
+</html>
