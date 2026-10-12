@@ -12,11 +12,12 @@ The project has two experiences: a self-playing concept film that tells the stor
 
 | | |
 |---|---|
-| **Production app**<br>[pangalay-mirror.vercel.app/app](https://pangalay-mirror.vercel.app/app/) | **No-camera demo**<br>[Open the demo](https://pangalay-mirror.vercel.app/app/?demo=1) |
+| **Production app**<br>[pangalay-mirror.vercel.app/app](https://pangalay-mirror.vercel.app/app/) | **3D Blender experience**<br>[Open the 3D app](https://pangalay-mirror.vercel.app/app-3d/) |
+| **3D no-camera demo**<br>[Open the demo](https://pangalay-mirror.vercel.app/app-3d/?demo=1) | **2D no-camera demo**<br>[Open the demo](https://pangalay-mirror.vercel.app/app/?demo=1) |
 | **Dance timeline review**<br>[Open the aligned review route](https://pangalay-mirror.vercel.app/app/timeline.html) | **Concept film**<br>[aljabrialam.github.io/pangalay-mirror](https://aljabrialam.github.io/pangalay-mirror/) |
 | **GitHub repo**<br>[github.com/aljabrialam/pangalay-mirror](https://github.com/aljabrialam/pangalay-mirror) | **Review checklist**<br>[`docs/REVIEW-BEFORE-SUBMISSION.md`](docs/REVIEW-BEFORE-SUBMISSION.md) |
 
-For the camera app, use HTTPS or `localhost`, allow camera access, and stand back until the app sees your shoulders, elbows, and wrists. In demo mode, the game runs without a camera. Keys **1–4** force the four taught moves, **5** forces the closing gesture, and **D** toggles the tracking debug overlay.
+For either camera app, use HTTPS or `localhost`, allow camera access, and stand back until the app sees your shoulders, elbows, and wrists. The 3D route uses Blender-authored girl and boy avatars with Three.js rendering; the 2D route remains available at `/app/`. In demo mode, each version runs without a camera. Keys **1–4** force the four taught moves, **5** forces the closing gesture, and **D** toggles the tracking debug overlay.
 
 ## Marketing and product views
 
@@ -57,6 +58,7 @@ One possible installation would reflect the dance avatar from a phone or tablet 
 | | Role | Status |
 |---|---|---|
 | **Webcam + MediaPipe Pose Landmarker** | Tracks one player's upper body; drives the mirrored avatar and body-framing gate | Built; local pose model bundled. Validate framing and tracking on the event laptop |
+| **Blender 3D experience** | Renders the selected player avatar and move coach in 3D; mirrors the existing arm pose, move lane, narration, score, and keepsake flow | Available at `/app-3d/`; girl's and boy's Blender sources and GLB models are included. `/app/` remains the existing 2D version |
 | **Gesture game** | Teaches four arm gestures, shows flying treasure targets, catches four treasures, then recognizes a closing pose | Built; demo mode reaches the result at 1,000 points. Real-camera gesture tuning remains |
 | **Hand Landmarker** | Checks palm orientation for the wrist-turn gesture | Built with one-arm-out fallback; real-camera check remains |
 | **Intro and stance lessons** | Introduces who the Tausug are, where they live, and what the player will learn | Built with the existing narration clips and Skip intro control |
@@ -95,6 +97,11 @@ pangalay-mirror/
 │   ├── timeline.html              Aligned review route for the main game
 │   ├── models/                    Local Pose and Hand Landmarker models
 │   └── vendor/                    MediaPipe Tasks Vision JS and WebAssembly
+├── app-3d/
+│   ├── index.html                 Separate Blender avatar experience
+│   ├── models/                    Girl/boy Blender source files and GLB exports
+│   ├── tools/create_avatars.py    Blender authoring/export script
+│   └── vendor/                    Pinned Three.js 0.180.0 modules and GLTF loader
 ├── film/                           Published concept film, audio, narration, and art
 ├── assets/                         Avatar art and supporting project assets
 ├── graphics/                       Marketing, responsive-view, and future-concept graphics
@@ -116,7 +123,7 @@ Use Python's static server from the repository root. Camera access works on `loc
 python3 -m http.server 8000
 ```
 
-Open the camera app at <http://localhost:8000/app/> or the no-camera demo at <http://localhost:8000/app/?demo=1>. The aligned review route is at <http://localhost:8000/app/timeline.html>.
+Open the 2D camera app at <http://localhost:8000/app/> or its no-camera demo at <http://localhost:8000/app/?demo=1>. The separate 3D route is at <http://localhost:8000/app-3d/> and its no-camera demo at <http://localhost:8000/app-3d/?demo=1>. The aligned review route for the 2D app is at <http://localhost:8000/app/timeline.html>.
 
 For offline use, both model files and the MediaPipe library/WASM are already in the repo. The fonts have system fallbacks. To verify offline startup, allow camera permission first, turn off Wi-Fi, and reload on the event laptop.
 

@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pangalay Mirror · 3D</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Albert+Sans:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@500&display=swap">
+<style>
+:root{--night:#1A0820;--deep:#2A0C2E;--gold:#F2C14E;--paper:#F6EFDF;--mist:#C9D8D6;--jade:#5FD0A8;--ink:#0B1418}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#0d0412;color:var(--paper);font-family:'Albert Sans',system-ui,sans-serif}
+#app{position:relative;width:100vw;height:100vh;height:100dvh;overflow:hidden;display:grid;place-items:center}
+#stage{position:relative;width:min(100vw,177.78dvh);aspect-ratio:16/9;container-type:inline-size;overflow:hidden;background:var(--night)}
+#scene{position:absolute;inset:0;width:100%;height:100%}
+.strip{position:absolute;left:0;top:0;width:100%;height:2.6cqw;background:url(../film/pis-art.png) 0 -8px/40cqw auto;border-bottom:.3cqw solid var(--gold)}
+.cap{position:absolute;left:3cqw;top:4.2cqw;font-family:'Gloock',Georgia,serif;font-size:2.4cqw;text-shadow:0 .2cqw .8cqw #000}
+.panel{position:absolute;right:2.4cqw;top:5cqw;width:27cqw;background:rgba(6,20,26,.43);border:1px solid rgba(242,193,78,.35);border-radius:1.2cqw;padding:1.6cqw;display:flex;flex-direction:column;gap:.8cqw}
+.row{display:flex;justify-content:space-between;align-items:baseline;font-size:1.7cqw}
+.row b{color:var(--gold)}
+.k{font-size:1.05cqw;letter-spacing:.16em;text-transform:uppercase;color:var(--mist);font-weight:700}
+.big{font-family:'Gloock',Georgia,serif;font-size:2.8cqw;color:var(--gold);line-height:1.05}
+.sm{font-size:1.4cqw;line-height:1.35;color:var(--paper)}
+.rule{border-top:1px solid rgba(201,216,214,.25);padding-top:.9cqw;display:flex;gap:1cqw;align-items:center}
+.rule img{width:7cqw;height:7cqw;object-fit:contain;flex:none}
+.name{font-family:'Gloock',Georgia,serif;font-size:2.2cqw;line-height:1.05}
+.sug{font-family:'Noto Naskh Arabic','Geeza Pro',serif;font-size:1.9cqw;color:var(--gold);direction:rtl;text-align:left;line-height:1.4}
+.bar{height:.8cqw;border-radius:1cqw;background:rgba(255,255,255,.14);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--gold)}
+#ghostwrap{display:flex;justify-content:center}
+#ghostwrap svg{width:11cqw;height:auto}
+.cam{position:absolute;left:2.4cqw;bottom:2.4cqw;width:19cqw;aspect-ratio:4/3;border-radius:1cqw;overflow:hidden;border:1px solid rgba(95,208,168,.6);background:#06141a}
+.cam video,.cam canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.cam span{position:absolute;left:.7cqw;bottom:.5cqw;font-size:.95cqw;letter-spacing:.14em;text-transform:uppercase;color:var(--mist)}
+#rate{position:absolute;left:50%;top:22%;transform:translateX(-50%);font-family:'Gloock',Georgia,serif;font-size:5cqw;color:var(--gold);text-shadow:0 .3cqw 1.4cqw #000;opacity:0;transition:opacity .25s}
+#rate.on{opacity:1}
+#debugOverlay{position:absolute;left:2.4cqw;top:9cqw;font:1cqw/1.4 ui-monospace,monospace;color:var(--jade);white-space:pre;background:rgba(0,0,0,.45);padding:.5cqw .8cqw;border-radius:.5cqw}
+#debugOverlay[hidden],#cover[hidden],#intro[hidden],#choice[hidden],#panel[hidden],.rule[hidden],#result[hidden]{display:none}
+#cover,#result{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6cqw;text-align:center;background:radial-gradient(ellipse 70% 70% at 50% 50%,rgba(24,7,30,.96),rgba(24,7,30,.82)),url(../film/pis-art.png) center/cover}
+#result{display:grid;grid-template-columns:minmax(0,1fr) 14cqw;align-items:center;gap:2cqw;padding:2cqw 4cqw;overflow:auto}
+.result-main,.result-preview{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.9cqw;min-width:0}.result-preview{padding:1cqw;border:1px solid rgba(242,193,78,.4);border-radius:1cqw;background:rgba(6,20,26,.45)}
+#keepsakePreview{display:block;width:12cqw;max-height:40cqh;aspect-ratio:4/5;object-fit:contain;border:1px solid rgba(242,193,78,.7);border-radius:.5cqw;box-shadow:0 .4cqw 1.2cqw #0009}#keepsakePreview[hidden]{display:none}#previewStatus{font-size:1.2cqw;color:var(--mist)}
+.mark{font-family:'Gloock',Georgia,serif;font-size:7cqw;line-height:1}
+.hero{font-family:'Noto Naskh Arabic','Geeza Pro',serif;font-size:6cqw;line-height:1.2;color:var(--gold);direction:rtl}
+.tag{font-size:2.2cqw;color:var(--gold);font-weight:600}
+.pick{display:flex;gap:1.4cqw}
+button{font:inherit;font-size:1.7cqw;font-weight:600;padding:1cqw 2.2cqw;border-radius:.8cqw;border:2px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer}button:disabled{opacity:.7;cursor:wait}
+button.on,button.go{background:var(--gold);color:var(--night)}
+.note{font-size:1.2cqw;color:var(--mist);max-width:60cqw;line-height:1.5}
+#choice{position:absolute;z-index:3;left:22cqw;top:13cqw;width:56cqw;padding:2cqw;border:1px solid rgba(242,193,78,.55);border-radius:1.2cqw;background:rgba(26,8,32,.94);text-align:center;box-shadow:0 1cqw 3cqw #0008}
+.choice-title{font-family:'Gloock',Georgia,serif;font-size:3cqw;color:var(--gold)}
+.choice-hint{margin:.7cqw 0 1.3cqw;font-size:1.4cqw;color:var(--paper)}
+.choice-options{display:flex;justify-content:center;gap:2cqw}
+.avatar-option{width:20cqw;padding:.7cqw .8cqw;border:2px solid rgba(242,193,78,.28);border-radius:1cqw;color:var(--mist);font-size:1.15cqw;letter-spacing:.08em;transition:border-color .12s,background .12s}
+.avatar-option.holding{border-color:var(--gold);background:rgba(242,193,78,.14);color:var(--gold)}
+.avatar-option img{display:block;width:100%;height:18cqw;object-fit:contain}
+.choice-bar{height:.5cqw;background:#ffffff24;border-radius:1cqw;overflow:hidden;margin-top:.65cqw}
+.choice-bar i{display:block;width:0;height:100%;background:var(--gold)}
+#intro{position:absolute;z-index:4;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;background:radial-gradient(ellipse 70% 70% at 50% 50%,rgba(24,7,30,.97),rgba(24,7,30,.9)),url(../film/pis-art.png) center/cover}
+.intro-card{width:88cqw;max-height:88cqh;overflow:auto;padding:3cqw;border:1px solid rgba(242,193,78,.55);border-radius:1.4cqw;background:rgba(26,8,32,.76);box-shadow:0 1cqw 3cqw #0008}
+.intro-layout{display:flex;align-items:center;justify-content:center;gap:2cqw}.intro-text{flex:1;min-width:0}
+#whereMap{display:block;flex:none;width:30cqw;height:auto;max-height:72cqh;filter:drop-shadow(0 .4cqw .7cqw #0008)}#whereMap[hidden]{display:none}
+.map-land{fill:#C9D8D6;fill-opacity:.84;stroke:#F6EFDF;stroke-opacity:.56;stroke-width:2}.map-borneo{fill:#B6C5BD}.map-sulu{fill:#F2C14E;stroke:#FFF2B8;stroke-width:3}.map-route{fill:none;stroke:#F2C14E;stroke-width:2;stroke-dasharray:5 5}.map-label{font:600 22px 'Albert Sans',sans-serif;fill:#F6EFDF;paint-order:stroke;stroke:#1A0820;stroke-width:4;stroke-linejoin:round}.map-label.gold{fill:#F2C14E}.map-note{font:500 18px 'Albert Sans',sans-serif;fill:#C9D8D6}
+.intro-k{font-size:1.2cqw;letter-spacing:.18em;text-transform:uppercase;color:var(--mist);font-weight:700}
+.intro-title{margin:1cqw 0;font-family:'Gloock',Georgia,serif;font-size:4.5cqw;line-height:1.05;color:var(--gold)}
+.intro-copy{font-size:2cqw;line-height:1.45;color:var(--paper)}
+.intro-actions{margin-top:2cqw}
+.got{display:flex;gap:2cqw}
+.got div{width:14cqw;display:flex;flex-direction:column;align-items:center;gap:.4cqw;font-size:1.3cqw}
+.got img{width:9cqw;height:9cqw;object-fit:contain}
+#timelineLane{position:absolute;z-index:5;left:23cqw;bottom:1.2cqw;width:74cqw;height:7.4cqw;padding:.55cqw 1cqw .7cqw;background:rgba(6,20,26,.92);border:1px solid rgba(242,193,78,.62);border-radius:.9cqw;overflow:hidden;box-shadow:0 .4cqw 1cqw #0008}
+#timelineLane[hidden]{display:none}
+#laneHeading{font-size:.92cqw;letter-spacing:.14em;text-transform:uppercase;color:var(--mist);margin-bottom:.3cqw}
+#laneTrack{position:relative;height:4.3cqw;border-top:1px solid #ffffff2c;isolation:isolate}
+#laneMarker{position:absolute;z-index:2;left:32%;top:-.3cqw;height:4.6cqw;border-left:.2cqw solid var(--gold);filter:drop-shadow(0 0 .3cqw var(--gold))}
+#laneMarker:before{content:'';position:absolute;left:-.55cqw;top:1.45cqw;width:.9cqw;height:.9cqw;border-radius:50%;background:var(--gold);box-shadow:0 0 .7cqw .18cqw #f2c14eaa;animation:markerBeat .8s ease-in-out infinite alternate}
+.lane-move{position:absolute;top:.4cqw;transform:translateX(-50%);width:4.4cqw;height:3.5cqw;border-radius:.5cqw;background:#ffffff12;text-align:center;color:var(--paper);transition:opacity .16s,transform .18s,box-shadow .18s,background .18s;will-change:left,transform}
+.lane-move.gold{border:1px solid var(--gold);color:var(--gold);background:#f2c14e22}.lane-move.filler{width:2.8cqw;color:var(--mist);border:1px solid #c9d8d655}
+.lane-move.approaching{transform:translateX(-50%) scale(1.12);background:#f2c14e45;box-shadow:0 0 .8cqw #f2c14e88;animation:cueApproach .55s ease-in-out infinite alternate}
+.lane-move.at-marker{transform:translateX(-50%) scale(1.18);background:#f2c14e55;box-shadow:0 0 1cqw #f2c14eaa;z-index:1}
+.lane-move.caught{animation:cueCaught .68s ease-out both;z-index:3}
+.lane-paused .lane-move,.lane-paused #laneMarker:before{animation-play-state:paused}
+@keyframes markerBeat{from{transform:scale(.82);opacity:.72}to{transform:scale(1.22);opacity:1}}
+@keyframes cueApproach{from{filter:brightness(1)}to{filter:brightness(1.5)}}
+@keyframes cueCaught{0%{transform:translateX(-50%) scale(1.18);box-shadow:0 0 0 .1cqw #f2c14eaa}45%{transform:translateX(-50%) scale(1.45);box-shadow:0 0 1.4cqw .6cqw #f2c14e99;background:#fff2b8}100%{transform:translateX(-50%) scale(.8);opacity:0}}
+.lane-glyph{display:block;font-size:1.7cqw;line-height:2cqw}.lane-name{display:block;font-size:.65cqw;letter-spacing:.06em;white-space:nowrap}
+#laneRating{position:absolute;right:1cqw;top:.5cqw;color:var(--gold);font-family:'Gloock',Georgia,serif;font-size:1.6cqw;opacity:0;transition:opacity .2s}#laneRating.on{opacity:1;animation:ratingPop .65s cubic-bezier(.18,.9,.3,1.35)}
+@keyframes ratingPop{0%{transform:scale(.7);opacity:0}70%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){#laneMarker:before,.lane-move.approaching,.lane-move.caught,#laneRating.on{animation:none}.lane-move,#laneRating{transition:none}.lane-move.approaching,.lane-move.at-marker{transform:translateX(-50%)}}
+#orientationHint{display:none;position:fixed;inset:0;z-index:20;padding:24px;background:radial-gradient(ellipse at center,#321239,#100613);color:var(--paper);text-align:center;place-items:center}
+#orientationHint .orientation-card{max-width:420px;padding:28px;border:1px solid rgba(242,193,78,.6);border-radius:18px;background:rgba(26,8,32,.82);box-shadow:0 12px 42px #0008}
+#orientationHint .phone-icon{font-size:clamp(40px,12vw,68px);line-height:1.2;color:var(--gold)}
+#orientationHint h2{margin:12px 0;font:clamp(25px,7vw,36px)/1.1 'Gloock',Georgia,serif;color:var(--gold)}
+#orientationHint p{margin:0;font-size:clamp(16px,4.4vw,19px);line-height:1.5}
+@media (orientation:portrait) and (max-width:767px){#orientationHint{display:grid}}
+#avatar{display:none}
+#ghostwrap svg{display:none}
+#threeScene{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#twoDFallback{color:var(--gold);font-size:1.2cqw;text-decoration:underline}
+#twoDFallback[hidden]{display:none}
+</style>
+</head>
+<body>
+<div id="app"><div id="stage">
+  <svg id="scene" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#150618"/><stop offset=".35" stop-color="#3A1240"/><stop offset=".62" stop-color="#B8473F"/><stop offset=".8" stop-color="#F08A4B"/><stop offset="1" stop-color="#F7B565"/></linearGradient>
+      <radialGradient id="sun"><stop offset="0" stop-color="#FFE9A8"/><stop offset=".55" stop-color="#FFC861"/><stop offset="1" stop-color="#FF9A52" stop-opacity="0"/></radialGradient>
+      <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1C6E77"/><stop offset="1" stop-color="#072C33"/></linearGradient>
+      <clipPath id="skirtclip"><path d="M-44 -178 H44 L60 -4 H-60 Z"/></clipPath>
+      <clipPath id="pisclip"><path d="M12 -420 L44 -452 L36 -404 Z M-38 -390 A38 38 0 0 1 38 -390 Q0 -404 -38 -390 Z"/></clipPath>
+    </defs>
+    <rect width="1280" height="470" fill="url(#sky)"/>
+    <circle cx="640" cy="470" r="230" fill="url(#sun)"/>
+    <rect y="470" width="1280" height="170" fill="url(#sea)"/>
+    <rect y="630" width="1280" height="90" fill="#22102A"/><rect y="630" width="1280" height="4" fill="#F2C14E"/>
+    <g id="avatar" transform="translate(560,655) scale(1.02)"></g>
+    <g id="treasureCue" visibility="hidden" aria-label="Treasure target">
+      <circle id="treasureGlow" r="48" fill="#F2C14E" opacity="0"/>
+      <rect id="treasureRing" x="-28" y="-28" width="56" height="56" rx="3" transform="rotate(45)" fill="#0B1418" fill-opacity=".18" stroke="#F2C14E" stroke-width="5"/>
+      <circle id="treasureProgress" r="29" fill="none" stroke="#FFF4CE" stroke-width="4" stroke-dasharray="182.2" stroke-dashoffset="182.2" transform="rotate(-90)"/>
+      <image id="treasureSprite" x="-25" y="-25" width="50" height="50" preserveAspectRatio="xMidYMid meet"/>
+    </g>
+  </svg>
+  <canvas id="threeScene" aria-hidden="true"></canvas>
+  <div class="strip"></div>
+  <div class="cap" id="cap">Follow the coach. Hold each gesture to catch a treasure.</div>
+  <div id="rate"></div>
+  <pre id="debugOverlay" hidden></pre>
+
+  <div class="cam"><video id="video" playsinline muted></video><canvas id="overlay"></canvas><span>Webcam · you</span></div>
+
+  <div id="choice" hidden aria-live="polite">
+    <div class="choice-title">Choose your avatar</div>
+    <div class="choice-hint" id="choiceHint">Raise one hand and hold it above your shoulder.</div>
+    <div class="choice-options">
+      <div class="avatar-option" id="choiceBoy"><img src="../assets/avatar_boy.png" alt="Boy avatar"><b>LEFT HAND · BOY</b><div class="choice-bar"><i id="choiceBoyBar"></i></div></div>
+      <div class="avatar-option" id="choiceGirl"><img src="../assets/avatar_girl.png" alt="Girl avatar"><b>RIGHT HAND · GIRL</b><div class="choice-bar"><i id="choiceGirlBar"></i></div></div>
+    </div>
+  </div>
+
+  <div id="intro" hidden aria-live="polite">
+    <div class="intro-card">
+      <div class="intro-layout">
+        <div class="intro-text">
+          <div class="intro-k" id="introK">A people of the current</div>
+          <div class="intro-title" id="introTitle">Meet the Tausug</div>
+          <div class="intro-copy" id="introCopy"></div>
+        </div>
+        <svg id="whereMap" hidden viewBox="0 0 480 660" role="img" aria-label="Simplified map showing the Sulu Archipelago and Jolo between Mindanao and Borneo">
+          <text class="map-note" x="18" y="28">SIMPLIFIED MAP · PHILIPPINES</text>
+          <path class="map-land" d="M302 61 Q335 68 350 98 L344 134 368 157 356 190 330 208 318 246 298 237 287 201 267 183 281 150 270 122 282 86Z"/>
+          <path class="map-land" d="M328 301 Q348 286 365 302L374 323 362 338 346 333Z M375 350 Q397 339 411 356L405 374 385 377Z M350 370 Q366 359 381 371L376 390 358 391Z"/>
+          <path class="map-land" d="M347 396 Q377 386 404 408L419 442 410 478 390 501 366 493 350 462 333 441Z"/>
+          <path class="map-land" d="M164 285 Q184 295 183 322L172 351 178 378 162 410 151 444 134 458 125 425 138 392 132 361 146 330Z"/>
+          <path class="map-borneo" d="M66 526 Q105 501 149 515L182 546 177 583 149 611 117 620 89 599 68 571Z"/>
+          <path class="map-sulu" d="M221 491 Q228 482 235 490L233 501 224 502Z M244 508 Q252 499 259 508L256 519 247 520Z M269 525 Q278 516 286 525L283 536 273 537Z M294 543 Q303 534 310 544L307 554 297 555Z"/>
+          <circle cx="278" cy="529" r="11" fill="none" stroke="#FFF2B8" stroke-width="3"/>
+          <path class="map-route" d="M251 536 Q243 555 220 562"/>
+          <text class="map-label" x="308" y="89">Luzon</text>
+          <text class="map-label" x="369" y="321">Visayas</text>
+          <text class="map-label" x="367" y="450">Mindanao</text>
+          <text class="map-label" x="76" y="650">Borneo</text>
+          <text class="map-label gold" x="137" y="567">Sulu Archipelago</text>
+          <text class="map-label gold" x="292" y="520">Jolo</text>
+        </svg>
+      </div>
+      <div class="intro-actions"><button class="go" id="skipIntro">Skip intro</button></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel">
+    <div class="row"><span>Score <b id="score">0</b></span><span id="stars">☆☆☆☆☆</span></div>
+    <div class="k" id="gk">Get ready</div>
+    <div class="big" id="gname">—</div>
+    <div class="sm" id="gdesc"></div>
+    <div id="ghostwrap"><svg viewBox="-230 -520 460 540"><g id="ghost"></g></svg></div>
+    <div class="bar"><i id="hold"></i></div>
+    <div class="rule" id="card" hidden><img id="timg" alt=""><div><div class="k">You caught</div><div class="name" id="tname"></div><div class="sug" id="tar" lang="tsg"></div><div class="sm" id="tdesc"></div></div></div>
+  </div>
+
+  <div id="timelineLane" hidden aria-label="Next moves lane"><div id="laneHeading">Next moves · follow the marker</div><div id="laneTrack"><i id="laneMarker"></i><div id="laneNotes"></div></div><div id="laneRating" aria-live="polite"></div></div>
+
+  <div id="result" hidden>
+    <div class="result-main">
+      <div class="k">Round complete</div>
+      <div class="mark" style="font-size:5cqw">Magsukul</div>
+      <div class="hero" style="font-size:4cqw" lang="tsg">مَغْسُكُلْ</div>
+      <div class="tag">Thank you, in the Tausug language</div>
+      <div class="got" id="got"></div>
+      <div class="row" style="gap:3cqw"><span>Score <b id="score2">0</b></span><span id="stars2"></span></div>
+      <button class="go" id="downloadSnapshot" disabled>Download keepsake PNG</button>
+      <div class="note">Your keepsake is made on this device. Your camera image is not uploaded.</div>
+      <button class="go" id="again">Play again</button>
+    </div>
+    <div class="result-preview">
+      <div class="k">Keepsake preview</div>
+      <div class="note" id="previewStatus" aria-live="polite">Preparing…</div>
+      <img id="keepsakePreview" alt="Preview of your Pangalay Mirror keepsake" hidden>
+    </div>
+  </div>
+
+  <div id="cover">
+    <div class="hero" lang="tsg">فَڠَلَيْ</div>
+    <div class="mark" id="coverTitle">Pangalay Mirror</div>
+    <div class="tag" id="tagline">Step in. Move. Meet the Tausug.</div>
+    <button class="go" id="start">Start with camera</button>
+    <div class="note" id="msg" aria-live="polite">Stand back so the camera sees you from the waist up. Keys: 1–4 and 5 force a gesture, D shows the debug numbers. Add <b>?demo=1</b> to the address to run without a camera.</div>
+    <button class="go" id="demoFallback" type="button" hidden onclick="location.href=new URL('?demo=1',location.href).href">Try no-camera demo</button>
+    <a id="twoDFallback" href="../app/" hidden>Open the 2D app</a>
+  </div>
+</div></div>
+
+<div id="orientationHint" role="status" aria-live="polite"><div class="orientation-card"><div class="phone-icon" aria-hidden="true">↻</div><h2>Turn your phone sideways</h2><p>Pangalay Mirror is designed for landscape play. Rotate your phone to see the full dance screen.</p></div></div>
+
+<audio id="bgm" src="../film/pangalay.mp3" loop preload="auto"></audio>
+
+<script type="module">
+import * as THREE from './vendor/three.module.js';
+import {GLTFLoader} from './vendor/addons/loaders/GLTFLoader.js';
+import {clone as cloneSkeleton} from './vendor/addons/utils/SkeletonUtils.js';
+/* Pangalay Mirror — playable prototype.
+   webcam -> MediaPipe pose landmarks -> arm angles -> Blender/GLB avatar + gesture matcher -> catch -> voice + treasure card.
+   Cultural content and gameplay remain reused from the existing app and ../film. */
+const $=id=>document.getElementById(id), DEMO=new URLSearchParams(location.search).has('demo');
+const INK='#0B1418', SKIN='#C98E63', FILM='../film/';
+
+/* ---------- Blender models + Three.js stage ---------- */
+const threeCanvas=$('threeScene'), gltfLoader=new GLTFLoader();
+let threeRenderer=null,threeScene=null,threeCamera=null,threeModels=null,player3D=null,coach3D=null,threeReady=null,roundAvatarFrame=null;
+function resize3D(){if(!threeRenderer)return;const r=$('stage').getBoundingClientRect();threeRenderer.setSize(Math.max(1,r.width),Math.max(1,r.height),false);threeCamera.left=-8;threeCamera.right=8;threeCamera.top=4.5;threeCamera.bottom=-4.5;threeCamera.updateProjectionMatrix();render3D()}
+function render3D(){if(threeRenderer&&threeScene&&threeCamera)threeRenderer.render(threeScene,threeCamera)}
+function recolorCoach(root){root.traverse(o=>{if(!o.isMesh)return;const tint=m=>{const c=m.clone();c.color.set('#F2C14E');c.emissive?.set('#8A5B08');c.emissiveIntensity=.35;c.transparent=true;c.opacity=.62;c.depthWrite=false;return c};o.material=Array.isArray(o.material)?o.material.map(tint):tint(o.material);o.renderOrder=2})}
+function bindAvatar(kind){
+  if(!threeScene||!threeModels)return;
+  if(player3D)threeScene.remove(player3D);if(coach3D)threeScene.remove(coach3D);
+  player3D=cloneSkeleton(threeModels[kind]);player3D.name='3D player '+kind;player3D.position.set(-1.5,-3.65,0);player3D.scale.setScalar(1.16);threeScene.add(player3D);
+  coach3D=cloneSkeleton(threeModels[kind]);coach3D.name='3D coach';coach3D.position.set(5.25,-3.65,0);coach3D.scale.setScalar(.64);recolorCoach(coach3D);threeScene.add(coach3D);
+  applyPose3D(player3D,pose);applyPose3D(coach3D,IDLE);render3D()
+}
+function applyPose3D(root,p){if(!root||!p)return;for(const [side,angles] of [['L',p.l],['R',p.r]])for(const [joint,index] of [['shoulder',0],['elbow',1],['wrist',2]]){const bone=root.getObjectByName(`${joint}_${side}`);if(bone)bone.rotation.z=THREE.MathUtils.degToRad(-angles[index])}}
+async function init3D(){
+  if(threeReady)return threeReady;
+  threeReady=(async()=>{
+    threeRenderer=new THREE.WebGLRenderer({canvas:threeCanvas,alpha:true,antialias:!matchMedia('(pointer: coarse)').matches,preserveDrawingBuffer:true,powerPreference:'low-power'});
+    threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));threeRenderer.outputColorSpace=THREE.SRGBColorSpace;threeRenderer.setClearColor(0x000000,0);
+    threeScene=new THREE.Scene();threeCamera=new THREE.OrthographicCamera(-8,8,4.5,-4.5,.1,80);threeCamera.position.set(0,0,18);threeCamera.lookAt(0,0,0);
+    threeScene.add(new THREE.HemisphereLight(0xffead1,0x26152b,2.0));const key=new THREE.DirectionalLight(0xffffff,2.4);key.position.set(-3,6,8);threeScene.add(key);
+    resize3D();window.addEventListener('resize',resize3D,{passive:true});
+    const [girl,boy]=await Promise.all(['girl','boy'].map(async kind=>(await gltfLoader.loadAsync(`./models/avatar-${kind}.glb`)).scene));
+    threeModels={girl,boy};bindAvatar(kind);return true
+  })().catch(error=>{threeReady=null;try{threeRenderer?.dispose()}catch(e){}threeRenderer=null;throw error});
+  return threeReady
+}
+threeCanvas.addEventListener('webglcontextlost',e=>{e.preventDefault();$('msg').textContent='The 3D renderer stopped. Try again or open the 2D app.';$('twoDFallback').hidden=false;$('cover').hidden=false;$('start').disabled=true});
+window.addEventListener('resize',()=>{const hint=$('orientationHint');if(hint)hint.setAttribute('aria-hidden',getComputedStyle(hint).display==='none'?'true':'false')},{passive:true});
+function capture3DPlayer(){if(!threeRenderer)return null;try{const source=threeRenderer.domElement,stage=$('stage').getBoundingClientRect(),scale=source.width/stage.width,out=document.createElement('canvas');out.width=420;out.height=570;const c=out.getContext('2d');c.drawImage(source,360*scale,95*scale,300*scale,575*scale,0,0,out.width,out.height);return out}catch(e){console.warn('3D keepsake capture failed',e);return null}}
+
+/* ---------- avatar rig (same as the film) ---------- */
+function arm(k,side,kind){
+  const S=side<0?'L':'R';let up,fo,ha;
+  if(kind==='ghost'){const c='stroke="#F2C14E" stroke-width="16" stroke-linecap="round"';up=`<line y2="80" ${c}/>`;fo=`<line y2="75" ${c}/>`;ha=`<line y2="38" ${c}/>`}
+  else{const c=kind==='girl'?'#B32E63':'#17324A';
+    up=`<line y2="80" stroke="${INK}" stroke-width="30" stroke-linecap="round"/><line y2="80" stroke="${c}" stroke-width="22" stroke-linecap="round"/>`;
+    fo=`<line y2="75" stroke="${INK}" stroke-width="26" stroke-linecap="round"/><line y2="75" stroke="${c}" stroke-width="18" stroke-linecap="round"/>`;
+    ha=`<ellipse cy="14" rx="9" ry="17" fill="${SKIN}" stroke="${INK}" stroke-width="3"/>`;
+    if(kind==='girl')for(let i=-1.5;i<=1.5;i++)ha+=`<path d="M${i*4} 28 q${side*3} 18 ${side*22} 26" fill="none" stroke="#F2C14E" stroke-width="3.5" stroke-linecap="round"/>`}
+  return `<g id="${k}${S}1">${up}<g id="${k}${S}2">${fo}<g id="${k}${S}3">${ha}</g></g></g>`;
+}
+function body(kind){
+  const st=` stroke="${INK}" stroke-width="4" stroke-linejoin="round"`,
+    feet=`<ellipse cx="-24" cy="0" rx="20" ry="8" fill="${INK}"/><ellipse cx="24" cy="0" rx="20" ry="8" fill="${INK}"/>`,
+    head=`<rect x="-9" y="-352" width="18" height="24" fill="${SKIN}"${st}/><circle cy="-384" r="36" fill="${SKIN}"${st}/><path d="M-18 -381 q6 5 12 0 M6 -381 q6 5 12 0" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/><path d="M-8 -366 q8 6 16 0" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>`;
+  if(kind==='ghost')return `<circle cy="-384" r="34" fill="none" stroke="#F2C14E" stroke-width="14"/><path d="M0 -350 V-175 M-46 -315 H46 M-28 -175 H28 M-28 -175 L-32 -6 M28 -175 L32 -6" fill="none" stroke="#F2C14E" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>`;
+  if(kind==='girl')return feet+
+    `<path d="M-44 -178 H44 L60 -4 H-60 Z" fill="#7A0F2E"/><image href="${FILM}pis-sw.png" x="-62" y="-182" width="124" height="182" preserveAspectRatio="xMidYMid slice" clip-path="url(#skirtclip)"/><path d="M-44 -178 H44 L60 -4 H-60 Z" fill="none"${st}/>`+
+    `<path d="M-46 -328 Q0 -342 46 -328 L38 -172 H-38 Z" fill="#B32E63"${st}/><path d="M-14 -334 L0 -302 L14 -334" fill="none" stroke="#F2C14E" stroke-width="4"/>`+
+    `<g fill="#F2C14E"><circle cy="-280" r="5"/><circle cy="-254" r="5"/><circle cy="-228" r="5"/><circle cy="-202" r="5"/></g>`+
+    head+`<circle cy="-430" r="16" fill="#17100D"/><path d="M-37 -384 A37 37 0 0 1 37 -384 Q20 -406 0 -406 Q-20 -406 -37 -384 Z" fill="#17100D"/>`;
+  return feet+
+    `<path d="M-44 -178 H-2 L-8 -4 H-48 Z" fill="#3A2A55"${st}/><path d="M44 -178 H2 L8 -4 H48 Z" fill="#3A2A55"${st}/>`+
+    `<path d="M-48 -328 Q0 -342 48 -328 L42 -170 H-42 Z" fill="#17324A"${st}/>`+
+    `<line y1="-334" y2="-196" stroke="#F2C14E" stroke-width="3"/><g fill="#F2C14E"><circle cx="10" cy="-296" r="5"/><circle cx="10" cy="-268" r="5"/><circle cx="10" cy="-240" r="5"/><circle cx="10" cy="-212" r="5"/></g>`+
+    `<path d="M-30 -178 l-6 44 h16 l4 -44 Z" fill="#C8323C"${st}/><rect x="-44" y="-198" width="88" height="22" fill="#C8323C"${st}/>`+
+    head+`<path d="M12 -420 L44 -452 L36 -404 Z" fill="#7A0F2E"${st}/><path d="M-38 -390 A38 38 0 0 1 38 -390 Q0 -404 -38 -390 Z" fill="#7A0F2E"${st}/><image href="${FILM}pis-sw.png" x="-42" y="-456" width="90" height="70" preserveAspectRatio="xMidYMid slice" clip-path="url(#pisclip)"/>`;
+}
+function build(id,k,kind){$(id).innerHTML=body(kind)+arm(k,-1,kind)+arm(k,1,kind)}
+function setPose(k,p){[['L',-1,p.l],['R',1,p.r]].forEach(a=>{
+  $(k+a[0]+'1').setAttribute('transform',`translate(${a[1]*46},-315) rotate(${a[2][0].toFixed(1)})`);
+  $(k+a[0]+'2').setAttribute('transform',`translate(0,80) rotate(${a[2][1].toFixed(1)})`);
+  $(k+a[0]+'3').setAttribute('transform',`translate(0,75) rotate(${a[2][2].toFixed(1)})`)});
+  if(k==='a')applyPose3D(player3D,p);else if(k==='h')applyPose3D(coach3D,p);render3D()}
+
+/* ---------- content (from the film) ---------- */
+const IDLE={l:[8,6,0],r:[-8,-6,0]};
+const STEPS=[
+ {key:'open', g:'Open arms',gd:'A greeting of welcome and joy.',pose:{l:[88,4,55],r:[-88,-4,-55]},target:'right',teach:'g0',vo:'vo0',name:'Kulintangan',ar:'كُلِنْتَڠَنْ',desc:'A row of small gongs. Cousin of the gamelan.',img:'tr0.png'},
+ {key:'overhead',g:'Hands overhead',gd:'Triumph and great happiness.',pose:{l:[150,25,-70],r:[-150,-25,70]},target:'right',teach:'g1',vo:'vo1',name:'Pis syabit',ar:'فِسْ سِيَبِتْ',desc:'A woven headcloth. Cousin of songket.',img:'tr1.png'},
+ {key:'crossed',g:'Crossed arms',gd:'Held at the chest, for protectiveness or playfulness.',pose:{l:[10,-125,-25],r:[-10,125,25]},target:'center',teach:'g2',vo:'vo2',name:'Pearl shell',ar:'',desc:'Sulu pearls once sailed to the markets of Singapore.',img:'tr2.png'},
+ {key:'kalis',g:'One arm out',gd:'Reach one arm out to the side and turn the wrist.',pose:{l:[35,30,40],r:[-92,-8,-55]},target:'right',teach:'g3',vo:'vo3',name:'Kalis',ar:'كَلِسْ',desc:'The wavy-bladed Tausug sword. Cousin of the keris.',img:'tr3.png'},
+ {key:'heart',g:'Hands to heart',gd:'The closing gesture. Bring your hands to your chest.',pose:{l:[25,-138,-10],r:[-25,138,10]},teach:'exit',vo:null,closing:true}
+];
+
+/* ---------- landmarks -> rig angles ---------- */
+const wrap=a=>((a+540)%360)-180, deg=(a,b)=>Math.atan2(-(b.x-a.x),b.y-a.y)*180/Math.PI;
+/* returns mirrored points in a square-ish space, so the player's left arm drives the avatar's screen-left arm */
+function points(lm,aspect){const p=i=>({x:(1-lm[i].x)*aspect,y:lm[i].y,v:lm[i].visibility??1});
+  return{shL:p(11),shR:p(12),elL:p(13),elR:p(14),wrL:p(15),wrR:p(16),inL:p(19),inR:p(20),hipL:p(23),hipR:p(24)}}
+function angles(P){
+  const one=(sh,el,wr,inx,side)=>{let a1=deg(sh,el);const f=deg(el,wr);
+    if(side<0&&a1<-90)a1+=360;if(side>0&&a1>90)a1-=360;            /* keep straight-up arms continuous */
+    const a2=wrap(f-a1),a3=inx.v>.4?Math.max(-80,Math.min(80,wrap(deg(wr,inx)-f))):0;return[a1,a2,a3]};
+  return{l:one(P.shL,P.elL,P.wrL,P.inL,-1),r:one(P.shR,P.elR,P.wrR,P.inR,1)}}
+/* ---------- gesture rules (loose on purpose: it is a dance, not a test) ---------- */
+function handFacesCamera(hand){
+  if(!hand||hand.length<18)return false;
+  const w=hand[0],i=hand[5],p=hand[17],ax=i.x-w.x,ay=i.y-w.y,az=(i.z||0)-(w.z||0),bx=p.x-w.x,by=p.y-w.y,bz=(p.z||0)-(w.z||0);
+  const nx=ay*bz-az*by,ny=az*bx-ax*bz,nz=ax*by-ay*bx,mag=Math.hypot(nx,ny,nz);
+  return mag>0&&Math.abs(nz)/mag>.62;
+}
+function detect(P,A,hands=null,aspect=1){
+  const SW=Math.abs(P.shR.x-P.shL.x)||.2,d=(P.wrL.x-P.wrR.x)/SW,midY=(P.shL.y+P.shR.y)/2,
+    chest=w=>w.y>midY-.25*SW&&w.y<midY+1.25*SW, inside=w=>w.x>P.shL.x-.25*SW&&w.x<P.shR.x+.25*SW,
+    outL=A.l[0]>55&&A.l[0]<125&&Math.abs(A.l[1])<55, outR=A.r[0]<-55&&A.r[0]>-125&&Math.abs(A.r[1])<55,
+    downL=A.l[0]<50&&P.wrL.y>P.shL.y, downR=A.r[0]>-50&&P.wrR.y>P.shR.y,
+    oneOut=outR?P.wrR:outL?P.wrL:null;
+  let kalis=(outR&&downL)||(outL&&downR);
+  if(oneOut&&hands&&hands.length){
+    const nearest=hands.map(h=>({h,d:Math.hypot((1-h[0].x)*aspect-oneOut.x,h[0].y-oneOut.y)/SW})).sort((a,b)=>a.d-b.d)[0];
+    if(nearest&&nearest.d<.48)kalis=handFacesCamera(nearest.h);
+  }
+  return{
+    open:outL&&outR,
+    overhead:P.wrL.y<P.shL.y-.55*SW&&P.wrR.y<P.shR.y-.55*SW,
+    crossed:d>.08&&chest(P.wrL)&&chest(P.wrR),
+    kalis,
+    heart:d>-.55&&d<=.08&&chest(P.wrL)&&chest(P.wrR)&&inside(P.wrL)&&inside(P.wrR)
+  }}
+/* forward kinematics: a rig pose -> fake landmarks (used by demo mode, keys 1-5, and the self-test) */
+function fake(pose){const r=Math.PI/180,lm=[];for(let i=0;i<33;i++)lm.push({x:.5,y:.5,visibility:1});
+  const S=.0016,cx=.5,cy=.62,put=(i,x,y)=>{lm[i]={x:1-(cx+x*S),y:cy+y*S,visibility:1}};   /* stored un-mirrored, like a real camera */
+  [['l',-1,11,13,15,19],['r',1,12,14,16,20]].forEach(([k,side,sh,el,wr,inx])=>{const a=pose[k],a1=a[0]*r,a2=a1+a[1]*r,a3=a2+a[2]*r;
+    let x=side*46,y=-315;put(sh,x,y);x-=80*Math.sin(a1);y+=80*Math.cos(a1);put(el,x,y);x-=75*Math.sin(a2);y+=75*Math.cos(a2);put(wr,x,y);x-=40*Math.sin(a3);y+=40*Math.cos(a3);put(inx,x,y)});
+  put(23,-28,-175);put(24,28,-175);put(0,0,-384);return lm}
+const mix=(a,b,w)=>({l:a.l.map((v,i)=>v+(b.l[i]-v)*w),r:a.r.map((v,i)=>v+(b.r[i]-v)*w)});
+
+/* ---------- audio: one shared voice player, unlocked by the Start tap ---------- */
+const voice=new Audio(),bgm=$('bgm');let voiceDone=null;
+function say(name,done){voiceDone=done||null;try{voice.pause();voice.src=FILM+name+'.mp3';bgm.volume=.15;voice.play().catch(()=>finishVoice())}catch(e){finishVoice()}}
+function finishVoice(){bgm.volume=.5;const d=voiceDone;voiceDone=null;if(d)d()}
+voice.addEventListener('ended',finishVoice);voice.addEventListener('error',finishVoice);
+
+/* ---------- game state ---------- */
+let kind='girl',step=-1,phase='idle',heldMs=0,lostMs=0,score=0,caught=[],pose=IDLE,forced=null,demoPose=IDLE,phaseAt=0,last=performance.now(),bodyVisibleSince=null,choiceSince={boy:null,girl:null},introIndex=-1,attractHandSince=null,restartTimer=null,laneActive=false,laneTime=0,treasureCueAt=0,treasureTarget=null,keepsakeCanvas=null,roundPlayerFrame=null;
+const HOLD=650;
+const LANE_EVENTS=[{t:9.6,g:'↔',n:'OPEN',gold:1},{t:18.4,g:'•',n:'FLOW'},{t:25.5,g:'↟',n:'OVERHEAD',gold:1},{t:36.2,g:'•',n:'FLOW'},{t:45.1,g:'×',n:'CROSS',gold:1},{t:52.9,g:'•',n:'FLOW'},{t:62.1,g:'↻',n:'WRIST',gold:1},{t:72.6,g:'♡',n:'CLOSE'}];
+function initLane(){const box=$('laneNotes');box.innerHTML='';LANE_EVENTS.forEach((m,i)=>{const e=document.createElement('div');e.id='laneMove'+i;e.className='lane-move '+(m.gold?'gold':'filler');e.innerHTML='<span class="lane-glyph">'+m.g+'</span><span class="lane-name">'+m.n+'</span>';box.appendChild(e)})}
+function tickLane(){const track=$('laneTrack'),lane=$('timelineLane'),w=track.clientWidth||600;lane.classList.toggle('lane-paused',phase==='hold'||phase==='done');LANE_EVENTS.forEach((m,i)=>{const e=$('laneMove'+i),delta=m.t-laneTime,x=w*.32+delta*w/32;e.style.left=(x/w*100)+'%';e.style.opacity=x<-20||x>w+20?'0':'1';e.classList.toggle('approaching',delta>0&&delta<=2);e.classList.toggle('at-marker',delta<=0&&delta>=-.65)})}
+const TREASURE_STARTS=[{x:1180,y:180},{x:1180,y:510},{x:-40,y:390},{x:1160,y:650}],HAND_LENGTH=182.2;
+function wristTarget(s){const sidePose=side=>{const a1=s.pose[side][0]*Math.PI/180,a2=(s.pose[side][0]+s.pose[side][1])*Math.PI/180,a3=(s.pose[side][0]+s.pose[side][1]+s.pose[side][2])*Math.PI/180,sgn=side==='l'?-1:1;return{x:sgn*46-80*Math.sin(a1)-75*Math.sin(a2)-14*Math.sin(a3),y:-315+80*Math.cos(a1)+75*Math.cos(a2)+14*Math.cos(a3)}};
+  const p=s.target==='center'?{x:(sidePose('l').x+sidePose('r').x)/2,y:(sidePose('l').y+sidePose('r').y)/2}:sidePose(s.target==='left'?'l':'r');return{x:560+p.x*1.02,y:655+p.y*1.02}}
+function clearTreasureCue(){treasureTarget=null;$('treasureCue').setAttribute('visibility','hidden');$('treasureGlow').setAttribute('opacity','0');$('treasureProgress').setAttribute('stroke-dashoffset',String(HAND_LENGTH))}
+function setTreasureCue(s,i){if(s.closing){clearTreasureCue();return}treasureTarget=wristTarget(s);treasureCueAt=performance.now();const start=TREASURE_STARTS[i];$('treasureSprite').setAttribute('href',FILM+s.img);$('treasureCue').setAttribute('transform',`translate(${start.x} ${start.y}) scale(.45)`);$('treasureCue').setAttribute('visibility','visible');$('treasureProgress').setAttribute('stroke-dashoffset',String(HAND_LENGTH));$('treasureGlow').setAttribute('opacity','0')}
+function updateTreasureCue(now){if(!treasureTarget||step<0||STEPS[step].closing||phase==='hold')return;const start=TREASURE_STARTS[step],t=Math.max(0,Math.min(1,(now-treasureCueAt)/1100)),ease=1-Math.pow(1-t,3),x=start.x+(treasureTarget.x-start.x)*ease,y=start.y+(treasureTarget.y-start.y)*ease,scale=.45+.55*ease;$('treasureCue').setAttribute('transform',`translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${scale.toFixed(3)})`);const progress=phase==='try'?Math.min(1,heldMs/HOLD):0;$('treasureProgress').setAttribute('stroke-dashoffset',String(HAND_LENGTH*(1-progress)));$('treasureGlow').setAttribute('opacity',String(.08+.72*progress));$('treasureGlow').setAttribute('r',String(48+18*progress))}
+function collectTreasureCue(){if(!treasureTarget)return;$('treasureGlow').setAttribute('opacity','.95');$('treasureCue').setAttribute('transform',`translate(${treasureTarget.x} ${treasureTarget.y}) scale(1.35)`);setTimeout(clearTreasureCue,450)}
+function show(i){step=i;phase='teach';heldMs=0;phaseAt=performance.now();const s=STEPS[i];
+  setTreasureCue(s,i);
+  $('gk').textContent=s.closing?'Closing gesture':`Gesture ${i+1} of 4 · learn it`;$('gname').textContent=s.g;$('gdesc').textContent=s.gd;setPose('h',s.pose);$('card').hidden=true;
+  say(s.teach,()=>{if(step===i&&phase==='teach'){phase='try';$('gk').textContent=s.closing?'Closing gesture · your turn':`Gesture ${i+1} of 4 · your turn`}});
+  setTimeout(()=>{if(step===i&&phase==='teach'){phase='try'}},9000)}
+function hit(){const s=STEPS[step];phase='hold';$('hold').style.width='100%';
+  if(!s.closing){const when=[9.6,25.5,45.1,62.1][step],cue=LANE_EVENTS.findIndex(m=>m.t===when),tile=$('laneMove'+cue);if(tile){tile.classList.remove('at-marker','approaching');tile.classList.add('caught');setTimeout(()=>tile.classList.remove('caught'),700)}}
+  if(!s.closing){const when=[9.6,25.5,45.1,62.1][step],delta=Math.abs(laneTime-when);const r=$('laneRating');r.textContent=delta<1.3?'Perfect':delta<4?'Good':'Keep moving';r.classList.add('on');setTimeout(()=>r.classList.remove('on'),1500)}
+  if(s.closing){flash('Magsukul!');setTimeout(finish,1800);return}
+  collectTreasureCue();
+  score+=250;caught.push(s);flash('Marayaw!');$('score').textContent=score.toLocaleString();const n=caught.length;$('stars').textContent='★★★★★'.slice(0,n+1>4?5:n)+'☆☆☆☆☆'.slice(n+1>4?5:n);
+  $('gk').textContent='Hold the pose and listen';$('timg').src=FILM+s.img;$('tname').textContent=s.name;$('tar').textContent=s.ar;$('tdesc').textContent=s.desc;$('card').hidden=false;
+  const i=step;let moved=false;const next=()=>{if(moved)return;moved=true;if(step===i)show(i+1)};say(s.vo,next);setTimeout(next,11000)}
+function flash(t){const r=$('rate');r.textContent=t;r.classList.add('on');setTimeout(()=>r.classList.remove('on'),1600)}
+function capturePlayerFrame(){
+  try{if(video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0){const frame=document.createElement('canvas');frame.width=video.videoWidth;frame.height=video.videoHeight;const pc=frame.getContext('2d');pc.save();pc.translate(frame.width,0);pc.scale(-1,1);pc.drawImage(video,0,0,frame.width,frame.height);pc.restore();return frame}}catch(e){}
+  return null
+}
+function finish(){phase='done';laneActive=false;clearTreasureCue();$('timelineLane').hidden=true;$('score2').textContent=score.toLocaleString();$('stars2').textContent=$('stars').textContent;
+  roundPlayerFrame=capturePlayerFrame();roundAvatarFrame=capture3DPlayer();keepsakeCanvas=null;$('keepsakePreview').hidden=true;$('previewStatus').hidden=false;$('previewStatus').textContent='Preparing your keepsake…';$('downloadSnapshot').disabled=true;
+  $('got').innerHTML=caught.map(s=>`<div><img src="${FILM}${s.img}" alt=""><b>${s.name}</b></div>`).join('');$('result').hidden=false;say('result');clearTimeout(restartTimer);
+  createKeepsake().then(canvas=>{if(phase!=='done')return;keepsakeCanvas=canvas;$('keepsakePreview').src=canvas.toDataURL('image/png');$('keepsakePreview').hidden=false;$('previewStatus').hidden=true;$('downloadSnapshot').disabled=false}).catch(e=>{console.error('Keepsake preview failed',e);$('previewStatus').textContent='Preview unavailable. Please try the round again.'});
+  restartTimer=setTimeout(()=>{if(phase!=='done')return;$('result').hidden=true;keepsakeCanvas=null;roundPlayerFrame=null;$('keepsakePreview').removeAttribute('src');$('keepsakePreview').hidden=true;$('coverTitle').textContent='Pangalay Mirror';$('tagline').textContent='Raise your hand to begin';$('start').textContent='Raise your hand to begin';$('msg').textContent='Hold either hand above your shoulder for a moment.';$('cover').hidden=false;phase='attract';attractHandSince=null},60000)}
+async function createKeepsake(){
+  const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;const c=canvas.getContext('2d');
+  const playerFrame=roundPlayerFrame;
+  const sky=c.createLinearGradient(0,0,0,1350);sky.addColorStop(0,'#150618');sky.addColorStop(.42,'#B8473F');sky.addColorStop(.66,'#F08A4B');sky.addColorStop(.67,'#1C6E77');sky.addColorStop(1,'#072C33');c.fillStyle=sky;c.fillRect(0,0,1080,1350);
+  c.fillStyle='rgba(6,20,26,.72)';c.fillRect(0,0,1080,118);c.fillStyle='#F2C14E';c.fillRect(0,118,1080,5);
+  c.textAlign='center';c.fillStyle='#F6EFDF';c.font='700 30px "Albert Sans",sans-serif';c.fillText('PANGALAY MIRROR · YOUR DANCE',540,74);
+  c.fillStyle='rgba(6,20,26,.7)';c.fillRect(50,145,610,450);c.fillRect(680,145,350,450);
+  c.strokeStyle='rgba(242,193,78,.8)';c.lineWidth=4;c.strokeRect(50,145,610,450);c.strokeRect(680,145,350,450);
+  if(playerFrame){
+    const x=70,y=165,w=570,h=380,scale=Math.max(w/playerFrame.width,h/playerFrame.height),sw=w/scale,sh=h/scale,sx=(playerFrame.width-sw)/2,sy=(playerFrame.height-sh)/2;
+    c.save();c.beginPath();c.rect(x,y,w,h);c.clip();c.drawImage(playerFrame,sx,sy,sw,sh,x,y,w,h);c.restore();
+    c.fillStyle='#F2C14E';c.font='700 24px "Albert Sans",sans-serif';c.textAlign='left';c.fillText('YOU · YOUR MOMENT',76,576)
+  }else{
+    c.fillStyle='#0B1418';c.fillRect(70,165,570,380);c.fillStyle='#F2C14E';c.textAlign='center';c.font='700 29px "Albert Sans",sans-serif';c.fillText('NO CAMERA SNAPSHOT',355,330);c.fillStyle='#F6EFDF';c.font='500 23px "Albert Sans",sans-serif';c.fillText('This demo keepsake has no player photo.',355,375)
+  }
+  if(roundAvatarFrame)c.drawImage(roundAvatarFrame,700,170,310,365);
+  else{c.fillStyle='#0B1418';c.fillRect(700,170,310,365);c.fillStyle='#F6EFDF';c.textAlign='center';c.font='600 24px "Albert Sans",sans-serif';c.fillText('3D AVATAR PREVIEW',855,355)}
+  c.fillStyle='#F2C14E';c.textAlign='center';c.font='700 24px "Albert Sans",sans-serif';c.fillText(`${kind.toUpperCase()} AVATAR`,855,576);
+  c.fillStyle='#F2C14E';c.fillRect(50,625,980,4);c.textAlign='center';c.fillStyle='#F6EFDF';c.font='600 24px "Albert Sans",sans-serif';c.fillText('YOUR ROUND',540,674);
+  c.fillStyle='#F2C14E';c.font='700 48px "Gloock",Georgia,serif';c.fillText(`Score  ${score.toLocaleString()}`,540,731);c.fillStyle='#F6EFDF';c.font='30px "Albert Sans",sans-serif';c.fillText($('stars2').textContent||'☆☆☆☆☆',540,772);
+  c.textAlign='center';c.fillStyle='#C9D8D6';c.font='700 20px "Albert Sans",sans-serif';c.fillText('TREASURES CAUGHT',540,818);
+  const treasureImages=await Promise.all(caught.map(async s=>{try{const im=new Image();im.src=new URL(FILM+s.img,location.href).href;await im.decode();return im}catch(e){return null}}));
+  const cell=220,start=100;for(let i=0;i<caught.length;i++){const x=start+i*cell,im=treasureImages[i];if(im)c.drawImage(im,x+70,828,80,80);c.fillStyle='#F6EFDF';c.font='600 20px "Albert Sans",sans-serif';c.fillText(caught[i].name,x+110,930)}
+  c.fillStyle='rgba(6,20,26,.76)';c.fillRect(50,960,980,215);c.strokeStyle='rgba(242,193,78,.6)';c.lineWidth=3;c.strokeRect(50,960,980,215);
+  let profile=null;try{profile=new Image();profile.src=new URL('../assets/me.jpg',location.href).href;await profile.decode()}catch(e){profile=null}
+  if(profile){c.save();c.beginPath();c.arc(160,1067,78,0,Math.PI*2);c.clip();c.drawImage(profile,82,989,156,156);c.restore();c.strokeStyle='#F2C14E';c.lineWidth=4;c.beginPath();c.arc(160,1067,80,0,Math.PI*2);c.stroke()}
+  else{c.fillStyle='#2A0C2E';c.beginPath();c.arc(160,1067,78,0,Math.PI*2);c.fill();c.fillStyle='#F2C14E';c.font='700 48px "Albert Sans",sans-serif';c.textAlign='center';c.fillText('AA',160,1084)}
+  c.textAlign='left';c.fillStyle='#F2C14E';c.font='700 34px "Gloock",Georgia,serif';c.fillText('Aljabri Alam',280,1015);c.fillStyle='#F6EFDF';c.font='600 22px "Albert Sans",sans-serif';c.fillText('Tausug · Technical Lead, VISEO Asia',280,1053);
+  c.font='500 21px "Albert Sans",sans-serif';c.fillText('A Tausug technologist sharing his people’s dance and',280,1090);c.fillText('culture through software.',280,1120);c.fillStyle='#F2C14E';c.font='600 19px "Albert Sans",sans-serif';c.fillText('linkedin.com/in/aljabri-alam',280,1151);
+  let qr=null;try{qr=new Image();qr.src=new URL('../app/keepsake-qr.svg',location.href).href;await qr.decode()}catch(e){qr=null}
+  if(qr){c.fillStyle='#fff';c.fillRect(850,970,150,150);c.drawImage(qr,855,975,140,140);c.fillStyle='#F2C14E';c.font='700 18px "Albert Sans",sans-serif';c.textAlign='center';c.fillText('SCAN TO PLAY',925,1137);c.fillStyle='#F6EFDF';c.font='500 13px "Albert Sans",sans-serif';c.fillText('pangalay-mirror.vercel.app',925,1155,150);c.fillText('/app/',925,1171)}
+  c.textAlign='center';c.fillStyle='#F2C14E';c.font='72px "Gloock",Georgia,serif';c.fillText('Magsukul',540,1250);c.direction='rtl';c.font='54px "Noto Naskh Arabic",serif';c.fillText('مَغْسُكُلْ',540,1310);c.direction='ltr';
+  return canvas;
+}
+function downloadSnapshot(){if(!keepsakeCanvas)throw new Error('Keepsake preview is not ready');const a=document.createElement('a');a.download='pangalay-mirror-keepsake.png';a.href=keepsakeCanvas.toDataURL('image/png');a.click()}
+function reset(){score=0;caught=[];laneTime=0;laneActive=true;$('timelineLane').hidden=false;$('laneRating').textContent='';$('laneRating').classList.remove('on');try{bgm.currentTime=0;bgm.play().catch(()=>{})}catch(e){}tickLane();$('score').textContent='0';$('stars').textContent='☆☆☆☆☆';$('result').hidden=true;show(0)}
+
+function frame(lm,aspect,now,hands=null){
+  const dt=Math.min(100,now-last);last=now;if(laneActive){if(phase!=='hold'&&phase!=='done')laneTime+=dt/1000;tickLane()}updateTreasureCue(now);
+  if(forced){lm=fake(forced.pose);aspect=1;if(now>forced.until)forced=null}
+  let D=null,P=null;
+  if(lm){P=points(lm,aspect);const A=angles(P);pose=mix(pose,A,.45);D=detect(P,A,hands,aspect)}else pose=mix(pose,IDLE,.1);
+  setPose('a',pose);
+  if(phase==='try'&&D){const want=STEPS[step].key;
+    if(D[want]){heldMs+=dt;lostMs=0}else{lostMs+=dt;if(lostMs>250)heldMs=Math.max(0,heldMs-dt*2)}
+    $('hold').style.width=Math.min(100,heldMs/HOLD*100)+'%';if(heldMs>=HOLD)hit()}
+  else if(phase==='teach')$('hold').style.width='0%';
+  if(!$('debugOverlay').hidden)$('debugOverlay').textContent=D?`L ${pose.l.map(v=>v.toFixed(0)).join(' ')}\nR ${pose.r.map(v=>v.toFixed(0)).join(' ')}\n`+Object.keys(D).map(k=>(D[k]?'● ':'○ ')+k).join('\n')+`\nphase ${phase} step ${step}`:'no body found';
+  return P}
+
+/* ---------- camera framing gate ---------- */
+function waitForBody(lm,now){
+  const visible=i=>{const p=lm&&lm[i];return !!p&&Number.isFinite(p.visibility)&&p.visibility>=.5&&p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1};
+  const cap=$('cap');
+  if(!visible(11)||!visible(12)){$('cap').textContent='Step into view so I can see your arms.';bodyVisibleSince=null;return}
+  if(![13,14,15,16].every(visible)){$('cap').textContent='Take a step back.';bodyVisibleSince=null;return}
+  if(bodyVisibleSince===null){bodyVisibleSince=now;cap.textContent='Hold still and keep your arms in view.';return}
+  if(now-bodyVisibleSince<1000)return;
+  bodyVisibleSince=null;cap.textContent='Body found ✓';beginIntroduction()
+}
+
+const INTRO=[
+  {k:'Who are the Tausug?',title:'Meet the Tausug',copy:'The people of the current. They are a seafaring people from the far south of the Philippines.',audio:'intro0'},
+  {k:'Where do they live?',title:'The Sulu Archipelago',copy:'A chain of islands between Mindanao and Borneo, with Jolo at its heart. For centuries, the Sultanate of Sulu traded across these seas.',audio:'intro1',map:true},
+  {k:'What will you learn?',title:'Step into their world',copy:'Learn pangalay, one of their dances, and meet the treasures of their culture along the way.',audio:'intro2'}
+];
+function beginIntroduction(){phase='intro';introIndex=-1;$('panel').hidden=true;$('choice').hidden=true;$('intro').hidden=false;showIntro(0)}
+function showIntro(i){introIndex=i;const card=INTRO[i];$('introK').textContent=card.k;$('introTitle').textContent=card.title;$('introCopy').textContent=card.copy;$('whereMap').toggleAttribute('hidden',!card.map);$('intro').classList.toggle('has-map',!!card.map);
+  let advanced=false;const advance=()=>{if(advanced||phase!=='intro'||introIndex!==i)return;advanced=true;if(i<INTRO.length-1)showIntro(i+1);else finishIntroduction()};
+  say(card.audio,advance);setTimeout(advance,15000)}
+function finishIntroduction(){if(phase!=='intro')return;$('intro').hidden=true;introIndex=-1;
+  if(DEMO){pick('girl');beginStance()}else beginAvatarChoice()}
+function skipIntroduction(){if(phase!=='intro')return;voice.pause();voiceDone=null;bgm.volume=.5;finishIntroduction()}
+function beginStance(){phase='stance';$('choice').hidden=true;$('panel').hidden=true;$('intro').hidden=false;
+  $('introK').textContent='Before you begin';$('introTitle').textContent='Find your stance';$('introCopy').textContent='First, the stance. Keep your knees soft, your eyes lowered, and your fingers curled back.';
+  let advanced=false;const advance=()=>{if(advanced||phase!=='stance')return;advanced=true;$('intro').hidden=true;$('panel').hidden=false;reset()};
+  say('stance',advance);setTimeout(advance,15000)}
+function beginAvatarChoice(){phase='choose';choiceSince={boy:null,girl:null};$('intro').hidden=true;$('choice').hidden=false;$('panel').hidden=true;
+  $('choiceHint').textContent='Raise one hand and hold it above your shoulder.';$('cap').textContent='Body found ✓';say('choose');
+  setTimeout(()=>{if(phase==='choose')$('cap').textContent='Left hand for Boy · right hand for Girl'},1000)}
+function beginRound(){
+  clearTimeout(restartTimer);keepsakeCanvas=null;roundPlayerFrame=null;$('keepsakePreview').removeAttribute('src');$('keepsakePreview').hidden=true;$('previewStatus').hidden=false;$('downloadSnapshot').disabled=true;$('intro').hidden=true;$('choice').hidden=true;$('result').hidden=true;$('cover').hidden=true;$('tagline').textContent='Step in. Move. Meet the Tausug.';
+  if(DEMO){beginIntroduction();return}
+  phase='body';bodyVisibleSince=null;$('panel').hidden=false;$('cap').textContent='Step into view so I can see your arms.'
+}
+
+function chooseAvatar(lm,now){
+  const visible=i=>{const p=lm&&lm[i];return !!p&&Number.isFinite(p.visibility)&&p.visibility>=.5&&p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1};
+  const boy=visible(11)&&visible(15)&&lm[15].y<lm[11].y;
+  const girl=visible(12)&&visible(16)&&lm[16].y<lm[12].y;
+  const setProgress=(side,start)=>{const id=side==='boy'?'choiceBoy':'choiceGirl',bar=side==='boy'?'choiceBoyBar':'choiceGirlBar';
+    $(id).classList.toggle('holding',start!==null);$(bar).style.width=start===null?'0%':Math.min(100,(now-start)/800*100)+'%'};
+  if(boy&&girl){choiceSince={boy:null,girl:null};setProgress('boy',null);setProgress('girl',null);$('choiceHint').textContent='Raise one hand at a time: left for Boy, right for Girl.';return}
+  if(boy){choiceSince.girl=null;setProgress('girl',null);if(choiceSince.boy===null)choiceSince.boy=now;setProgress('boy',choiceSince.boy);$('choiceHint').textContent='Hold your left hand up for Boy.';
+    if(now-choiceSince.boy>=800)selectAvatar('boy');return}
+  if(girl){choiceSince.boy=null;setProgress('boy',null);if(choiceSince.girl===null)choiceSince.girl=now;setProgress('girl',choiceSince.girl);$('choiceHint').textContent='Hold your right hand up for Girl.';
+    if(now-choiceSince.girl>=800)selectAvatar('girl');return}
+  choiceSince={boy:null,girl:null};setProgress('boy',null);setProgress('girl',null);$('choiceHint').textContent='Raise one hand and hold it above your shoulder.';
+}
+function checkAttract(lm,now){
+  const raised=i=>{const w=lm&&lm[i],s=lm&&lm[i-4];return !!w&&!!s&&w.visibility>=.5&&s.visibility>=.5&&w.y<s.y&&w.x>=0&&w.x<=1&&w.y>=0&&w.y<=1};
+  if(raised(15)||raised(16)){if(attractHandSince===null)attractHandSince=now;if(now-attractHandSince>=800){attractHandSince=null;beginRound()}}
+  else attractHandSince=null;
+}
+function selectAvatar(k){pick(k);$('choice').hidden=true;choiceSince={boy:null,girl:null};$('cap').textContent='Follow the coach. Hold each gesture to catch a treasure.';beginStance()}
+
+/* ---------- camera + MediaPipe ---------- */
+const video=$('video'),ov=$('overlay'),ctx=ov.getContext('2d');let landmarker=null,handLandmarker=null,cameraStream=null,lastHandDetect=0,cachedHands=null,startupInProgress=false;
+function isMobileBrowser(){return matchMedia('(pointer: coarse)').matches||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(/Macintosh/i.test(navigator.userAgent)&&navigator.maxTouchPoints>1)}
+function stopCamera(){
+  for(const tracker of [handLandmarker,landmarker]){try{tracker?.close()}catch(e){}}
+  handLandmarker=null;landmarker=null;cachedHands=null;lastHandDetect=0;
+  if(cameraStream){cameraStream.getTracks().forEach(track=>track.stop());cameraStream=null}
+  video.pause();video.srcObject=null;ov.width=0;ov.height=0;
+}
+function startupErrorMessage(error){
+  if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia)return 'Camera access needs a secure browser page. Open the app on its HTTPS link, or use the no-camera demo.';
+  if(error?.name==='NotAllowedError'||error?.name==='SecurityError')return 'Camera permission was blocked. Allow camera access for this site in your browser settings, then tap Try again.';
+  if(error?.name==='NotFoundError'||error?.name==='DevicesNotFoundError')return 'No camera was found. Connect or enable a camera, then tap Try again.';
+  if(error?.name==='NotReadableError'||error?.name==='TrackStartError')return 'The camera is busy or unavailable. Close other apps using it, then tap Try again.';
+  if(/model|wasm|fetch|network|gpu|webgl|delegate/i.test(error?.message||''))return 'Pose tracking could not load. Check your connection, then tap Try again or use the no-camera demo.';
+  return 'Camera startup failed. Check camera permission and close other apps using the camera, then tap Try again or use the no-camera demo.';
+}
+async function initCamera(onProgress=()=>{}){
+  if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia)throw new Error('Secure camera access is unavailable');
+  onProgress('Requesting camera permission…');
+  cameraStream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480},facingMode:{ideal:'user'}},audio:false});
+  video.srcObject=cameraStream;await video.play();ov.width=video.videoWidth;ov.height=video.videoHeight;
+  onProgress('Preparing pose tracking…');
+  const {FilesetResolver,PoseLandmarker}=await import('../app/vendor/vision_bundle.mjs').catch(()=>import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs'));
+  let wasm='../app/vendor/wasm';try{const r=await fetch(wasm+'/vision_wasm_internal.js',{method:'HEAD'});if(!r.ok)throw 0}catch(e){wasm='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'}
+  const fs=await FilesetResolver.forVisionTasks(wasm);
+  let model='../app/models/pose_landmarker_lite.task';try{const r=await fetch(model,{method:'HEAD'});if(!r.ok)throw 0}catch(e){model='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task'}
+  const poseOptions={runningMode:'VIDEO',numPoses:1};
+  try{landmarker=await PoseLandmarker.createFromOptions(fs,{...poseOptions,baseOptions:{modelAssetPath:model,delegate:'GPU'}})}
+  catch(gpuError){console.warn('GPU pose tracking unavailable; retrying with CPU.',gpuError);onProgress('Switching to lower-load pose tracking…');landmarker=await PoseLandmarker.createFromOptions(fs,{...poseOptions,baseOptions:{modelAssetPath:model,delegate:'CPU'}})}
+  if(!isMobileBrowser()){
+    onProgress('Preparing optional hand tracking…');
+    try{
+      const {HandLandmarker}=await import('../app/vendor/vision_bundle.mjs').catch(()=>import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs'));
+      let handModel='../app/models/hand_landmarker.task';try{const r=await fetch(handModel,{method:'HEAD'});if(!r.ok)throw 0}catch(e){handModel='https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task'}
+      handLandmarker=await HandLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:handModel,delegate:'GPU'},runningMode:'VIDEO',numHands:2});
+    }catch(e){handLandmarker=null;console.warn('Hand tracking unavailable; one-arm wrist-turn fallback remains enabled.',e)}
+  }else{handLandmarker=null;console.info('Using the one-arm wrist-turn fallback on this mobile device.')}
+}
+function drawSkeleton(lm){ctx.clearRect(0,0,ov.width,ov.height);if(!lm)return;ctx.strokeStyle='#5FD0A8';ctx.lineWidth=5;ctx.lineCap='round';
+  [[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24]].forEach(([a,b])=>{ctx.beginPath();ctx.moveTo(lm[a].x*ov.width,lm[a].y*ov.height);ctx.lineTo(lm[b].x*ov.width,lm[b].y*ov.height);ctx.stroke()})}
+function loop(now){
+  let lm=null,aspect=1,hands=null;
+  if(DEMO){/* no camera: drift toward the wanted pose so the whole flow can be shown and tested */
+    const target=(phase==='try'||phase==='hold')&&step>=0?STEPS[step].pose:IDLE;demoPose=mix(demoPose,target,phase==='try'&&now-phaseAt>1500?.06:.03);lm=fake(demoPose)}
+  else if(landmarker&&video.readyState>=2){const r=landmarker.detectForVideo(video,now);lm=r.landmarks&&r.landmarks[0]||null;aspect=video.videoWidth/video.videoHeight;if(handLandmarker){if(now-lastHandDetect>=66){const hr=handLandmarker.detectForVideo(video,now);cachedHands=hr.landmarks||null;lastHandDetect=now}hands=cachedHands}drawSkeleton(lm)}
+  if(!DEMO&&phase==='body'){waitForBody(lm,now);pose=IDLE;setPose('a',pose);requestAnimationFrame(loop);return}
+  if(phase==='attract'){checkAttract(lm,now);requestAnimationFrame(loop);return}
+  frame(lm,aspect,now,hands);
+  if(phase==='choose'){chooseAvatar(lm,now);requestAnimationFrame(loop);return}
+  requestAnimationFrame(loop)}
+
+/* ---------- start-up ---------- */
+function pick(k){kind=k;build('avatar','a',k);bindAvatar(k);setPose('a',pose)}
+build('ghost','h','ghost');setPose('h',IDLE);pick('girl');initLane();
+$('start').onclick=async()=>{
+  if(phase==='attract'){beginRound();return}
+  if(startupInProgress)return;
+  try{voice.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';voice.play().catch(()=>{})}catch(e){}   /* unlock the voice player inside the tap */
+  bgm.volume=.5;bgm.play().catch(()=>{});
+  startupInProgress=true;$('start').disabled=true;$('start').textContent='Starting…';$('demoFallback').hidden=true;$('twoDFallback').hidden=true;
+  try{
+    const cameraPromise=DEMO?Promise.resolve():initCamera(message=>{$('msg').textContent=message});
+    const modelPromise=init3D();await Promise.all([cameraPromise,modelPromise]);
+  }catch(e){console.error('3D experience startup failed',e);stopCamera();const modelsAvailable=!!threeReady;$('msg').textContent=modelsAvailable?startupErrorMessage(e):'The 3D scene could not start in this browser. Open the 2D app instead.';$('demoFallback').hidden=!modelsAvailable;$('twoDFallback').hidden=false;$('start').disabled=false;$('start').textContent='Try again';startupInProgress=false;return}
+  startupInProgress=false;$('start').disabled=false;$('demoFallback').hidden=true;
+  $('cover').hidden=true;last=performance.now();
+  beginRound();
+  requestAnimationFrame(loop)};
+$('skipIntro').onclick=skipIntroduction;
+$('again').onclick=beginRound;
+$('downloadSnapshot').onclick=()=>{try{downloadSnapshot()}catch(e){console.error('Snapshot download failed',e);$('previewStatus').textContent='Could not download the keepsake. Please try again.'}};
+addEventListener('keydown',e=>{const n=+e.key;if(phase==='attract'&&n>=1&&n<=5)beginRound();if(n>=1&&n<=5){if(phase==='body'||phase==='choose'){bodyVisibleSince=null;$('choice').hidden=true;$('panel').hidden=false;$('cap').textContent='Follow the coach. Hold each gesture to catch a treasure.';reset()}forced={pose:STEPS[n-1].pose,until:performance.now()+1500}}if(e.key==='d'||e.key==='D')$('debugOverlay').hidden=!$('debugOverlay').hidden});
+if(DEMO)$('start').textContent='Start demo (no camera)';
+/* self-test hook: every target pose must satisfy its own rule and no other gold rule */
+window.__selftest=()=>STEPS.map(s=>{const P=points(fake(s.pose),1),D=detect(P,angles(P));return s.key+': '+Object.keys(D).filter(k=>D[k]).join(',')});
+window.__state=()=>({phase,step,score,caught:caught.length});
+</script>
+</body>
+</html>

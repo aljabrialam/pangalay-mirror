@@ -1,8 +1,19 @@
 # Review Before Makeathon Submission
 
 Production app: https://pangalay-mirror.vercel.app/app/
+Separate 3D experience: https://pangalay-mirror.vercel.app/app-3d/
 Dance timeline review copy: https://pangalay-mirror.vercel.app/app/timeline.html
-No-camera demo: add `?demo=1` to either app URL.
+No-camera demos: add `?demo=1` to either app URL.
+
+## Blender 3D route (`015-blender-3d-experience`)
+
+- The independent `/app-3d/` page loads local Blender-exported girl/boy GLB avatars with the pinned local Three.js renderer. The 2D `/app/` route and `/app/timeline.html` are unchanged.
+- Local landscape browser review completed: both route self-tests return `open: open`, `overhead: overhead`, `crossed: crossed`, `kalis: kalis`, and `heart: heart`.
+- Local `/app-3d/?demo=1` completed the no-camera round with all four treasures, 1,000 points, five stars, and an automatically generated keepsake preview containing the 3D avatar and existing maker/QR content.
+- The combined avatar GLBs are 622,036 bytes. They are well below the 8 MB initial model budget.
+- Responsive browser checks showed portrait guidance at 390×844 and landscape layout at 844×390. This is a viewport check, not a physical-phone camera test.
+- Temporarily removing one local GLB produced a clear 3D startup error and an accessible link to `/app/`; the asset was restored afterward.
+- The camera was not granted during this review. A physical-phone camera round, device-specific performance, and camera-denial recovery still require owner review.
 
 ## Experience polish baseline (`012-experience-polish`)
 
@@ -40,4 +51,4 @@ No-camera demo: add `?demo=1` to either app URL.
 
 The local 390×844 and 844×390 viewport review verifies portrait guidance and landscape sizing only. It does not replace a physical mobile camera, GPU/CPU fallback, or memory-pressure review.
 
-Automated/local checks pass for syntax, unique gesture matching, the full demo (score 1,000; four catches), intro skip progression, and synthetic palm orientation. Real camera, saved PNG and QR scanning, event lighting, and Wi-Fi-off startup still need this device review.
+Automated/local checks pass for syntax, unique gesture matching on `/app/`, `/app/timeline.html`, and `/app-3d/`, full no-camera rounds on all three routes (score 1,000; four catches), intro skip progression, and synthetic palm orientation. Real camera, saved PNG and QR scanning, event lighting, camera-denial recovery, and Wi-Fi-off startup still need this device review.
